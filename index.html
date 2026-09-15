@@ -19,21 +19,24 @@
     <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50 shadow-lg">
         <div class="max-w-7xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between">
             <div class="flex items-center space-x-3">
-                <i class="fa-solid fa-beer-mug-empty text-amber-500 text-2xl"></i>
+                <!-- Reemplazamos el ícono por el logo -->
+                <img src="logo.png" alt="Logo Albardón" class="h-10 w-10 object-contain rounded-full bg-slate-900 border border-slate-700">
                 <div>
-                    <h1 class="text-xl font-bold tracking-wider text-amber-500">ALBARDÓN</h1>
+                    <!-- Título en blanco -->
+                    <h1 class="text-xl font-bold tracking-wider text-white">ALBARDÓN</h1>
                     <span class="text-xs text-slate-400 block font-normal">Sistema Integral de Gestión</span>
                 </div>
             </div>
+            <!-- Pestañas reordenadas -->
             <nav class="flex space-x-2 mt-4 sm:mt-0 overflow-x-auto pb-1 sm:pb-0">
-                <button onclick="switchTab('coccion')" id="btn-coccion" class="tab-btn active px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+                <button onclick="switchTab('recetas')" id="btn-recetas" class="tab-btn active px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-book-open"></i> Recetas
+                </button>
+                <button onclick="switchTab('coccion')" id="btn-coccion" class="tab-btn px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700 transition-colors flex items-center gap-2">
                     <i class="fa-solid fa-clipboard-list"></i> Cocción
                 </button>
                 <button onclick="switchTab('fermentacion')" id="btn-fermentacion" class="tab-btn px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700 transition-colors flex items-center gap-2">
                     <i class="fa-solid fa-temperature-half"></i> Fermentación
-                </button>
-                <button onclick="switchTab('recetas')" id="btn-recetas" class="tab-btn px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700 transition-colors flex items-center gap-2">
-                    <i class="fa-solid fa-book-open"></i> Recetas
                 </button>
                 <button onclick="switchTab('stock')" id="btn-stock" class="tab-btn px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700 transition-colors flex items-center gap-2">
                     <i class="fa-solid fa-boxes-stacked"></i> Stock Barriles
@@ -47,8 +50,68 @@
 
     <main class="max-w-7xl mx-auto px-4 py-6">
 
-        <!-- ==================== MÓDULO 1: COCCIÓN ==================== -->
-        <section id="tab-coccion" class="space-y-6">
+        <!-- ==================== MÓDULO 1: RECETAS (Ahora visible por defecto) ==================== -->
+        <section id="tab-recetas" class="space-y-6">
+            <div class="card p-4 flex justify-between items-center">
+                <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
+                    <i class="fa-solid fa-book-open"></i> Biblioteca de Recetas
+                </h2>
+                <button onclick="mostrarFormularioReceta()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 transition-colors">
+                    <i class="fa-solid fa-plus"></i> Nueva Receta
+                </button>
+            </div>
+
+            <!-- FORMULARIO CREAR RECETA -->
+            <div id="form-receta-panel" class="card p-4 space-y-4 hidden border-amber-500/50">
+                <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider border-b border-slate-700 pb-2">Crear Nueva Receta</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    <div>
+                        <label class="text-slate-400 block mb-1">Nombre del Estilo / Receta</label>
+                        <input type="text" id="rec-nombre" placeholder="ej. Red Ale Santafesina" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1">D.I. Teórica (Densidad Inicial)</label>
+                        <input type="text" id="rec-di" placeholder="1.052" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-mono">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-slate-300 uppercase block">Maltas / Granos</label>
+                        <div id="rec-granos-inputs" class="space-y-2">
+                            <div class="flex gap-2">
+                                <input type="text" placeholder="ej. Malta Pilsen" class="rec-grano-nombre flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs">
+                                <input type="number" placeholder="Kg" class="rec-grano-cant w-24 bg-slate-900 border border-slate-700 rounded p-2 text-xs">
+                            </div>
+                        </div>
+                        <button onclick="agregarFilaGrano()" class="text-xs text-amber-400 hover:underline flex items-center gap-1"><i class="fa-solid fa-plus"></i> Agregar Malta</button>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-slate-300 uppercase block">Lúpulos</label>
+                        <div id="rec-lupulos-inputs" class="space-y-2">
+                            <div class="flex gap-2">
+                                <input type="text" placeholder="ej. Cascade" class="rec-lupulo-nombre flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs">
+                                <input type="number" placeholder="Grs" class="rec-lupulo-cant w-20 bg-slate-900 border border-slate-700 rounded p-2 text-xs">
+                                <input type="text" placeholder="Momento (60min, WP)" class="rec-lupulo-momento w-32 bg-slate-900 border border-slate-700 rounded p-2 text-xs">
+                            </div>
+                        </div>
+                        <button onclick="agregarFilaLupulo()" class="text-xs text-amber-400 hover:underline flex items-center gap-1"><i class="fa-solid fa-plus"></i> Agregar Lúpulo</button>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-2 border-t border-slate-700">
+                    <button onclick="ocultarFormularioReceta()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-bold px-4 py-2 rounded-lg">Cancelar</button>
+                    <button onclick="guardarReceta()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold px-4 py-2 rounded-lg">Guardar Receta</button>
+                </div>
+            </div>
+
+            <!-- GRILLA DE RECETAS GUARDADAS -->
+            <div id="grilla-recetas" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+        </section>
+
+        <!-- ==================== MÓDULO 2: COCCIÓN ==================== -->
+        <section id="tab-coccion" class="space-y-6 hidden">
             <div class="card p-4 flex flex-wrap justify-between items-center gap-4">
                 <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
                     <i class="fa-solid fa-clipboard-list"></i> Planilla Digital de Cocción
@@ -206,7 +269,7 @@
             </div>
         </section>
 
-        <!-- ==================== MÓDULO 2: FERMENTACIÓN ==================== -->
+        <!-- ==================== MÓDULO 3: FERMENTACIÓN ==================== -->
         <section id="tab-fermentacion" class="space-y-6 hidden">
             <div class="card p-4 flex justify-between items-center">
                 <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
@@ -277,66 +340,6 @@
             </div>
         </section>
 
-        <!-- ==================== MÓDULO 3: RECETAS ==================== -->
-        <section id="tab-recetas" class="space-y-6 hidden">
-            <div class="card p-4 flex justify-between items-center">
-                <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
-                    <i class="fa-solid fa-book-open"></i> Biblioteca de Recetas
-                </h2>
-                <button onclick="mostrarFormularioReceta()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 transition-colors">
-                    <i class="fa-solid fa-plus"></i> Nueva Receta
-                </button>
-            </div>
-
-            <!-- FORMULARIO CREAR RECETA -->
-            <div id="form-receta-panel" class="card p-4 space-y-4 hidden border-amber-500/50">
-                <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider border-b border-slate-700 pb-2">Crear Nueva Receta</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                    <div>
-                        <label class="text-slate-400 block mb-1">Nombre del Estilo / Receta</label>
-                        <input type="text" id="rec-nombre" placeholder="ej. Red Ale Santafesina" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
-                    </div>
-                    <div>
-                        <label class="text-slate-400 block mb-1">D.I. Teórica (Densidad Inicial)</label>
-                        <input type="text" id="rec-di" placeholder="1.052" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-mono">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="space-y-2">
-                        <label class="text-xs font-bold text-slate-300 uppercase block">Maltas / Granos</label>
-                        <div id="rec-granos-inputs" class="space-y-2">
-                            <div class="flex gap-2">
-                                <input type="text" placeholder="ej. Malta Pilsen" class="rec-grano-nombre flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs">
-                                <input type="number" placeholder="Kg" class="rec-grano-cant w-24 bg-slate-900 border border-slate-700 rounded p-2 text-xs">
-                            </div>
-                        </div>
-                        <button onclick="agregarFilaGrano()" class="text-xs text-amber-400 hover:underline flex items-center gap-1"><i class="fa-solid fa-plus"></i> Agregar Malta</button>
-                    </div>
-
-                    <div class="space-y-2">
-                        <label class="text-xs font-bold text-slate-300 uppercase block">Lúpulos</label>
-                        <div id="rec-lupulos-inputs" class="space-y-2">
-                            <div class="flex gap-2">
-                                <input type="text" placeholder="ej. Cascade" class="rec-lupulo-nombre flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs">
-                                <input type="number" placeholder="Grs" class="rec-lupulo-cant w-20 bg-slate-900 border border-slate-700 rounded p-2 text-xs">
-                                <input type="text" placeholder="Momento (60min, WP)" class="rec-lupulo-momento w-32 bg-slate-900 border border-slate-700 rounded p-2 text-xs">
-                            </div>
-                        </div>
-                        <button onclick="agregarFilaLupulo()" class="text-xs text-amber-400 hover:underline flex items-center gap-1"><i class="fa-solid fa-plus"></i> Agregar Lúpulo</button>
-                    </div>
-                </div>
-
-                <div class="flex justify-end gap-3 pt-2 border-t border-slate-700">
-                    <button onclick="ocultarFormularioReceta()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-bold px-4 py-2 rounded-lg">Cancelar</button>
-                    <button onclick="guardarReceta()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold px-4 py-2 rounded-lg">Guardar Receta</button>
-                </div>
-            </div>
-
-            <!-- GRILLA DE RECETAS GUARDADAS -->
-            <div id="grilla-recetas" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
-        </section>
-
         <!-- ==================== MÓDULO 4: STOCK DE BARRILES (MATRIZ 6 ESTADOS) ==================== -->
         <section id="tab-stock" class="space-y-6 hidden">
             <div class="card p-4 flex flex-wrap justify-between items-center gap-4">
@@ -376,7 +379,7 @@
 
     <!-- MODALES DE INTERACCIÓN -->
 
-    <!-- MODAL BARRIL -->
+    <!-- MODAL BARRIL (Actualizado con 20L y Conector) -->
     <div id="modal-barril" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
         <div class="card p-6 w-full max-w-md space-y-4">
             <h3 id="modal-barril-titulo" class="font-bold text-amber-400 text-base border-b border-slate-700 pb-2">Gestionar Barril</h3>
@@ -385,12 +388,22 @@
                     <label class="text-slate-400 block mb-1">Código de Barril</label>
                     <input type="text" id="barril-codigo" placeholder="ej. K-01" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-mono text-amber-400">
                 </div>
-                <div>
-                    <label class="text-slate-400 block mb-1">Capacidad</label>
-                    <select id="barril-capacidad" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
-                        <option value="50L">50 Litros</option>
-                        <option value="30L">30 Litros</option>
-                    </select>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-slate-400 block mb-1">Capacidad</label>
+                        <select id="barril-capacidad" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+                            <option value="50L">50 Litros</option>
+                            <option value="30L">30 Litros</option>
+                            <option value="20L">20 Litros</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1">Tipo de Conector</label>
+                        <select id="barril-conector" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+                            <option value="G">Conector G</option>
+                            <option value="S">Conector S</option>
+                        </select>
+                    </div>
                 </div>
                 <div>
                     <label class="text-slate-400 block mb-1">Estado Actual</label>
@@ -465,7 +478,7 @@
                     </select>
                 </div>
                 <div>
-                    <label class="text-slate-400 block mb-1">Detalle / Barriles / Conceto</label>
+                    <label class="text-slate-400 block mb-1">Detalle / Barriles / Concepto</label>
                     <input type="text" id="mov-concepto" placeholder="ej. 2 Barriles Scottish 50L (K-02, K-05)" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
                 </div>
                 <div>
@@ -489,9 +502,9 @@
         };
 
         const barrilesIniciales = [
-            { codigo: 'K-01', capacidad: '50L', estado: 'vacio_limpio', cerveza: '', cliente: '' },
-            { codigo: 'K-02', capacidad: '50L', estado: 'lleno_fabrica', cerveza: 'Scottish Ale (L-2026-01)', cliente: '' },
-            { codigo: 'K-03', capacidad: '50L', estado: 'entregado_cliente', cerveza: 'Scottish Ale (L-2026-01)', cliente: 'Bar El Portal' }
+            { codigo: 'K-01', capacidad: '50L', conector: 'G', estado: 'vacio_limpio', cerveza: '', cliente: '' },
+            { codigo: 'K-02', capacidad: '50L', conector: 'G', estado: 'lleno_fabrica', cerveza: 'Scottish Ale (L-2026-01)', cliente: '' },
+            { codigo: 'K-03', capacidad: '50L', conector: 'G', estado: 'entregado_cliente', cerveza: 'Scottish Ale (L-2026-01)', cliente: 'Bar El Portal' }
         ];
 
         const clientesIniciales = [
@@ -693,6 +706,8 @@
             let html = '';
             barriles.forEach((b, idx) => {
                 const est = etiquetasEstado[b.estado] || { texto: b.estado, clase: 'bg-slate-700' };
+                const conector = b.conector || 'G'; // Valor por defecto para barriles antiguos si los hubiere
+                
                 html += `
                     <div class="card p-4 space-y-3 flex flex-col justify-between">
                         <div>
@@ -701,7 +716,7 @@
                                 <span class="text-xs px-2 py-0.5 rounded font-bold ${est.clase}">${est.texto}</span>
                             </div>
                             <div class="text-xs space-y-1 text-slate-300">
-                                <p>Capacidad: <span class="font-mono font-semibold">${b.capacidad}</span></p>
+                                <p>Capacidad: <span class="font-mono font-semibold">${b.capacidad}</span> | Conector: <span class="font-mono font-semibold text-emerald-400">${conector}</span></p>
                                 ${b.cerveza ? `<p>Cerveza: <span class="font-semibold text-slate-100">${b.cerveza}</span></p>` : ''}
                                 ${b.cliente ? `<p>Ubicación: <span class="text-amber-300 font-semibold">${b.cliente}</span></p>` : ''}
                             </div>
@@ -717,6 +732,7 @@
         function mostrarModalBarril() {
             document.getElementById('barril-codigo').value = '';
             document.getElementById('barril-cerveza').value = '';
+            document.getElementById('barril-conector').value = 'G';
             toggleCamposEstadoBarril();
             document.getElementById('modal-barril').classList.remove('hidden');
         }
@@ -741,6 +757,7 @@
             const b = barriles[idx];
             document.getElementById('barril-codigo').value = b.codigo;
             document.getElementById('barril-capacidad').value = b.capacidad;
+            document.getElementById('barril-conector').value = b.conector || 'G';
             document.getElementById('barril-estado').value = b.estado;
             document.getElementById('barril-cerveza').value = b.cerveza || '';
             toggleCamposEstadoBarril();
@@ -750,6 +767,7 @@
         function guardarBarril() {
             const codigo = document.getElementById('barril-codigo').value.trim();
             const capacidad = document.getElementById('barril-capacidad').value;
+            const conector = document.getElementById('barril-conector').value;
             const estado = document.getElementById('barril-estado').value;
             const cerveza = document.getElementById('barril-cerveza').value.trim();
             const cliente = estado === 'entregado_cliente' ? document.getElementById('barril-cliente-select').value : '';
@@ -757,7 +775,7 @@
             if (!codigo) return alert("Ingrese el código del barril.");
 
             const idx = barriles.findIndex(b => b.codigo === codigo);
-            const obj = { codigo, capacidad, estado, cerveza, cliente };
+            const obj = { codigo, capacidad, conector, estado, cerveza, cliente };
 
             if (idx >= 0) barriles[idx] = obj;
             else barriles.push(obj);
@@ -868,7 +886,10 @@
         // --- INICIALIZACIÓN ---
         document.getElementById('coc-fecha').valueAsDate = new Date();
         document.getElementById('ferm-fecha').valueAsDate = new Date();
+        
+        // Ejecutar funciones iniciales de renderizado
         actualizarSelectRecetas();
+        renderRecetas(); // Nos aseguramos de renderizar las recetas ya que es la vista inicial
         renderTablaFermentacion();
     </script>
 </body>
