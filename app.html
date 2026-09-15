@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Albardón - Control de Stock y Cuentas Corrientes</title>
+  
+  <!-- Icono para la pantalla de inicio del celular y pestaña del navegador -->
+  <link rel="icon" type="image/png" href="logo.png" />
+  <link rel="apple-touch-icon" href="logo.png" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    @media print {
+      body * { visibility: hidden; }
+      #modal-remito-contenido, #modal-remito-contenido * { visibility: visible; }
+      #modal-remito-contenido { position: absolute; left: 0; top: 0; width: 100%; color: #000 !important; background: #fff !important; }
+      .no-print { display: none !important; }
+    }
+  </style>
+
+  <!-- Firebase App & Realtime Database SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDJg96zXlE5UMdRCC_cmP-W41pyzjTWkHw",
+      authDomain: "albardon-app.firebaseapp.com",
+      databaseURL: "https://albardon-app-default-rtdb.firebaseio.com",
+      projectId: "albardon-app",
+      storageBucket: "albardon-app.firebasestorage.app",
+      messagingSenderId: "896139459749",
+      appId: "1:896139459749:web:f5424d85e9bf277cbfa14c"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // Exponer funciones y referencias al ámbito global (window)
+    window.db = db;
+    window.dbRef = ref;
+    window.dbSet = set;
+
+    // Escuchar cambios en la nube en tiempo real
+    onValue(ref(db, 'albardon_datos'), (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        window.listadoBarriles = data.barriles || [];
+        window.listadoClientes = data.clientes || [];
+      } else {
+        window.listadoBarriles = JSON.parse(localStorage.getItem('albardon_barriles')) || [];
+        window.listadoClientes = JSON.parse(localStorage.getItem('albardon_clientes')) || [];
+        window.guardarEnNube();
+      }
+      window.cargarDatos();
+      document.getElementById('status-badge').innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Sincronizado en Nube`;
+    });
+  </script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen pb-12">
+  <!-- Header con Logo -->
+  <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-40">
+    <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl overflow-hidden border border-amber-500/30 flex items-center justify-center bg-slate-800">
+          <img src="logo.png" alt="Albardón Cerveza Artesanal" class="w-full h-full object-contain p-1" />
+        </div>
+        <div>
+          <h1 class="font-bold text-lg text-amber-500 leading-tight">Albardón</h1>
+          <p class="text-xs text-slate-400">Control de Barriles, Botellas y Cuentas Corrientes</p>
+        </div>
+      </div>
+      <div id="status-badge" class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> Conectando...
+      </div>
+    </div>
+  </header>
+
+  <!-- Container Principal -->
+  <main class="max-w-5xl mx-auto px-4 py-6 space-y-6">
+
+    <!-- Dashboard -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-lg">
+        <div class="flex items-center justify-between text-slate-400 mb-1">
+          <span class="text-xs font-medium uppercase tracking-wider">Total Barriles</span>
+          <i data-lucide="package" class="w-4 h-4 text-amber-500"></i>
+        </div>
+        <div class="text-2xl font-bold text-slate-100" id="stat-total-barriles">0</div>
+      </div>
+      <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-lg">
+        <div class="flex items-center justify-between text-slate-400 mb-1">
+          <span class="text-xs font-medium uppercase tracking-wider">En Fábrica</span>
+          <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+        </div>
+        <div class="text-2xl font-bold text-emerald-400" id="stat-vacios">0</div>
+      </div>
+      <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-lg">
+        <div class="flex items-center justify-between text-slate-400 mb-1">
+          <span class="text-xs font-medium uppercase tracking-wider">En Clientes</span>
+          <i data-lucide="truck" class="w-4 h-4 text-blue-400"></i>
+        </div>
+        <div class="text-2xl font-bold text-blue-400" id="stat-en-clientes">0</div>
+      </div>
+      <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-lg">
+        <div class="flex items-center justify-between text-slate-400 mb-1">
+          <span class="text-xs font-medium uppercase tracking-wider">Deuda Global</span>
+          <i data-lucide="dollar-sign" class="w-4 h-4 text-red-400"></i>
+        </div>
+        <div class="text-2xl font-bold text-red-400" id="stat-deuda-total">$0</div>
+      </div>
+    </div>
+
+    <!-- Pestañas -->
+    <div class="flex border-b border-slate-700 space-x-2">
+      <button onclick="switchTab('barriles')" id="tab-barriles" class="px-5 py-2.5 text-sm font-semibold text-amber-500 border-b-2 border-amber-500 transition-colors flex items-center gap-2">
+        <i data-lucide="beer" class="w-4 h-4"></i> Gestión de Barriles
+      </button>
+      <button onclick="switchTab('clientes')" id="tab-clientes" class="px-5 py-2.5 text-sm font-semibold text-slate-400 hover:text-slate-200 border-b-2 border-transparent transition-colors flex items-center gap-2">
+        <i data-lucide="users" class="w-4 h-4"></i> Cuentas Corrientes
+      </button>
+    </div>
+
+    <!-- SECCIÓN 1: BARRILES -->
+    <div id="sec-barriles" class="space-y-6">
+      <div class="bg-slate-800 p-5 rounded-xl border border-slate-700">
+        <h2 class="text-md font-semibold text-slate-200 mb-4 flex items-center gap-2">
+          <i data-lucide="plus-circle" class="w-5 h-5 text-amber-500"></i> Registrar / Nuevo Barril
+        </h2>
+        <form id="form-barril" onsubmit="guardarBarril(event)" class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Código o N° de Barril</label>
+            <input type="text" id="barril-codigo" required placeholder="Ej: B-01" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-500 text-white" />
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Capacidad (Litros)</label>
+            <select id="barril-capacidad" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-500 text-white">
+              <option value="50">50 Litros</option>
+              <option value="30">30 Litros</option>
+              <option value="20">20 Litros</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Tipo de Conector</label>
+            <select id="barril-conector" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-500 text-white">
+              <option value="S">Tipo S (Sankey / Micromatic)</option>
+              <option value="G">Tipo G (Grundy)</option>
+            </select>
+          </div>
+          <div class="flex items-end">
+            <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 font-semibold text-slate-950 py-2 rounded-lg text-sm transition flex items-center justify-center gap-2">
+              <i data-lucide="save" class="w-4 h-4"></i> Guardar Barril
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-md">
+        <div class="p-4 border-b border-slate-700 flex justify-between items-center">
+          <h3 class="font-semibold text-slate-200">Inventario de Barriles</h3>
+          <span class="text-xs text-slate-400">Sincronizado en tiempo real</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm text-slate-300">
+            <thead class="bg-slate-900/50 text-slate-400 text-xs uppercase tracking-wider border-b border-slate-700">
+              <tr>
+                <th class="p-3.5">Código</th>
+                <th class="p-3.5">Capacidad / Tipo</th>
+                <th class="p-3.5">Estado / Ubicación</th>
+                <th class="p-3.5">Estilo Contenido</th>
+                <th class="p-3.5">Cliente Asignado</th>
+                <th class="p-3.5 text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-barriles-body" class="divide-y divide-slate-700/50">
+              <tr><td colspan="6" class="p-4 text-center text-slate-500">Cargando barriles desde Firebase...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 2: CLIENTES -->
+    <div id="sec-clientes" class="space-y-6 hidden">
+      <div class="bg-slate-800 p-5 rounded-xl border border-slate-700">
+        <h2 class="text-md font-semibold text-slate-200 mb-4 flex items-center gap-2">
+          <i data-lucide="user-plus" class="w-5 h-5 text-amber-500"></i> Alta de Nuevo Cliente / Bar
+        </h2>
+        <form id="form-cliente" onsubmit="guardarCliente(event)" class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Nombre del Comercio / Cliente</label>
+            <input type="text" id="cliente-nombre" required placeholder="Ej: Bar El Faro" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-500 text-white" />
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Teléfono / WhatsApp</label>
+            <input type="text" id="cliente-telefono" placeholder="Ej: 3421234567" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-500 text-white" />
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Dirección / Ubicación</label>
+            <input type="text" id="cliente-direccion" placeholder="Ej: Av. San Martín 1234" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-500 text-white" />
+          </div>
+          <div class="flex items-end">
+            <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 font-semibold text-slate-950 py-2 rounded-lg text-sm transition flex items-center justify-center gap-2">
+              <i data-lucide="plus" class="w-4 h-4"></i> Agregar Cliente
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="cards-clientes"></div>
+    </div>
+
+  </main>
+
+  <!-- MODAL DE EDICIÓN DE BARRIL -->
+  <div id="modal-barril" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
+    <div class="bg-slate-800 border border-slate-700 rounded-xl w-full max-w-md p-6 space-y-5 shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+        <h3 class="font-bold text-amber-500 text-lg flex items-center gap-2">
+          <i data-lucide="edit-3" class="w-5 h-5"></i> Editar Barril <span id="modal-barril-codigo" class="text-white font-mono"></span>
+        </h3>
+        <button onclick="cerrarModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      
+      <form id="form-editar-barril" onsubmit="guardarCambiosBarril(event)" class="space-y-4">
+        <input type="hidden" id="edit-barril-id" />
+        
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Estado actual / Ubicación</label>
+          <select id="edit-barril-estado" onchange="alCambiarEstadoModal()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500">
+            <option value="Fábrica Vacío - Sucio">Fábrica Vacío - Sucio</option>
+            <option value="Fábrica Vacío - Limpio">Fábrica Vacío - Limpio</option>
+            <option value="Fábrica Vacío-Sanitizado">Fábrica Vacío-Sanitizado</option>
+            <option value="Fábrica Lleno - SIN GAS">Fábrica Lleno - SIN GAS</option>
+            <option value="Fábrica Lleno - Listo">Fábrica Lleno - Listo</option>
+            <option value="Entregado en cliente">Entregado en cliente</option>
+            <option value="Fuera de servicio / Mantenimiento">Fuera de servicio / Mantenimiento</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Estilo de Cerveza Contenido</label>
+          <select id="edit-barril-estilo-combo" onchange="toggleEstiloOtro()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500">
+            <option value="">-- Sin Estilo / Vacío --</option>
+            <option value="APA">APA</option>
+            <option value="PORTER">PORTER</option>
+            <option value="SCOTTISH">SCOTTISH</option>
+            <option value="SESSION IPA">SESSION IPA</option>
+            <option value="GINGER">GINGER</option>
+            <option value="AMERICAN WHEAT">AMERICAN WHEAT</option>
+            <option value="OTRO">OTRO</option>
+          </select>
+          <input type="text" id="edit-barril-estilo-otro" placeholder="Escriba el estilo personalizado..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500 mt-2 hidden" />
+        </div>
+
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Importe / Valor del Barril ($)</label>
+          <input type="number" id="edit-barril-precio" placeholder="Ej: 45000" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500" />
+        </div>
+
+        <div id="contenedor-select-cliente">
+          <label class="block text-xs text-slate-400 mb-1">Cliente Asignado</label>
+          <select id="edit-barril-cliente" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500">
+            <option value="">-- Sin asignar --</option>
+          </select>
+        </div>
+
+        <div class="flex gap-3 pt-3 border-t border-slate-700">
+          <button type="button" onclick="cerrarModal()" class="w-1/2 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm font-semibold text-slate-200 transition">Cancelar</button>
+          <button type="submit" class="w-1/2 py-2 bg-amber-500 hover:bg-amber-600 rounded-lg text-sm font-semibold text-slate-950 transition">Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL REMITO -->
+  <div id="modal-remito" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
+    <div class="bg-slate-800 border border-slate-700 rounded-xl w-full max-w-lg p-6 space-y-5 shadow-2xl overflow-y-auto max-h-[90vh]">
+      <div class="flex justify-between items-center border-b border-slate-700 pb-3 no-print">
+        <h3 class="font-bold text-amber-500 text-lg flex items-center gap-2">
+          <i data-lucide="file-text" class="w-5 h-5"></i> Remito de Entrega
+        </h3>
+        <button onclick="cerrarModalRemito()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <!-- Agregar Botellas -->
+      <div class="bg-slate-900/80 p-3 rounded-lg border border-slate-700 space-y-2 no-print">
+        <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wide flex items-center gap-1">
+          <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Agregar Botellas a la Entrega
+        </h4>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <select id="botella-tamano" class="bg-slate-800 text-xs text-white border border-slate-700 rounded p-1.5 focus:outline-none">
+            <option value="355 cc">355 cc</option>
+            <option value="500 cc">500 cc</option>
+            <option value="1000 cc">1000 cc (1L)</option>
+          </select>
+          <select id="botella-estilo" onchange="toggleEstiloBotellaOtro()" class="bg-slate-800 text-xs text-white border border-slate-700 rounded p-1.5 focus:outline-none">
+            <option value="APA">APA</option>
+            <option value="PORTER">PORTER</option>
+            <option value="SCOTTISH">SCOTTISH</option>
+            <option value="SESSION IPA">SESSION IPA</option>
+            <option value="GINGER">GINGER</option>
+            <option value="AMERICAN WHEAT">AMERICAN WHEAT</option>
+            <option value="OTRO">OTRO</option>
+          </select>
+          <input type="number" id="botella-cantidad" min="1" placeholder="Cant." class="bg-slate-800 text-xs text-white border border-slate-700 rounded p-1.5 focus:outline-none" />
+          <input type="number" id="botella-precio" placeholder="Precio ($)" class="bg-slate-800 text-xs text-white border border-slate-700 rounded p-1.5 focus:outline-none" />
+        </div>
+        <input type="text" id="botella-estilo-otro" placeholder="Escriba el estilo personalizado..." class="w-full bg-slate-800 text-xs text-white border border-slate-700 rounded p-1.5 focus:outline-none hidden" />
+        <button onclick="agregarBotellaRemito()" class="w-full bg-slate-700 hover:bg-slate-600 text-amber-400 text-xs font-semibold py-1.5 rounded transition flex items-center justify-center gap-1">
+          <i data-lucide="plus" class="w-3.5 h-3.5"></i> Añadir Botellas al Remito
+        </button>
+      </div>
+
+      <!-- Vista previa remito -->
+      <div id="modal-remito-contenido" class="bg-slate-900 p-5 rounded-lg border border-slate-700 text-slate-200 space-y-4">
+        <!-- Generado dinámicamente -->
+      </div>
+
+      <div class="flex gap-2 pt-2 border-t border-slate-700 no-print">
+        <button onclick="cerrarModalRemito()" class="w-1/3 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-xs font-semibold text-slate-200 transition">Cerrar</button>
+        <button onclick="window.print()" class="w-1/3 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-xs font-semibold text-slate-200 transition flex items-center justify-center gap-1">
+          <i data-lucide="printer" class="w-3.5 h-3.5"></i> Imprimir
+        </button>
+        <button id="btn-enviar-wa" onclick="enviarRemitoWhatsApp()" class="w-1/3 py-2 bg-emerald-600 hover:bg-emerald-500 font-semibold text-white rounded-lg text-xs transition flex items-center justify-center gap-1">
+          <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Enviar por WA
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.listadoBarriles = [];
+    window.listadoClientes = [];
+    const estilosPredefinidos = ["APA", "PORTER", "SCOTTISH", "SESSION IPA", "GINGER", "AMERICAN WHEAT"];
+    let clienteRemitoActual = null;
+    let botellasRemitoTemporal = [];
+
+    window.onload = () => {
+      lucide.createIcons();
+    };
+
+    window.guardarEnNube = function() {
+      if (window.db && window.dbRef && window.dbSet) {
+        window.dbSet(window.dbRef(window.db, 'albardon_datos'), {
+          barriles: window.listadoBarriles,
+          clientes: window.listadoClientes
+        });
+      }
+      localStorage.setItem('albardon_barriles', JSON.stringify(window.listadoBarriles));
+      localStorage.setItem('albardon_clientes', JSON.stringify(window.listadoClientes));
+    };
+
+    function switchTab(tab) {
+      const secBarriles = document.getElementById('sec-barriles');
+      const secClientes = document.getElementById('sec-clientes');
+      const tabBarriles = document.getElementById('tab-barriles');
+      const tabClientes = document.getElementById('tab-clientes');
+
+      if (tab === 'barriles') {
+        secBarriles.classList.remove('hidden');
+        secClientes.classList.add('hidden');
+        tabBarriles.className = "px-5 py-2.5 text-sm font-semibold text-amber-500 border-b-2 border-amber-500 transition-colors flex items-center gap-2";
+        tabClientes.className = "px-5 py-2.5 text-sm font-semibold text-slate-400 hover:text-slate-200 border-b-2 border-transparent transition-colors flex items-center gap-2";
+      } else {
+        secBarriles.classList.add('hidden');
+        secClientes.classList.remove('hidden');
+        tabClientes.className = "px-5 py-2.5 text-sm font-semibold text-amber-500 border-b-2 border-amber-500 transition-colors flex items-center gap-2";
+        tabBarriles.className = "px-5 py-2.5 text-sm font-semibold text-slate-400 hover:text-slate-200 border-b-2 border-transparent transition-colors flex items-center gap-2";
+      }
+    }
+
+    window.cargarDatos = function() {
+      renderTablaBarriles();
+      renderClientes();
+      actualizarEstadisticas();
+    };
+
+    function obtenerBadgeEstado(estado) {
+      if (estado.includes('Entregado')) {
+        return `<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20">${estado}</span>`;
+      } else if (estado.includes('SIN GAS')) {
+        return `<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-orange-500/10 text-orange-400 border border-orange-500/20">${estado}</span>`;
+      } else if (estado.includes('Lleno')) {
+        return `<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">${estado}</span>`;
+      } else if (estado.includes('Sucio')) {
+        return `<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-stone-500/20 text-stone-300 border border-stone-500/30">${estado}</span>`;
+      } else if (estado.includes('Sanitizado') || estado.includes('Limpio')) {
+        return `<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">${estado}</span>`;
+      } else if (estado.includes('Mantenimiento')) {
+        return `<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-red-500/10 text-red-400 border border-red-500/20">${estado}</span>`;
+      }
+      return `<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-700 text-slate-300 border border-slate-600">${estado}</span>`;
+    }
+
+    function renderTablaBarriles() {
+      const tbody = document.getElementById('tabla-barriles-body');
+      if (window.listadoBarriles.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-500">No hay barriles registrados aún. Registrá el primero arriba.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = window.listadoBarriles.map(b => {
+        const clienteObj = window.listadoClientes.find(c => c.id === b.cliente_id);
+        const clienteNombre = clienteObj ? clienteObj.nombre : '—';
+        const conector = b.conector || 'S';
+        const estilo = b.estilo || '—';
+
+        return `
+          <tr class="hover:bg-slate-700/30 transition">
+            <td class="p-3.5 font-bold text-amber-400">${b.codigo}</td>
+            <td class="p-3.5 text-slate-300">${b.capacidad}L <span class="bg-slate-800 border border-slate-700 px-2 py-0.5 rounded text-xs ml-1 font-semibold text-slate-200">Tipo ${conector}</span></td>
+            <td class="p-3.5">${obtenerBadgeEstado(b.estado)}</td>
+            <td class="p-3.5 font-medium text-slate-200">${estilo}</td>
+            <td class="p-3.5 font-medium">${clienteNombre}</td>
+            <td class="p-3.5 text-right">
+              <button onclick="abrirModalEditarBarril('${b.id}')" class="px-3 py-1 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 rounded text-xs font-semibold transition flex items-center gap-1.5 ml-auto">
+                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i> Editar / Asignar
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+      lucide.createIcons();
+    }
+
+    function guardarBarril(e) {
+      e.preventDefault();
+      const codigo = document.getElementById('barril-codigo').value.trim();
+      const capacidad = parseInt(document.getElementById('barril-capacidad').value);
+      const conector = document.getElementById('barril-conector').value;
+
+      const nuevoBarril = {
+        id: 'b_' + Date.now(),
+        codigo,
+        capacidad,
+        conector,
+        estado: 'Fábrica Vacío - Sucio',
+        estilo: '',
+        precio: 0,
+        cliente_id: null
+      };
+
+      window.listadoBarriles.push(nuevoBarril);
+      window.guardarEnNube();
+      document.getElementById('form-barril').reset();
+    }
+
+    function toggleEstiloOtro() {
+      const combo = document.getElementById('edit-barril-estilo-combo');
+      const inputOtro = document.getElementById('edit-barril-estilo-otro');
+      if (combo.value === 'OTRO') {
+        inputOtro.classList.remove('hidden');
+        inputOtro.focus();
+      } else {
+        inputOtro.classList.add('hidden');
+        inputOtro.value = '';
+      }
+    }
+
+    function toggleEstiloBotellaOtro() {
+      const combo = document.getElementById('botella-estilo');
+      const inputOtro = document.getElementById('botella-estilo-otro');
+      if (combo.value === 'OTRO') {
+        inputOtro.classList.remove('hidden');
+        inputOtro.focus();
+      } else {
+        inputOtro.classList.add('hidden');
+        inputOtro.value = '';
+      }
+    }
+
+    function alCambiarEstadoModal() {
+      toggleClienteSelect();
+      const estado = document.getElementById('edit-barril-estado').value;
+      const esVacio = estado.includes('Vacío') || estado.includes('Limpio') || estado.includes('Sanitizado') || estado.includes('Sucio') || estado.includes('Mantenimiento');
+      
+      if (esVacio) {
+        document.getElementById('edit-barril-estilo-combo').value = '';
+        document.getElementById('edit-barril-estilo-otro').value = '';
+        document.getElementById('edit-barril-estilo-otro').classList.add('hidden');
+        document.getElementById('edit-barril-precio').value = '';
+      }
+    }
+
+    function abrirModalEditarBarril(id) {
+      const barril = window.listadoBarriles.find(b => b.id === id);
+      if (!barril) return;
+
+      document.getElementById('edit-barril-id').value = barril.id;
+      document.getElementById('modal-barril-codigo').innerText = `(${barril.codigo})`;
+      document.getElementById('edit-barril-estado').value = barril.estado || 'Fábrica Vacío - Sucio';
+      document.getElementById('edit-barril-precio').value = barril.precio || '';
+
+      const comboEstilo = document.getElementById('edit-barril-estilo-combo');
+      const inputOtro = document.getElementById('edit-barril-estilo-otro');
+      const estiloActual = barril.estilo || '';
+
+      if (!estiloActual) {
+        comboEstilo.value = '';
+        inputOtro.classList.add('hidden');
+        inputOtro.value = '';
+      } else if (estilosPredefinidos.includes(estiloActual)) {
+        comboEstilo.value = estiloActual;
+        inputOtro.classList.add('hidden');
+        inputOtro.value = '';
+      } else {
+        comboEstilo.value = 'OTRO';
+        inputOtro.classList.remove('hidden');
+        inputOtro.value = estiloActual;
+      }
+
+      const selectCliente = document.getElementById('edit-barril-cliente');
+      selectCliente.innerHTML = `<option value="">-- Sin asignar --</option>` + 
+        window.listadoClientes.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
+      
+      selectCliente.value = barril.cliente_id || '';
+
+      alCambiarEstadoModal();
+      document.getElementById('modal-barril').classList.remove('hidden');
+    }
+
+    function toggleClienteSelect() {
+      const estado = document.getElementById('edit-barril-estado').value;
+      const selectCliente = document.getElementById('edit-barril-cliente');
+      if (estado !== 'Entregado en cliente') {
+        selectCliente.value = '';
+        selectCliente.disabled = true;
+        selectCliente.classList.add('opacity-50');
+      } else {
+        selectCliente.disabled = false;
+        selectCliente.classList.remove('opacity-50');
+      }
+    }
+
+    function cerrarModal() {
+      document.getElementById('modal-barril').classList.add('hidden');
+    }
+
+    function guardarCambiosBarril(e) {
+      e.preventDefault();
+      const id = document.getElementById('edit-barril-id').value;
+      const barril = window.listadoBarriles.find(b => b.id === id);
+
+      if (barril) {
+        const estadoNuevo = document.getElementById('edit-barril-estado').value;
+        barril.estado = estadoNuevo;
+
+        const esVacio = estadoNuevo.includes('Vacío') || estadoNuevo.includes('Limpio') || estadoNuevo.includes('Sanitizado') || estadoNuevo.includes('Sucio') || estadoNuevo.includes('Mantenimiento');
+
+        if (esVacio) {
+          barril.estilo = '';
+          barril.precio = 0;
+        } else {
+          const comboEstilo = document.getElementById('edit-barril-estilo-combo').value;
+          if (comboEstilo === 'OTRO') {
+            barril.estilo = document.getElementById('edit-barril-estilo-otro').value.trim();
+          } else {
+            barril.estilo = comboEstilo;
+          }
+          barril.precio = parseFloat(document.getElementById('edit-barril-precio').value) || 0;
+        }
+
+        barril.cliente_id = document.getElementById('edit-barril-cliente').value || null;
+
+        window.guardarEnNube();
+        cerrarModal();
+      }
+    }
+
+    function renderClientes() {
+      const container = document.getElementById('cards-clientes');
+      if (window.listadoClientes.length === 0) {
+        container.innerHTML = `<div class="col-span-2 text-center py-6 text-slate-500 bg-slate-800 rounded-xl border border-slate-700">No hay clientes dados de alta. Registrá uno arriba.</div>`;
+        return;
+      }
+
+      container.innerHTML = window.listadoClientes.map(c => {
+        const saldo = parseFloat(c.saldo || 0);
+        const barrilesAsignados = window.listadoBarriles.filter(b => b.cliente_id === c.id);
+
+        return `
+          <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 space-y-4 shadow-md">
+            <div class="flex items-start justify-between">
+              <div>
+                <h3 class="font-bold text-lg text-slate-100">${c.nombre}</h3>
+                <div class="space-y-0.5 mt-0.5">
+                  <p class="text-xs text-slate-400 flex items-center gap-1"><i data-lucide="phone" class="w-3 h-3"></i> ${c.telefono || 'Sin teléfono'}</p>
+                  <p class="text-xs text-slate-400 flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3"></i> ${c.direccion || 'Sin dirección'}</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <span class="text-xs text-slate-400 block">Saldo Cta Cte</span>
+                <span class="text-xl font-bold ${saldo > 0 ? 'text-red-400' : 'text-emerald-400'}">$${saldo.toLocaleString('es-AR')}</span>
+              </div>
+            </div>
+
+            <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-700/50">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs text-slate-400 font-medium">Barriles en su poder (${barrilesAsignados.length}):</span>
+                <button onclick="generarRemito('${c.id}')" class="text-xs text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                  <i data-lucide="file-text" class="w-3 h-3"></i> Generar Remito
+                </button>
+              </div>
+              <div class="flex flex-wrap gap-1.5">
+                ${barrilesAsignados.length > 0 ? 
+                  barrilesAsignados.map(b => `<span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs px-2 py-0.5 rounded font-mono font-bold">${b.codigo} (${b.capacidad}L${b.estilo ? ' - ' + b.estilo : ''})</span>`).join('') :
+                  '<span class="text-xs text-slate-500 italic">Ningún barril asignado</span>'
+                }
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-700">
+              <button onclick="registrarMovimiento('${c.id}', 'Carga')" class="bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 text-xs font-semibold py-2 rounded-lg transition flex items-center justify-center gap-1">
+                <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Cargar Cerveza ($)
+              </button>
+              <button onclick="registrarMovimiento('${c.id}', 'Pago')" class="bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-semibold py-2 rounded-lg transition flex items-center justify-center gap-1">
+                <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Registrar Pago ($)
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+      lucide.createIcons();
+    }
+
+    function guardarCliente(e) {
+      e.preventDefault();
+      const nombre = document.getElementById('cliente-nombre').value.trim();
+      const telefono = document.getElementById('cliente-telefono').value.trim();
+      const direccion = document.getElementById('cliente-direccion').value.trim();
+
+      const nuevoCliente = {
+        id: 'c_' + Date.now(),
+        nombre,
+        telefono,
+        direccion,
+        saldo: 0
+      };
+
+      window.listadoClientes.push(nuevoCliente);
+      window.guardarEnNube();
+      document.getElementById('form-cliente').reset();
+    }
+
+    function registrarMovimiento(clienteId, tipo) {
+      const cliente = window.listadoClientes.find(c => c.id === clienteId);
+      const montoStr = prompt(`Ingrese el monto a ${tipo === 'Carga' ? 'cargar en la cuenta de' : 'recibir de'} ${cliente.nombre}:`);
+      if (!montoStr) return;
+
+      const monto = parseFloat(montoStr);
+      if (isNaN(monto) || monto <= 0) {
+        alert('Monto no válido');
+        return;
+      }
+
+      cliente.saldo = tipo === 'Carga' ? (parseFloat(cliente.saldo || 0) + monto) : (parseFloat(cliente.saldo || 0) - monto);
+      window.guardarEnNube();
+    }
+
+    function agregarBotellaRemito() {
+      const tamano = document.getElementById('botella-tamano').value;
+      const comboEstilo = document.getElementById('botella-estilo').value;
+      let estilo = comboEstilo;
+
+      if (comboEstilo === 'OTRO') {
+        estilo = document.getElementById('botella-estilo-otro').value.trim();
+        if (!estilo) {
+          alert('Por favor ingrese el nombre del estilo personalizado.');
+          return;
+        }
+      }
+
+      const cantidad = parseInt(document.getElementById('botella-cantidad').value) || 0;
+      const precio = parseFloat(document.getElementById('botella-precio').value) || 0;
+
+      if (cantidad <= 0 || precio <= 0) {
+        alert('Por favor ingrese cantidad y precio válidos para las botellas.');
+        return;
+      }
+
+      botellasRemitoTemporal.push({ tamano, estilo, cantidad, precio });
+      document.getElementById('botella-cantidad').value = '';
+      document.getElementById('botella-precio').value = '';
+      document.getElementById('botella-estilo').value = 'APA';
+      document.getElementById('botella-estilo-otro').value = '';
+      document.getElementById('botella-estilo-otro').classList.add('hidden');
+      renderVistaPreviaRemito();
+    }
+
+    function eliminarBotellaRemito(index) {
+      botellasRemitoTemporal.splice(index, 1);
+      renderVistaPreviaRemito();
+    }
+
+    function generarRemito(clienteId) {
+      const cliente = window.listadoClientes.find(c => c.id === clienteId);
+      if (!cliente) return;
+      
+      clienteRemitoActual = cliente;
+      botellasRemitoTemporal = [];
+      renderVistaPreviaRemito();
+      document.getElementById('modal-remito').classList.remove('hidden');
+    }
+
+    function renderVistaPreviaRemito() {
+      if (!clienteRemitoActual) return;
+      const cliente = clienteRemitoActual;
+      const barriles = window.listadoBarriles.filter(b => b.cliente_id === cliente.id);
+      const fechaActual = new Date().toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+      const totalBarriles = barriles.reduce((sum, b) => sum + (parseFloat(b.precio) || 0), 0);
+      const totalBotellas = botellasRemitoTemporal.reduce((sum, bot) => sum + (bot.cantidad * bot.precio), 0);
+      const totalEntrega = totalBarriles + totalBotellas;
+
+      const saldoAnterior = parseFloat(cliente.saldo || 0);
+      const saldoTotalConEntrega = saldoAnterior + totalEntrega;
+
+      let HTMLRemito = `
+        <div class="border-b border-slate-700 pb-3 flex justify-between items-center">
+          <div class="flex items-center space-x-3">
+            <div class="w-12 h-12 rounded-lg overflow-hidden border border-slate-700 bg-slate-800 flex items-center justify-center">
+              <img src="logo.png" alt="Logo Albardón" class="w-full h-full object-contain p-0.5" />
+            </div>
+            <div>
+              <h2 class="text-xl font-bold text-black uppercase tracking-wide">ALBARDÓN</h2>
+              <p class="text-xs text-slate-400">Cerveza Artesanal Santafesina</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="text-xs font-bold bg-slate-800 px-2 py-1 rounded border border-slate-700 text-slate-300">REMITO DE ENTREGA</span>
+            <p class="text-[11px] text-slate-400 mt-1">Fecha: ${fechaActual}</p>
+          </div>
+        </div>
+
+        <div class="text-xs space-y-1 bg-slate-800/60 p-3 rounded border border-slate-700/50">
+          <p><strong class="text-slate-300">Cliente / Bar:</strong> ${cliente.nombre}</p>
+          <p><strong class="text-slate-300">Dirección:</strong> ${cliente.direccion || 'Sin especificar'}</p>
+          <p><strong class="text-slate-300">Teléfono:</strong> ${cliente.telefono || 'Sin especificar'}</p>
+        </div>
+
+        <div>
+          <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Detalle de Entrega:</h4>
+          <table class="w-full text-xs text-left border-collapse">
+            <thead>
+              <tr class="border-b border-slate-700 text-slate-400 uppercase text-[10px]">
+                <th class="py-1.5">Producto</th>
+                <th class="py-1.5">Detalle / Estilo</th>
+                <th class="py-1.5 text-center">Cant.</th>
+                <th class="py-1.5 text-right">Unitario</th>
+                <th class="py-1.5 text-right">Importe</th>
+                <th class="py-1.5 no-print"></th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800">
+              ${barriles.map(b => `
+                <tr>
+                  <td class="py-2 font-bold text-amber-400 font-mono">Barril ${b.codigo} (${b.capacidad}L)</td>
+                  <td class="py-2 font-medium text-slate-200">${b.estilo || 'Sin especificar'} (Tipo ${b.conector || 'S'})</td>
+                  <td class="py-2 text-center text-slate-300">1</td>
+                  <td class="py-2 text-right text-slate-400">$${(parseFloat(b.precio) || 0).toLocaleString('es-AR')}</td>
+                  <td class="py-2 text-right font-semibold text-slate-200">$${(parseFloat(b.precio) || 0).toLocaleString('es-AR')}</td>
+                  <td class="py-2 no-print"></td>
+                </tr>
+              `).join('')}
+
+              ${botellasRemitoTemporal.map((bot, idx) => `
+                <tr>
+                  <td class="py-2 font-bold text-amber-400">Botella ${bot.tamano}</td>
+                  <td class="py-2 font-medium text-slate-200">${bot.estilo}</td>
+                  <td class="py-2 text-center text-slate-300">${bot.cantidad}</td>
+                  <td class="py-2 text-right text-slate-400">$${bot.precio.toLocaleString('es-AR')}</td>
+                  <td class="py-2 text-right font-semibold text-slate-200">$${(bot.cantidad * bot.precio).toLocaleString('es-AR')}</td>
+                  <td class="py-2 text-right no-print">
+                    <button onclick="eliminarBotellaRemito(${idx})" class="text-red-400 hover:text-red-300 p-0.5"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                  </td>
+                </tr>
+              `).join('')}
+
+              ${barriles.length === 0 && botellasRemitoTemporal.length === 0 ? `
+                <tr><td colspan="6" class="py-4 text-center text-slate-500 italic">No hay ítems cargados en esta entrega.</td></tr>
+              ` : ''}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Estado Cta Cte -->
+        <div class="bg-slate-800/80 p-3 rounded-lg border border-slate-700 space-y-1.5 text-xs">
+          <h5 class="font-bold text-amber-400 uppercase tracking-wide text-[10px] mb-1">Estado de Cuenta Corriente</h5>
+          <div class="flex justify-between text-slate-300">
+            <span>Subtotal Entrega Actual:</span>
+            <span class="font-semibold">$${totalEntrega.toLocaleString('es-AR')}</span>
+          </div>
+          <div class="flex justify-between text-slate-400">
+            <span>Saldo Anterior Cta Cte:</span>
+            <span>$${saldoAnterior.toLocaleString('es-AR')}</span>
+          </div>
+          <div class="flex justify-between text-slate-100 font-bold border-t border-slate-700/60 pt-1.5 text-sm">
+            <span>Saldo Total Pendiente:</span>
+            <span class="${saldoTotalConEntrega > 0 ? 'text-red-400' : 'text-emerald-400'}">$${saldoTotalConEntrega.toLocaleString('es-AR')}</span>
+          </div>
+        </div>
+
+        <div class="pt-4 mt-2 border-t border-slate-800 flex justify-between items-end text-[11px] text-slate-400">
+          <div>
+            <p>Firma Receptor: ______________________</p>
+          </div>
+          <p class="italic">¡Gracias por elegir Albardón!</p>
+        </div>
+      `;
+
+      document.getElementById('modal-remito-contenido').innerHTML = HTMLRemito;
+      lucide.createIcons();
+    }
+
+    function cerrarModalRemito() {
+      document.getElementById('modal-remito').classList.add('hidden');
+      clienteRemitoActual = null;
+      botellasRemitoTemporal = [];
+    }
+
+    function enviarRemitoWhatsApp() {
+      if (!clienteRemitoActual) return;
+
+      const barriles = window.listadoBarriles.filter(b => b.cliente_id === clienteRemitoActual.id);
+      const fechaActual = new Date().toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      
+      const totalBarriles = barriles.reduce((sum, b) => sum + (parseFloat(b.precio) || 0), 0);
+      const totalBotellas = botellasRemitoTemporal.reduce((sum, bot) => sum + (bot.cantidad * bot.precio), 0);
+      const totalEntrega = totalBarriles + totalBotellas;
+
+      const saldoAnterior = parseFloat(clienteRemitoActual.saldo || 0);
+      const saldoTotalConEntrega = saldoAnterior + totalEntrega;
+
+      let mensaje = `*REMITO DE ENTREGA - ALBARDÓN CERVEZA ARTESANAL*\n`;
+      mensaje += `📅 *Fecha:* ${fechaActual}\n`;
+      mensaje += `🏢 *Cliente:* ${clienteRemitoActual.nombre}\n`;
+      if (clienteRemitoActual.direccion) mensaje += `📍 *Dirección:* ${clienteRemitoActual.direccion}\n`;
+      mensaje += `\n*Detalle de Entrega:*\n`;
+
+      if (barriles.length > 0) {
+        mensaje += `\n🍺 *Barriles:*\n`;
+        barriles.forEach(b => {
+          const precioVal = parseFloat(b.precio) || 0;
+          mensaje += `• Barril *${b.codigo}* (${b.capacidad}L) - ${b.estilo || 'Sin especificar'} (Conector ${b.conector || 'S'}) | *$${precioVal.toLocaleString('es-AR')}*\n`;
+        });
+      }
+
+      if (botellasRemitoTemporal.length > 0) {
+        mensaje += `\n🍾 *Botellas:*\n`;
+        botellasRemitoTemporal.forEach(bot => {
+          const sub = bot.cantidad * bot.precio;
+          mensaje += `• ${bot.cantidad}x Botella *${bot.tamano}* (${bot.estilo}) a $${bot.precio.toLocaleString('es-AR')} c/u | *$${sub.toLocaleString('es-AR')}*\n`;
+        });
+      }
+
+      mensaje += `\n*ESTADO DE CUENTA CORRIENTE:*\n`;
+      mensaje += `📦 Total Entrega Actual: *$${totalEntrega.toLocaleString('es-AR')}*\n`;
+      mensaje += `📊 Saldo Anterior: *$${saldoAnterior.toLocaleString('es-AR')}*\n`;
+      mensaje += `💳 *Saldo Total Pendiente: $${saldoTotalConEntrega.toLocaleString('es-AR')}*\n`;
+
+      mensaje += `\n_¡Muchas gracias por elegirnos!_`;
+
+      const telefonoLimpio = (clienteRemitoActual.telefono || '').replace(/[^0-9]/g, '');
+      const urlWA = telefonoLimpio 
+        ? `https://wa.me/${telefonoLimpio}?text=${encodeURIComponent(mensaje)}`
+        : `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
+
+      window.open(urlWA, '_blank');
+    }
+
+    function actualizarEstadisticas() {
+      document.getElementById('stat-total-barriles').innerText = window.listadoBarriles.length;
+      document.getElementById('stat-vacios').innerText = window.listadoBarriles.filter(b => b.estado.includes('Fábrica')).length;
+      document.getElementById('stat-en-clientes').innerText = window.listadoBarriles.filter(b => b.estado.includes('Entregado')).length;
+      
+      const totalDeuda = window.listadoClientes.reduce((acc, c) => acc + parseFloat(c.saldo || 0), 0);
+      document.getElementById('stat-deuda-total').innerText = '$' + totalDeuda.toLocaleString('es-AR');
+    }
+  </script>
+</body>
+</html>
