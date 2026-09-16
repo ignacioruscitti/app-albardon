@@ -86,7 +86,7 @@
                     <i class="fa-solid fa-sliders"></i> Configuración Técnica de Receta
                 </h3>
                 
-                <!-- PARÁMETROS GENERALES DE BREW-O-MATIC -->
+                <!-- PARÁMETROS GENERALES DE RECETA -->
                 <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-3 text-xs bg-slate-900/60 p-4 rounded-xl border border-slate-700/80">
                     <div class="col-span-2">
                         <label class="text-slate-400 block mb-1">Nombre / Estilo</label>
@@ -129,18 +129,51 @@
                     </div>
                 </div>
 
-                <!-- SECCIÓN AGUA & EMPASTE -->
-                <div class="space-y-3 bg-slate-900/40 p-4 rounded-xl border border-slate-700">
+                <!-- SECCIÓN AGUA, MACERADO Y LAVADO -->
+                <div class="space-y-4 bg-slate-900/40 p-4 rounded-xl border border-slate-700">
                     <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
                         <i class="fa-solid fa-droplet"></i> Parámetros de Agua, Macerado y Lavado
                     </h4>
-                    <div class="grid grid-cols-2 md:grid-cols-6 gap-3 text-xs">
-                        <div><label class="text-slate-400">AGUA INICIAL (LTS)</label><input type="number" id="rec-agua-ini" placeholder="195" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-3 text-xs">
+                        <div><label class="text-slate-400">AGUA MACERADO (LTS)</label><input type="number" id="rec-agua-ini" placeholder="195" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
                         <div><label class="text-slate-400">T° AGUA INICIAL</label><input type="text" id="rec-temp-agua-ini" placeholder="73 °C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
                         <div><label class="text-slate-400">T° MACERADO</label><input type="text" id="rec-temp-mac" placeholder="66 °C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
                         <div><label class="text-slate-400">AGUA LAVADO (LTS)</label><input type="number" id="rec-agua-lav" placeholder="173" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
                         <div><label class="text-slate-400">T° AGUA LAVADO</label><input type="text" id="rec-temp-lav" placeholder="75 °C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
-                        <div><label class="text-slate-400">SALES / ADITIVOS</label><input type="text" id="rec-sales" placeholder="Gypsum 30g" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
+                    </div>
+
+                    <!-- MÚLTIPLES SALES: MACERADO Y LAVADO -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                        <div class="space-y-2 bg-slate-950/40 p-3 rounded-lg border border-slate-800">
+                            <div class="flex justify-between items-center border-b border-slate-800 pb-1">
+                                <label class="text-xs font-bold text-amber-300 uppercase">Sales de Macerado</label>
+                                <button onclick="agregarFilaSal('macerado')" class="text-[11px] text-amber-400 hover:underline flex items-center gap-1"><i class="fa-solid fa-plus"></i> Agregar Sal</button>
+                            </div>
+                            <div id="rec-sales-mac-inputs" class="space-y-2"></div>
+                        </div>
+
+                        <div class="space-y-2 bg-slate-950/40 p-3 rounded-lg border border-slate-800">
+                            <div class="flex justify-between items-center border-b border-slate-800 pb-1">
+                                <label class="text-xs font-bold text-amber-300 uppercase">Sales de Lavado</label>
+                                <button onclick="agregarFilaSal('lavado')" class="text-[11px] text-amber-400 hover:underline flex items-center gap-1"><i class="fa-solid fa-plus"></i> Agregar Sal</button>
+                            </div>
+                            <div id="rec-sales-lav-inputs" class="space-y-2"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN HERVIDO Y ENFRIADO -->
+                <div class="space-y-3 bg-slate-900/40 p-4 rounded-xl border border-slate-700">
+                    <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-fire"></i> Parámetros de Hervido y Enfriado
+                    </h4>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 text-xs">
+                        <div><label class="text-slate-400">DENS. PRE-HERVOR</label><input type="text" id="rec-dens-pre" placeholder="1.049" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1 font-mono"></div>
+                        <div><label class="text-slate-400">LTS PRE-HERVOR</label><input type="number" id="rec-lts-pre" placeholder="310" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1 font-mono"></div>
+                        <div><label class="text-slate-400">TIEMPO HERVOR (MIN)</label><input type="number" id="rec-tiempo-hervor" placeholder="60" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
+                        <div><label class="text-slate-400">EVAPORACIÓN (%)</label><input type="number" id="rec-evaporacion" placeholder="6" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
+                        <div><label class="text-slate-400">PÉRDIDA TRUB (LTS)</label><input type="number" id="rec-trub" placeholder="10" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
+                        <div><label class="text-slate-400">TIEMPO ENFRIADO (MIN)</label><input type="number" id="rec-tiempo-enfriado" placeholder="30" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
                     </div>
                 </div>
 
@@ -148,24 +181,13 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="space-y-2">
                         <label class="text-xs font-bold text-slate-300 uppercase block">Maltas / Granos</label>
-                        <div id="rec-granos-inputs" class="space-y-2">
-                            <div class="flex gap-2">
-                                <input type="text" placeholder="Pilsner US Cargill" class="rec-grano-nombre flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs">
-                                <input type="number" placeholder="Kg" class="rec-grano-cant w-20 bg-slate-900 border border-slate-700 rounded p-2 text-xs">
-                            </div>
-                        </div>
+                        <div id="rec-granos-inputs" class="space-y-2"></div>
                         <button onclick="agregarFilaGrano()" class="text-xs text-amber-400 hover:underline flex items-center gap-1"><i class="fa-solid fa-plus"></i> Agregar Malta</button>
                     </div>
 
                     <div class="space-y-2">
                         <label class="text-xs font-bold text-slate-300 uppercase block">Lúpulos</label>
-                        <div id="rec-lupulos-inputs" class="space-y-2">
-                            <div class="flex gap-2">
-                                <input type="text" placeholder="Cascade" class="rec-lupulo-nombre flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs">
-                                <input type="number" placeholder="Grs" class="rec-lupulo-cant w-20 bg-slate-900 border border-slate-700 rounded p-2 text-xs">
-                                <input type="text" placeholder="Momento (60m, WP)" class="rec-lupulo-momento w-28 bg-slate-900 border border-slate-700 rounded p-2 text-xs">
-                            </div>
-                        </div>
+                        <div id="rec-lupulos-inputs" class="space-y-2"></div>
                         <button onclick="agregarFilaLupulo()" class="text-xs text-amber-400 hover:underline flex items-center gap-1"><i class="fa-solid fa-plus"></i> Agregar Lúpulo</button>
                     </div>
                 </div>
@@ -255,7 +277,7 @@
                             <div><label class="text-slate-400">PH</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
                             <div><label class="text-slate-400">COMIENZO LAVADO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
                             <div><label class="text-slate-400">FIN LAVADO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                            <div><label class="text-slate-400">SALES (grs)</label><input type="text" placeholder="grs" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            <div><label class="text-slate-400">SALES (grs)</label><input type="text" id="coc-sales-lav" placeholder="grs" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
                         </div>
                     </div>
                 </div>
@@ -264,9 +286,9 @@
                     <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Hervido</h3>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
                         <div><label class="text-slate-400">ENCENDIDO OLLA</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-slate-400">LTS ANTES HERVOR</label><input type="number" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                        <div><label class="text-slate-400">LTS ANTES HERVOR</label><input type="number" id="coc-lts-pre" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 font-mono"></div>
                         <div><label class="text-slate-400">PH ANTES HERVOR</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-slate-400">DENS. ANTES HERVOR</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 font-mono"></div>
+                        <div><label class="text-slate-400">DENS. ANTES HERVOR</label><input type="text" id="coc-dens-pre" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 font-mono"></div>
                         <div><label class="text-slate-400">COMIENZO HERVOR</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
                         <div><label class="text-slate-400">LTS DESPUES HERVOR</label><input type="number" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
                         <div><label class="text-slate-400">PH DESPUES HERVOR</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
@@ -604,8 +626,8 @@
         </div>
 
         <div class="space-y-3">
-            <h3 class="text-xs font-bold text-amber-800 uppercase border-b border-slate-200 pb-1">Agua y Macerado</h3>
-            <div class="grid grid-cols-3 gap-2 text-slate-700" id="rec-pdf-agua-det"></div>
+            <h3 class="text-xs font-bold text-amber-800 uppercase border-b border-slate-200 pb-1">Agua, Macerado y Hervido</h3>
+            <div class="grid grid-cols-2 gap-2 text-slate-700" id="rec-pdf-agua-det"></div>
         </div>
 
         <div class="space-y-3 pt-2">
@@ -623,7 +645,6 @@
 
     <!-- LÓGICA JAVASCRIPT INTEGRADA -->
     <script>
-        // --- BASE DE DATOS LOCALSTORAGE ---
         const recetasIniciales = {
             apa_pilsen_280: {
                 id: 'apa_pilsen_280',
@@ -641,7 +662,14 @@
                 tempMac: "66 °C",
                 aguaLav: 173,
                 tempLav: "75 °C",
-                sales: "Gypsum 30g, Cloruro de Calcio 20g",
+                salesMac: [{ nombre: "Gypsum (Sulfato de Calcio)", cantidad: 30 }, { nombre: "Cloruro de Calcio", cantidad: 20 }],
+                salesLav: [{ nombre: "Gypsum", cantidad: 15 }],
+                densPre: "1.049",
+                ltsPre: 310,
+                tiempoHervor: 60,
+                evaporacion: 6,
+                trub: 10,
+                tiempoEnfriado: 30,
                 granos: [
                     { nombre: "Pilsner US Cargill", cantidad: 55 },
                     { nombre: "Melanoidin Malt (Ba-Malt)", cantidad: 5 },
@@ -689,12 +717,15 @@
             if (tabId === 'cc') renderClientes();
         }
 
-        // --- MÓDULO RECETAS COMPLETO ---
+        // --- RECETAS ---
         function renderRecetas() {
             const container = document.getElementById('grilla-recetas');
             let html = '';
             Object.keys(recetas).forEach(key => {
                 const r = recetas[key];
+                const salesMacTxt = (r.salesMac && r.salesMac.length > 0) ? r.salesMac.map(s => `${s.nombre}: ${s.cantidad}g`).join(', ') : 'Ninguna';
+                const salesLavTxt = (r.salesLav && r.salesLav.length > 0) ? r.salesLav.map(s => `${s.nombre}: ${s.cantidad}g`).join(', ') : 'Ninguna';
+
                 html += `
                     <div class="card p-5 space-y-4 flex flex-col justify-between">
                         <div>
@@ -715,10 +746,18 @@
                             </div>
 
                             <div class="space-y-3 text-xs border-t border-slate-800 pt-3">
+                                <div class="bg-slate-900/40 p-2 rounded border border-slate-800 text-[11px] text-slate-300 space-y-1">
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <p>💧 Macerado: <strong class="text-slate-100">${r.aguaIni || '--'} Lts</strong> (${r.tempAguaIni || '--'} / Mac: ${r.tempMac || '--'})</p>
+                                        <p>🚿 Lavado: <strong class="text-slate-100">${r.aguaLav || '--'} Lts</strong> (${r.tempLav || '--'})</p>
+                                    </div>
+                                    <p class="text-slate-400">🧪 Sales Mac: <span class="text-slate-300">${salesMacTxt}</span></p>
+                                    <p class="text-slate-400">🧪 Sales Lav: <span class="text-slate-300">${salesLavTxt}</span></p>
+                                </div>
+
                                 <div class="bg-slate-900/40 p-2 rounded border border-slate-800 text-[11px] text-slate-300 grid grid-cols-2 gap-2">
-                                    <p>💧 Empaste: <strong class="text-slate-100">${r.aguaIni || '--'} Lts</strong> (${r.tempAguaIni || '--'} / Mac: ${r.tempMac || '--'})</p>
-                                    <p>🚿 Lavado: <strong class="text-slate-100">${r.aguaLav || '--'} Lts</strong> (${r.tempLav || '--'})</p>
-                                    ${r.sales ? `<p class="col-span-2 text-slate-400">🧪 Sales: <span class="text-slate-300">${r.sales}</span></p>` : ''}
+                                    <p>🔥 Pre-Hervor: <strong class="text-amber-300 font-mono">${r.densPre || '--'}</strong> (${r.ltsPre || '--'} Lts)</p>
+                                    <p>⏱️ Hervor: <strong class="text-slate-100">${r.tiempoHervor || 60} min</strong> (Evap: ${r.evaporacion || 6}%)</p>
                                 </div>
 
                                 <div>
@@ -753,20 +792,41 @@
             actualizarSelectRecetas();
         }
 
-        function mostrarFormularioReceta() { document.getElementById('form-receta-panel').classList.remove('hidden'); }
+        function mostrarFormularioReceta() {
+            document.getElementById('rec-sales-mac-inputs').innerHTML = '';
+            document.getElementById('rec-sales-lav-inputs').innerHTML = '';
+            document.getElementById('rec-granos-inputs').innerHTML = '';
+            document.getElementById('rec-lupulos-inputs').innerHTML = '';
+            
+            agregarFilaSal('macerado');
+            agregarFilaSal('lavado');
+            agregarFilaGrano();
+            agregarFilaLupulo();
+
+            document.getElementById('form-receta-panel').classList.remove('hidden');
+        }
+
         function ocultarFormularioReceta() { document.getElementById('form-receta-panel').classList.add('hidden'); }
         
-        function agregarFilaGrano() {
+        function agregarFilaSal(tipo, nombre = '', cant = '') {
+            const container = document.getElementById(tipo === 'macerado' ? 'rec-sales-mac-inputs' : 'rec-sales-lav-inputs');
+            const div = document.createElement('div');
+            div.className = 'flex gap-2 item-sal-' + tipo;
+            div.innerHTML = `<input type="text" value="${nombre}" placeholder="ej. Gypsum" class="sal-nombre flex-1 bg-slate-900 border border-slate-700 rounded p-1.5 text-xs"><input type="number" value="${cant}" placeholder="Grs" class="sal-cant w-20 bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-amber-400 font-bold"><button onclick="this.parentElement.remove()" class="text-red-400 font-bold px-1">×</button>`;
+            container.appendChild(div);
+        }
+
+        function agregarFilaGrano(nombre = '', cant = '') {
             const div = document.createElement('div');
             div.className = 'flex gap-2';
-            div.innerHTML = `<input type="text" placeholder="Malta" class="rec-grano-nombre flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs"><input type="number" placeholder="Kg" class="rec-grano-cant w-20 bg-slate-900 border border-slate-700 rounded p-2 text-xs">`;
+            div.innerHTML = `<input type="text" value="${nombre}" placeholder="Malta" class="rec-grano-nombre flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs"><input type="number" value="${cant}" placeholder="Kg" class="rec-grano-cant w-20 bg-slate-900 border border-slate-700 rounded p-2 text-xs"><button onclick="this.parentElement.remove()" class="text-red-400 font-bold px-1">×</button>`;
             document.getElementById('rec-granos-inputs').appendChild(div);
         }
 
-        function agregarFilaLupulo() {
+        function agregarFilaLupulo(nombre = '', cant = '', momento = '') {
             const div = document.createElement('div');
             div.className = 'flex gap-2';
-            div.innerHTML = `<input type="text" placeholder="Lúpulo" class="rec-lupulo-nombre flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs"><input type="number" placeholder="Grs" class="rec-lupulo-cant w-20 bg-slate-900 border border-slate-700 rounded p-2 text-xs"><input type="text" placeholder="Momento" class="rec-lupulo-momento w-28 bg-slate-900 border border-slate-700 rounded p-2 text-xs">`;
+            div.innerHTML = `<input type="text" value="${nombre}" placeholder="Lúpulo" class="rec-lupulo-nombre flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs"><input type="number" value="${cant}" placeholder="Grs" class="rec-lupulo-cant w-20 bg-slate-900 border border-slate-700 rounded p-2 text-xs"><input type="text" value="${momento}" placeholder="Momento" class="rec-lupulo-momento w-28 bg-slate-900 border border-slate-700 rounded p-2 text-xs"><button onclick="this.parentElement.remove()" class="text-red-400 font-bold px-1">×</button>`;
             document.getElementById('rec-lupulos-inputs').appendChild(div);
         }
 
@@ -777,6 +837,20 @@
             const id = nombre.toLowerCase().replace(/[^a-z0-9]/g, '_');
             const granos = [];
             const lupulos = [];
+            const salesMac = [];
+            const salesLav = [];
+
+            document.querySelectorAll('.item-sal-macerado').forEach(f => {
+                const nom = f.querySelector('.sal-nombre').value.trim();
+                const cant = parseFloat(f.querySelector('.sal-cant').value) || 0;
+                if (nom) salesMac.push({ nombre: nom, cantidad: cant });
+            });
+
+            document.querySelectorAll('.item-sal-lavado').forEach(f => {
+                const nom = f.querySelector('.sal-nombre').value.trim();
+                const cant = parseFloat(f.querySelector('.sal-cant').value) || 0;
+                if (nom) salesLav.push({ nombre: nom, cantidad: cant });
+            });
 
             document.querySelectorAll('.rec-grano-nombre').forEach((inp, idx) => {
                 if (inp.value.trim()) granos.push({ nombre: inp.value.trim(), cantidad: parseFloat(document.querySelectorAll('.rec-grano-cant')[idx].value) || 0 });
@@ -801,7 +875,14 @@
                 tempMac: document.getElementById('rec-temp-mac').value.trim(),
                 aguaLav: parseFloat(document.getElementById('rec-agua-lav').value) || 0,
                 tempLav: document.getElementById('rec-temp-lav').value.trim(),
-                sales: document.getElementById('rec-sales').value.trim(),
+                salesMac,
+                salesLav,
+                densPre: document.getElementById('rec-dens-pre').value.trim(),
+                ltsPre: parseFloat(document.getElementById('rec-lts-pre').value) || 0,
+                tiempoHervor: parseFloat(document.getElementById('rec-tiempo-hervor').value) || 60,
+                evaporacion: parseFloat(document.getElementById('rec-evaporacion').value) || 6,
+                trub: parseFloat(document.getElementById('rec-trub').value) || 0,
+                tiempoEnfriado: parseFloat(document.getElementById('rec-tiempo-enfriado').value) || 30,
                 granos,
                 lupulos
             };
@@ -837,9 +918,12 @@
             document.getElementById('coc-estilo').value = receta.nombre;
             if (receta.aguaIni) document.getElementById('coc-agua-lts').value = receta.aguaIni;
             if (receta.tempAguaIni) document.getElementById('coc-agua-temp').value = receta.tempAguaIni;
-            if (receta.sales) document.getElementById('coc-sales').value = receta.sales;
+            if (receta.salesMac) document.getElementById('coc-sales').value = receta.salesMac.map(s => `${s.nombre} (${s.cantidad}g)`).join(', ');
             if (receta.aguaLav) document.getElementById('coc-agua-lav-lts').value = receta.aguaLav;
             if (receta.tempLav) document.getElementById('coc-temp-lav').value = receta.tempLav;
+            if (receta.salesLav) document.getElementById('coc-sales-lav').value = receta.salesLav.map(s => `${s.nombre} (${s.cantidad}g)`).join(', ');
+            if (receta.densPre) document.getElementById('coc-dens-pre').value = receta.densPre;
+            if (receta.ltsPre) document.getElementById('coc-lts-pre').value = receta.ltsPre;
             if (receta.levadura) document.getElementById('coc-levadura').value = receta.levadura;
 
             let htmlG = '', totalKg = 0;
@@ -909,6 +993,9 @@
             const r = recetas[key];
             if (!r) return;
 
+            const salesMacTxt = (r.salesMac && r.salesMac.length > 0) ? r.salesMac.map(s => `${s.nombre} (${s.cantidad}g)`).join(', ') : 'Ninguna';
+            const salesLavTxt = (r.salesLav && r.salesLav.length > 0) ? r.salesLav.map(s => `${s.nombre} (${s.cantidad}g)`).join(', ') : 'Ninguna';
+
             document.getElementById('rec-pdf-nombre').innerText = r.nombre;
             document.getElementById('rec-pdf-batch').innerText = `Batch: ${r.batch || 280} Lts`;
             document.getElementById('rec-pdf-og').innerText = r.diTeorica;
@@ -919,9 +1006,12 @@
             document.getElementById('rec-pdf-efic').innerText = `${r.eficiencia || '70'}%`;
 
             document.getElementById('rec-pdf-agua-det').innerHTML = `
-                <div><strong>Agua Inicial:</strong> ${r.aguaIni || '--'} L (${r.tempAguaIni || '--'})</div>
-                <div><strong>T° Macerado:</strong> ${r.tempMac || '--'}</div>
+                <div><strong>Agua Macerado:</strong> ${r.aguaIni || '--'} L (${r.tempAguaIni || '--'} / Mac: ${r.tempMac || '--'})</div>
+                <div><strong>Sales Macerado:</strong> ${salesMacTxt}</div>
                 <div><strong>Agua Lavado:</strong> ${r.aguaLav || '--'} L (${r.tempLav || '--'})</div>
+                <div><strong>Sales Lavado:</strong> ${salesLavTxt}</div>
+                <div><strong>Densidad Pre-Hervor:</strong> ${r.densPre || '--'} (${r.ltsPre || '--'} L)</div>
+                <div><strong>Hervor / Enfriado:</strong> ${r.tiempoHervor || 60} min (Evap: ${r.evaporacion || 6}%)</div>
             `;
 
             document.getElementById('rec-pdf-granos').innerHTML = r.granos.map(g => `<li class="border-b border-slate-100 py-1 flex justify-between"><span>${g.nombre}</span><strong class="font-mono">${g.cantidad} kg</strong></li>`).join('');
