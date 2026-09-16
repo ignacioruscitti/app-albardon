@@ -32,7 +32,7 @@
             border: 1px solid #cbd5e1 !important;
             color: #0f172a !important;
         }
-        .pdf-export-mode h2, .pdf-export-mode h3, .pdf-export-mode label, .pdf-export-mode span {
+        .pdf-export-mode h2, .pdf-export-mode h3, .pdf-export-mode label, .pdf-export-mode span, .pdf-export-mode th, .pdf-export-mode td {
             color: #0f172a !important;
         }
     </style>
@@ -146,7 +146,6 @@
                 </div>
             </div>
 
-            <!-- CONTENEDOR EXCLUSIVO PARA EXPORTAR COCCIÓN -->
             <div id="area-impresion-coccion" class="space-y-6">
                 <div class="card p-4 space-y-3">
                     <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Encabezado</h3>
@@ -287,66 +286,74 @@
 
         <!-- ==================== MÓDULO 3: FERMENTACIÓN ==================== -->
         <section id="tab-fermentacion" class="space-y-6 hidden">
-            <div class="card p-4 flex justify-between items-center no-print">
+            <div class="card p-4 flex flex-wrap justify-between items-center gap-4 no-print">
                 <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
                     <i class="fa-solid fa-temperature-half"></i> Control de Fermentación
                 </h2>
-                <span class="text-xs font-mono bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/20">Fermentador #1 (Activo)</span>
-            </div>
-
-            <div class="card p-4 space-y-3">
-                <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Encabezado</h3>
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-                    <div><span class="text-xs text-slate-400 block">ESTILO</span><input type="text" id="ferm-estilo" value="Scottish Ale" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
-                    <div><span class="text-xs text-slate-400 block">FECHA ELABORACIÓN</span><input type="date" id="ferm-fecha" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
-                    <div><span class="text-xs text-slate-400 block">LOTE</span><input type="text" id="ferm-lote" value="L-2026-01" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1 font-mono text-amber-400"></div>
-                    <div><span class="text-xs text-slate-400 block">BATCH</span><input type="text" value="500L" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
-                    <div><span class="text-xs text-slate-400 block">D.I. RECETA</span><input type="text" id="ferm-di-receta" value="1.050" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1 font-mono"></div>
-                    <div><span class="text-xs text-amber-400 block font-bold">D.I. REAL</span><input type="text" id="ferm-di-real" value="1.048" oninput="calcularABV()" class="w-full bg-slate-900 border border-amber-500/50 rounded p-2 mt-1 font-mono text-amber-400 font-bold"></div>
+                <div class="flex items-center gap-3">
+                    <span class="text-xs font-mono bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/20">Fermentador #1 (Activo)</span>
+                    <button onclick="descargarFermentacionPDF()" title="Descargar Planilla de Fermentación en PDF" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-2 rounded-lg text-xs flex items-center gap-1">
+                        <i class="fa-solid fa-file-pdf"></i> Generar PDF
+                    </button>
                 </div>
             </div>
 
-            <div class="card p-4 space-y-3 overflow-x-auto">
-                <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Tabla de Seguimiento Diario</h3>
-                <table class="w-full text-left text-xs text-slate-300">
-                    <thead class="bg-slate-900 text-slate-400 uppercase font-mono">
-                        <tr>
-                            <th class="p-2 border border-slate-700 text-center">Día</th>
-                            <th class="p-2 border border-slate-700">Fecha</th>
-                            <th class="p-2 border border-slate-700">Densidad</th>
-                            <th class="p-2 border border-slate-700">Temperatura</th>
-                            <th class="p-2 border border-slate-700">Set Point</th>
-                            <th class="p-2 border border-slate-700">pH</th>
-                            <th class="p-2 border border-slate-700">Purga / Cosecha / Notas</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabla-dias-fermentacion">
-                    </tbody>
-                </table>
-            </div>
+            <!-- CONTENEDOR EXCLUSIVO PARA EXPORTAR FERMENTACIÓN -->
+            <div id="area-impresion-fermentacion" class="space-y-6">
+                <div class="card p-4 space-y-3">
+                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Encabezado</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                        <div><span class="text-xs text-slate-400 block">ESTILO</span><input type="text" id="ferm-estilo" value="Scottish Ale" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
+                        <div><span class="text-xs text-slate-400 block">FECHA ELABORACIÓN</span><input type="date" id="ferm-fecha" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
+                        <div><span class="text-xs text-slate-400 block">LOTE</span><input type="text" id="ferm-lote" value="L-2026-01" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1 font-mono text-amber-400"></div>
+                        <div><span class="text-xs text-slate-400 block">BATCH</span><input type="text" value="500L" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
+                        <div><span class="text-xs text-slate-400 block">D.I. RECETA</span><input type="text" id="ferm-di-receta" value="1.050" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1 font-mono"></div>
+                        <div><span class="text-xs text-amber-400 block font-bold">D.I. REAL</span><input type="text" id="ferm-di-real" value="1.048" oninput="calcularABV()" class="w-full bg-slate-900 border border-amber-500/50 rounded p-2 mt-1 font-mono text-amber-400 font-bold"></div>
+                    </div>
+                </div>
 
-            <div class="card p-4 space-y-4">
-                <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Cierre de Fermentación</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-                    <div class="space-y-4">
-                        <div>
-                            <label class="text-xs text-slate-400 font-bold block">D. F. (DENSIDAD FINAL)</label>
-                            <input type="text" id="ferm-df" placeholder="ej. 1.010" oninput="calcularABV()" class="w-full bg-slate-900 border border-slate-700 rounded p-3 text-lg font-mono text-amber-400 mt-1">
-                        </div>
-                        <div>
-                            <label class="text-xs text-slate-400 font-bold block">ALC. % (CÁLCULO AUTOMÁTICO)</label>
-                            <div id="resultado-abv" class="w-full bg-slate-950 border border-emerald-500/40 rounded p-3 text-2xl font-mono text-emerald-400 font-bold mt-1">
-                                -- %
+                <div class="card p-4 space-y-3 overflow-x-auto">
+                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Tabla de Seguimiento Diario</h3>
+                    <table class="w-full text-left text-xs text-slate-300">
+                        <thead class="bg-slate-900 text-slate-400 uppercase font-mono">
+                            <tr>
+                                <th class="p-2 border border-slate-700 text-center">Día</th>
+                                <th class="p-2 border border-slate-700">Fecha</th>
+                                <th class="p-2 border border-slate-700">Densidad</th>
+                                <th class="p-2 border border-slate-700">Temperatura</th>
+                                <th class="p-2 border border-slate-700">Set Point</th>
+                                <th class="p-2 border border-slate-700">pH</th>
+                                <th class="p-2 border border-slate-700">Purga / Cosecha / Notas</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-dias-fermentacion">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card p-4 space-y-4">
+                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Cierre de Fermentación</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="text-xs text-slate-400 font-bold block">D. F. (DENSIDAD FINAL)</label>
+                                <input type="text" id="ferm-df" placeholder="ej. 1.010" oninput="calcularABV()" class="w-full bg-slate-900 border border-slate-700 rounded p-3 text-lg font-mono text-amber-400 mt-1">
+                            </div>
+                            <div>
+                                <label class="text-xs text-slate-400 font-bold block">ALC. % (CÁLCULO AUTOMÁTICO)</label>
+                                <div id="resultado-abv" class="w-full bg-slate-950 border border-emerald-500/40 rounded p-3 text-2xl font-mono text-emerald-400 font-bold mt-1">
+                                    -- %
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="bg-slate-900 p-4 rounded-lg border border-slate-700 space-y-3 no-print">
-                        <h4 class="text-xs font-semibold text-slate-300 uppercase">Finalizar Lote</h4>
-                        <p class="text-xs text-slate-400">Al finalizar, podés dirigirte a la pestaña de Stock para pasar tus barriles vacíos a <strong>Lleno en fábrica</strong> con este lote.</p>
-                        <button onclick="switchTab('stock')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-lg text-sm flex items-center justify-center gap-2 transition-colors">
-                            <i class="fa-solid fa-boxes-stacked"></i> Ir a Stock de Barriles
-                        </button>
+                        <div class="bg-slate-900 p-4 rounded-lg border border-slate-700 space-y-3 no-print">
+                            <h4 class="text-xs font-semibold text-slate-300 uppercase">Finalizar Lote</h4>
+                            <p class="text-xs text-slate-400">Al finalizar, podés dirigirte a la pestaña de Stock para pasar tus barriles vacíos a <strong>Lleno en fábrica</strong> con este lote.</p>
+                            <button onclick="switchTab('stock')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-lg text-sm flex items-center justify-center gap-2 transition-colors">
+                                <i class="fa-solid fa-boxes-stacked"></i> Ir a Stock de Barriles
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -656,6 +663,27 @@
             const opt = {
                 margin:       8,
                 filename:     `Planilla_Coccion_${estilo.replace(/\s+/g, '_')}_${lote}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                element.classList.remove('pdf-export-mode');
+            });
+        }
+
+        // GENERACIÓN EXCLUSIVA DE PDF PARA PLANILLA DE FERMENTACIÓN
+        function descargarFermentacionPDF() {
+            const element = document.getElementById('area-impresion-fermentacion');
+            element.classList.add('pdf-export-mode');
+
+            const lote = document.getElementById('ferm-lote').value || 'Fermentacion';
+            const estilo = document.getElementById('ferm-estilo').value || 'Albardon';
+
+            const opt = {
+                margin:       8,
+                filename:     `Control_Fermentacion_${estilo.replace(/\s+/g, '_')}_${lote}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2 },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
