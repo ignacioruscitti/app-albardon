@@ -19,15 +19,13 @@
     <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50 shadow-lg">
         <div class="max-w-7xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between">
             <div class="flex items-center space-x-3">
-                <!-- Reemplazamos el ícono por el logo -->
                 <img src="logo.png" alt="Logo Albardón" class="h-10 w-10 object-contain rounded-full bg-slate-900 border border-slate-700">
                 <div>
-                    <!-- Título en blanco -->
                     <h1 class="text-xl font-bold tracking-wider text-white">ALBARDÓN</h1>
                     <span class="text-xs text-slate-400 block font-normal">Sistema Integral de Gestión</span>
                 </div>
             </div>
-            <!-- Pestañas reordenadas -->
+            <!-- Pestañas -->
             <nav class="flex space-x-2 mt-4 sm:mt-0 overflow-x-auto pb-1 sm:pb-0">
                 <button onclick="switchTab('recetas')" id="btn-recetas" class="tab-btn active px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
                     <i class="fa-solid fa-book-open"></i> Recetas
@@ -50,7 +48,7 @@
 
     <main class="max-w-7xl mx-auto px-4 py-6">
 
-        <!-- ==================== MÓDULO 1: RECETAS (Ahora visible por defecto) ==================== -->
+        <!-- ==================== MÓDULO 1: RECETAS ==================== -->
         <section id="tab-recetas" class="space-y-6">
             <div class="card p-4 flex justify-between items-center">
                 <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
@@ -61,7 +59,6 @@
                 </button>
             </div>
 
-            <!-- FORMULARIO CREAR RECETA -->
             <div id="form-receta-panel" class="card p-4 space-y-4 hidden border-amber-500/50">
                 <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider border-b border-slate-700 pb-2">Crear Nueva Receta</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
@@ -106,7 +103,6 @@
                 </div>
             </div>
 
-            <!-- GRILLA DE RECETAS GUARDADAS -->
             <div id="grilla-recetas" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
         </section>
 
@@ -119,12 +115,10 @@
                 <div class="flex items-center gap-3">
                     <label class="text-sm text-slate-300 font-medium">Cargar Receta Base:</label>
                     <select id="select-receta" onchange="cargarRecetaEnCoccion()" class="bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-lg p-2">
-                        <!-- Cargado dinámicamente -->
                     </select>
                 </div>
             </div>
 
-            <!-- ENCABEZADO -->
             <div class="card p-4 space-y-3">
                 <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Encabezado</h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -134,7 +128,6 @@
                 </div>
             </div>
 
-            <!-- OLLA DE AGUA -->
             <div class="card p-4 space-y-3">
                 <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Olla de Agua</h3>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
@@ -148,7 +141,6 @@
                 </div>
             </div>
 
-            <!-- GRANOS / MOLIENDA -->
             <div class="card p-4 space-y-3">
                 <div class="flex justify-between items-center border-b border-slate-700 pb-1">
                     <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Granos / Molienda</h3>
@@ -159,9 +151,7 @@
                 </div>
             </div>
 
-            <!-- MACERADO Y LAVADO -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- MACERADO -->
                 <div class="card p-4 space-y-3">
                     <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Macerado / Recirculado</h3>
                     <div class="grid grid-cols-2 gap-3 text-xs">
@@ -177,7 +167,6 @@
                     </div>
                 </div>
 
-                <!-- LAVADO -->
                 <div class="card p-4 space-y-3">
                     <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Lavado</h3>
                     <div class="grid grid-cols-3 gap-3 text-xs">
@@ -194,7 +183,6 @@
                 </div>
             </div>
 
-            <!-- HERVIDO -->
             <div class="card p-4 space-y-3">
                 <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Hervido</h3>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
@@ -212,7 +200,6 @@
                 </div>
             </div>
 
-            <!-- LÚPULOS -->
             <div class="card p-4 space-y-3">
                 <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Lúpulos</h3>
                 <div id="contenedor-lupulos" class="space-y-2">
@@ -220,7 +207,6 @@
                 </div>
             </div>
 
-            <!-- VARIOS, WHIRLPOOL, ENFRIADO, INOCULACIÓN -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-6">
                     <div class="card p-4 space-y-3">
@@ -278,7 +264,6 @@
                 <span class="text-xs font-mono bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/20">Fermentador #1 (Activo)</span>
             </div>
 
-            <!-- ENCABEZADO -->
             <div class="card p-4 space-y-3">
                 <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Encabezado</h3>
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
@@ -291,7 +276,6 @@
                 </div>
             </div>
 
-            <!-- TABLA SEGUIMIENTO DIARIO (18 DÍAS) -->
             <div class="card p-4 space-y-3 overflow-x-auto">
                 <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Tabla de Seguimiento Diario</h3>
                 <table class="w-full text-left text-xs text-slate-300">
@@ -307,12 +291,10 @@
                         </tr>
                     </thead>
                     <tbody id="tabla-dias-fermentacion">
-                        <!-- Generado por JavaScript -->
                     </tbody>
                 </table>
             </div>
 
-            <!-- CIERRE DE FERMENTACIÓN -->
             <div class="card p-4 space-y-4">
                 <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Cierre de Fermentación</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
@@ -340,7 +322,7 @@
             </div>
         </section>
 
-        <!-- ==================== MÓDULO 4: STOCK DE BARRILES (MATRIZ 6 ESTADOS) ==================== -->
+        <!-- ==================== MÓDULO 4: STOCK DE BARRILES ==================== -->
         <section id="tab-stock" class="space-y-6 hidden">
             <div class="card p-4 flex flex-wrap justify-between items-center gap-4">
                 <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
@@ -351,11 +333,10 @@
                 </button>
             </div>
 
-            <!-- GRILLA DE BARRILES -->
             <div id="grilla-barriles" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
         </section>
 
-        <!-- ==================== MÓDULO 5: CUENTAS CORRIENTES & REMITOS ==================== -->
+        <!-- ==================== MÓDULO 5: CUENTAS CORRIENTES & CLIENTES ==================== -->
         <section id="tab-cc" class="space-y-6 hidden">
             <div class="card p-4 flex flex-wrap justify-between items-center gap-4">
                 <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
@@ -371,7 +352,7 @@
                 </div>
             </div>
 
-            <!-- GRILLA DE CLIENTES -->
+            <!-- GRILLA DE CLIENTES (Soporta Editar y Eliminar) -->
             <div id="grilla-clientes" class="space-y-4"></div>
         </section>
 
@@ -379,7 +360,7 @@
 
     <!-- MODALES DE INTERACCIÓN -->
 
-    <!-- MODAL BARRIL (Actualizado con 20L y Conector) -->
+    <!-- MODAL BARRIL -->
     <div id="modal-barril" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
         <div class="card p-6 w-full max-w-md space-y-4">
             <h3 id="modal-barril-titulo" class="font-bold text-amber-400 text-base border-b border-slate-700 pb-2">Gestionar Barril</h3>
@@ -423,7 +404,6 @@
                 <div id="campo-barril-cliente" class="hidden">
                     <label class="text-slate-400 block mb-1">Cliente Asignado</label>
                     <select id="barril-cliente-select" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
-                        <!-- Cargado dinámicamente -->
                     </select>
                 </div>
             </div>
@@ -434,13 +414,14 @@
         </div>
     </div>
 
-    <!-- MODAL CLIENTE -->
+    <!-- MODAL CLIENTE (CREACIÓN / EDICIÓN) -->
     <div id="modal-cliente" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
         <div class="card p-6 w-full max-w-md space-y-4">
-            <h3 class="font-bold text-amber-400 text-base border-b border-slate-700 pb-2">Nuevo Cliente</h3>
+            <h3 id="modal-cliente-titulo" class="font-bold text-amber-400 text-base border-b border-slate-700 pb-2">Nuevo Cliente</h3>
+            <input type="hidden" id="cli-id-editar">
             <div class="space-y-3 text-xs">
                 <div>
-                    <label class="text-slate-400 block mb-1">Nombre / Razon Social</label>
+                    <label class="text-slate-400 block mb-1">Nombre / Razón Social</label>
                     <input type="text" id="cli-nombre" placeholder="ej. Bar El Portal" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
                 </div>
                 <div>
@@ -467,7 +448,6 @@
                 <div>
                     <label class="text-slate-400 block mb-1">Cliente</label>
                     <select id="mov-cliente-select" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
-                        <!-- Cargado dinámicamente -->
                     </select>
                 </div>
                 <div>
@@ -706,7 +686,7 @@
             let html = '';
             barriles.forEach((b, idx) => {
                 const est = etiquetasEstado[b.estado] || { texto: b.estado, clase: 'bg-slate-700' };
-                const conector = b.conector || 'G'; // Valor por defecto para barriles antiguos si los hubiere
+                const conector = b.conector || 'G';
                 
                 html += `
                     <div class="card p-4 space-y-3 flex flex-col justify-between">
@@ -785,7 +765,7 @@
             renderBarriles();
         }
 
-        // --- MÓDULO CUENTAS CORRIENTES ---
+        // --- MÓDULO CUENTAS CORRIENTES & CLIENTES ---
         function renderClientes() {
             const container = document.getElementById('grilla-clientes');
             let html = '';
@@ -797,22 +777,32 @@
                                 <h3 class="font-bold text-lg text-slate-100">${c.nombre}</h3>
                                 <p class="text-xs text-slate-400">Tel: ${c.telefono} | Dir: ${c.direccion}</p>
                             </div>
-                            <div class="text-right">
-                                <span class="text-xs text-slate-400 block">Saldo CC</span>
-                                <span class="text-xl font-mono font-bold ${c.saldo < 0 ? 'text-red-400' : 'text-emerald-400'}">
-                                    $ ${c.saldo.toLocaleString()}
-                                </span>
+                            <div class="flex items-center gap-4">
+                                <div class="text-right">
+                                    <span class="text-xs text-slate-400 block">Saldo CC</span>
+                                    <span class="text-xl font-mono font-bold ${c.saldo < 0 ? 'text-red-400' : 'text-emerald-400'}">
+                                        $ ${c.saldo.toLocaleString()}
+                                    </span>
+                                </div>
+                                <div class="flex gap-1">
+                                    <button onclick="editarCliente('${c.id}')" title="Editar Cliente" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs p-2 rounded-lg transition-colors">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </button>
+                                    <button onclick="eliminarCliente('${c.id}')" title="Eliminar Cliente" class="bg-red-500/20 hover:bg-red-500/40 text-red-400 text-xs p-2 rounded-lg transition-colors">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
                         <div class="space-y-1 text-xs">
                             <span class="text-slate-400 font-semibold block">ÚLTIMOS MOVIMIENTOS:</span>
-                            ${c.movimientos.map(m => `
+                            ${c.movimientos && c.movimientos.length > 0 ? c.movimientos.map(m => `
                                 <div class="flex justify-between py-1 border-b border-slate-800 text-slate-300">
                                     <span>${m.fecha} - ${m.concepto}</span>
                                     <span class="font-mono font-bold ${m.monto < 0 ? 'text-red-400' : 'text-emerald-400'}">$ ${m.monto.toLocaleString()}</span>
                                 </div>
-                            `).join('')}
+                            `).join('') : '<p class="text-slate-500 italic">Sin movimientos registrados.</p>'}
                         </div>
 
                         <div class="flex justify-end pt-2">
@@ -825,20 +815,72 @@
             container.innerHTML = html;
         }
 
-        function mostrarModalCliente() { document.getElementById('modal-cliente').classList.remove('hidden'); }
+        function mostrarModalCliente() { 
+            document.getElementById('modal-cliente-titulo').innerText = 'Nuevo Cliente';
+            document.getElementById('cli-id-editar').value = '';
+            document.getElementById('cli-nombre').value = '';
+            document.getElementById('cli-telefono').value = '';
+            document.getElementById('cli-direccion').value = '';
+            document.getElementById('modal-cliente').classList.remove('hidden'); 
+        }
+
         function cerrarModalCliente() { document.getElementById('modal-cliente').classList.add('hidden'); }
 
+        function editarCliente(id) {
+            const cli = clientes.find(c => c.id === id);
+            if (!cli) return;
+
+            document.getElementById('modal-cliente-titulo').innerText = 'Editar Cliente';
+            document.getElementById('cli-id-editar').value = cli.id;
+            document.getElementById('cli-nombre').value = cli.nombre;
+            document.getElementById('cli-telefono').value = cli.telefono;
+            document.getElementById('cli-direccion').value = cli.direccion;
+            
+            document.getElementById('modal-cliente').classList.remove('hidden');
+        }
+
         function guardarCliente() {
+            const editId = document.getElementById('cli-id-editar').value;
             const nombre = document.getElementById('cli-nombre').value.trim();
             const telefono = document.getElementById('cli-telefono').value.trim();
             const direccion = document.getElementById('cli-direccion').value.trim();
 
             if (!nombre) return alert("Ingrese el nombre del cliente.");
 
-            clientes.push({ id: 'c_' + Date.now(), nombre, telefono, direccion, saldo: 0, movimientos: [] });
+            if (editId) {
+                // Modo Edición
+                const idx = clientes.findIndex(c => c.id === editId);
+                if (idx >= 0) {
+                    clientes[idx].nombre = nombre;
+                    clientes[idx].telefono = telefono;
+                    clientes[idx].direccion = direccion;
+                }
+            } else {
+                // Modo Nuevo Cliente
+                clientes.push({ 
+                    id: 'c_' + Date.now(), 
+                    nombre, 
+                    telefono, 
+                    direccion, 
+                    saldo: 0, 
+                    movimientos: [] 
+                });
+            }
+
             guardarStorage();
             cerrarModalCliente();
             renderClientes();
+        }
+
+        function eliminarCliente(id) {
+            const cli = clientes.find(c => c.id === id);
+            if (!cli) return;
+
+            if (confirm(`¿Estás seguro de dar de baja al cliente "${cli.nombre}"?\nEsta acción no se puede deshacer.`)) {
+                clientes = clientes.filter(c => c.id !== id);
+                guardarStorage();
+                renderClientes();
+            }
         }
 
         function mostrarModalMovimiento() {
@@ -862,6 +904,7 @@
             const cli = clientes.find(c => c.id === clienteId);
             if (cli) {
                 cli.saldo += monto;
+                if (!cli.movimientos) cli.movimientos = [];
                 cli.movimientos.unshift({ fecha: new Date().toISOString().split('T')[0], concepto, monto });
                 guardarStorage();
                 cerrarModalMovimiento();
@@ -873,7 +916,7 @@
             const c = clientes.find(item => item.id === clienteId);
             if (!c) return;
 
-            const ultMov = c.movimientos[0] || { concepto: 'Detalle de remito', monto: 0 };
+            const ultMov = (c.movimientos && c.movimientos[0]) ? c.movimientos[0] : { concepto: 'Estado de Cuenta', monto: 0 };
             const texto = `Hola ${c.nombre}, te adjuntamos el remito de entrega de Cervecería Albardón.\n\n` +
                           `*Detalle:* ${ultMov.concepto}\n` +
                           `*Importe:* $${Math.abs(ultMov.monto).toLocaleString()}\n` +
@@ -887,9 +930,8 @@
         document.getElementById('coc-fecha').valueAsDate = new Date();
         document.getElementById('ferm-fecha').valueAsDate = new Date();
         
-        // Ejecutar funciones iniciales de renderizado
         actualizarSelectRecetas();
-        renderRecetas(); // Nos aseguramos de renderizar las recetas ya que es la vista inicial
+        renderRecetas();
         renderTablaFermentacion();
     </script>
 </body>
