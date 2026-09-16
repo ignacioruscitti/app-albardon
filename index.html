@@ -29,7 +29,7 @@
                     <span class="font-bold text-lg text-amber-400 tracking-wider">ALBARDÓN <span class="text-xs text-slate-400 font-normal">v2.4</span></span>
                 </div>
                 
-                <!-- NAVEGACIÓN -->
+                <!-- NAVEGACIÓN PRINCIPAL ENTRE MÓDULOS -->
                 <nav class="flex space-x-1 sm:space-x-2">
                     <button onclick="cambiarPestana('tab-resumen')" id="btn-tab-resumen" class="nav-btn bg-amber-500 text-slate-950 px-3 py-2 rounded-lg text-xs font-bold transition-all">
                         <i class="fa-solid fa-chart-pie mr-1"></i> Resumen
@@ -51,22 +51,27 @@
         <!-- ==================== MÓDULO 1: RESUMEN / DASHBOARD ==================== -->
         <section id="tab-resumen" class="space-y-6">
             <div class="card p-6">
-                <h2 class="text-xl font-bold text-amber-400 mb-2">Panel Geral de Control</h2>
-                <p class="text-xs text-slate-400">Bienvenido al sistema de trazabilidad y gestión logística de Albardón Cerveza Artesanal.</p>
+                <h2 class="text-xl font-bold text-amber-400 mb-2">Panel General de Control</h2>
+                <p class="text-xs text-slate-400">Plataforma integral de trazabilidad, control de barriles y cuentas corrientes.</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- DASHBOARD CARDS -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div class="card p-5 border-l-4 border-amber-500">
-                    <span class="text-xs text-slate-400 uppercase font-semibold">Total Barriles Registrados</span>
+                    <span class="text-xs text-slate-400 uppercase font-semibold">Total Barriles</span>
                     <div id="dash-total-barriles" class="text-3xl font-bold text-amber-400 font-mono mt-1">0</div>
                 </div>
                 <div class="card p-5 border-l-4 border-emerald-500">
-                    <span class="text-xs text-slate-400 uppercase font-semibold">Barriles Listos / Llenos</span>
+                    <span class="text-xs text-slate-400 uppercase font-semibold">Listos / Llenos</span>
                     <div id="dash-llenos-barriles" class="text-3xl font-bold text-emerald-400 font-mono mt-1">0</div>
                 </div>
                 <div class="card p-5 border-l-4 border-blue-500">
-                    <span class="text-xs text-slate-400 uppercase font-semibold">Barriles en Clientes</span>
+                    <span class="text-xs text-slate-400 uppercase font-semibold">En Clientes</span>
                     <div id="dash-clientes-barriles" class="text-3xl font-bold text-blue-400 font-mono mt-1">0</div>
+                </div>
+                <div class="card p-5 border-l-4 border-rose-500">
+                    <span class="text-xs text-slate-400 uppercase font-semibold">Saldo Pendiente C.C.</span>
+                    <div id="dash-saldo-cc" class="text-3xl font-bold text-rose-400 font-mono mt-1">$0</div>
                 </div>
             </div>
         </section>
@@ -82,7 +87,7 @@
                 </button>
             </div>
 
-            <!-- TARJETAS DE RESUMEN DE STOCK -->
+            <!-- RESUMEN STOCK -->
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div class="card p-4 border-l-4 border-blue-500">
                     <span class="text-xs text-slate-400 uppercase block">Vacíos en Fábrica</span>
@@ -102,7 +107,7 @@
                 </div>
             </div>
 
-            <!-- LISTADO DETALLADO DE BARRILES -->
+            <!-- TABLA BARRILES -->
             <div class="card p-4 space-y-3">
                 <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-2">Listado General de Barriles</h3>
                 <div class="overflow-x-auto">
@@ -129,12 +134,70 @@
 
         <!-- ==================== MÓDULO 3: CLIENTES / C.C. ==================== -->
         <section id="tab-cc" class="space-y-6 hidden">
-            <div class="card p-6">
-                <h2 class="text-xl font-bold text-amber-400 mb-2">Cuentas Corrientes y Clientes</h2>
-                <p class="text-xs text-slate-400">Administración de entregas, remitos y estado de cuenta por cliente.</p>
+            <div class="card p-4 flex flex-wrap justify-between items-center gap-4 no-print">
+                <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
+                    <i class="fa-solid fa-users"></i> Cuentas Corrientes & Clientes
+                </h2>
+                <button onclick="registrarNuevoCliente()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 transition-colors">
+                    <i class="fa-solid fa-user-plus"></i> Nuevo Cliente
+                </button>
             </div>
-            <div class="card p-4 text-center text-slate-500 text-xs">
-                Módulo sincronizado con el estado de barriles entregados.
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- LISTA DE CLIENTES -->
+                <div class="card p-4 space-y-3">
+                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-2">Clientes Registrados</h3>
+                    <div id="lista-clientes-cc" class="space-y-2">
+                        <!-- Render dinámico -->
+                    </div>
+                </div>
+
+                <!-- DETALLE DE CUENTA CORRIENTE -->
+                <div class="md:col-span-2 card p-4 space-y-4">
+                    <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+                        <div>
+                            <h3 id="cc-cliente-nombre" class="text-base font-bold text-amber-400">Seleccione un cliente</h3>
+                            <p id="cc-cliente-contacto" class="text-xs text-slate-400">-</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] text-slate-400 uppercase block">Saldo Actual</span>
+                            <span id="cc-cliente-saldo" class="text-xl font-bold font-mono text-slate-200">$0.00</span>
+                        </div>
+                    </div>
+
+                    <!-- BARRIL ASIGNADO AL CLIENTE -->
+                    <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800 space-y-2">
+                        <span class="text-xs font-bold text-amber-400 uppercase block">Barriles en su Poseción</span>
+                        <div id="cc-barriles-poseidos" class="flex flex-wrap gap-2 text-xs">
+                            <span class="text-slate-500 italic">Ningún cliente seleccionado</span>
+                        </div>
+                    </div>
+
+                    <!-- HISTORIAL DE MOVIMIENTOS Y REGISTRO -->
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <h4 class="text-xs font-bold text-slate-300 uppercase">Historial de Movimientos</h4>
+                            <button id="btn-nuevo-pago" onclick="registrarPagoCC()" disabled class="bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50 text-xs font-bold px-2 py-1 rounded transition-colors">
+                                + Registrar Pago
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-xs text-left">
+                                <thead class="bg-slate-900 text-slate-400 uppercase">
+                                    <tr>
+                                        <th class="p-2">Fecha</th>
+                                        <th class="p-2">Concepto / Detalle</th>
+                                        <th class="p-2 text-right">Monto</th>
+                                        <th class="p-2 text-right">Saldo</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-cc-movimientos" class="divide-y divide-slate-800">
+                                    <tr><td colspan="4" class="p-3 text-center text-slate-500">Seleccione un cliente para ver sus movimientos.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -209,16 +272,22 @@
 
                 <!-- Campos Dinámicos Entrega Cliente -->
                 <div id="campos-cliente-entrega" class="space-y-2 bg-slate-900/60 p-3 rounded-lg border border-slate-800 hidden">
-                    <p class="text-[11px] font-bold text-amber-400 uppercase">Datos de Entrega:</p>
+                    <p class="text-[11px] font-bold text-amber-400 uppercase">Datos de Entrega & Facturación:</p>
                     <div>
                         <label class="text-slate-400 block mb-1">Cliente Vinculado</label>
                         <select id="modal-select-cliente" class="w-full bg-slate-900 border border-slate-700 text-slate-200 rounded p-1.5 text-xs focus:outline-none focus:border-amber-500">
                             <!-- Carga dinámica -->
                         </select>
                     </div>
-                    <div>
-                        <label class="text-slate-400 block mb-1">Fecha de Entrega</label>
-                        <input type="date" id="modal-fecha-entrega" class="w-full bg-slate-900 border border-slate-700 text-slate-200 rounded p-1.5 text-xs focus:outline-none focus:border-amber-500">
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-slate-400 block mb-1">Fecha de Entrega</label>
+                            <input type="date" id="modal-fecha-entrega" class="w-full bg-slate-900 border border-slate-700 text-slate-200 rounded p-1.5 text-xs focus:outline-none focus:border-amber-500">
+                        </div>
+                        <div>
+                            <label class="text-slate-400 block mb-1">Precio Cobrado ($)</label>
+                            <input type="number" id="modal-precio-entrega" placeholder="0.00" class="w-full bg-slate-900 border border-slate-700 text-slate-200 rounded p-1.5 text-xs font-mono focus:outline-none focus:border-amber-500">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -230,11 +299,12 @@
         </div>
     </div>
 
-    <!-- ==================== JAVASCRIPT LOGIC ==================== -->
+    <!-- ==================== JAVASCRIPT SISTEMA COMPLETO ==================== -->
     <script>
         let barrilSeleccionadoId = null;
+        let clienteSeleccionadoId = null;
 
-        // Base de datos de barriles inicial / localStorage
+        // ESTADO GLOBAL / LOCALSTORAGE
         let barriles = JSON.parse(localStorage.getItem('albardon_barriles')) || [
             { id: "B-01", cap: "50L", conector: "S", estado: "Lleno en fábrica - listo", estilo: "APA Pilsen", lote: "L-2026-01", fechaLlenado: "2026-03-01", cliente: "Planta", fechaEntrega: "-" },
             { id: "B-02", cap: "50L", conector: "G", estado: "Vacío - Sanitizado en fábrica", estilo: "-", lote: "-", fechaLlenado: "-", cliente: "Planta", fechaEntrega: "-" },
@@ -242,15 +312,14 @@
             { id: "B-04", cap: "50L", conector: "G", estado: "Mantenimiento / Fuera de Servicio", estilo: "-", lote: "-", fechaLlenado: "-", cliente: "Planta", fechaEntrega: "-" }
         ];
 
-        // Lista base de clientes
-        const listaClientes = [
-            "Bar Central Santa Fe",
-            "Cervecería del Puerto",
-            "Resto Bar El Litoral",
-            "Cliente Genérico / Venta Directa"
+        let clientes = JSON.parse(localStorage.getItem('albardon_clientes')) || [
+            { id: 1, nombre: "Bar Central Santa Fe", contacto: "342-4000111", movs: [{ fecha: "2026-03-05", concepto: "Entrega Barril B-03 (30L Honey)", monto: 45000, saldo: 45000 }] },
+            { id: 2, nombre: "Cervecería del Puerto", contacto: "342-4000222", movs: [] },
+            { id: 3, nombre: "Resto Bar El Litoral", contacto: "342-4000333", movs: [] },
+            { id: 4, nombre: "Cliente Genérico / Venta Directa", contacto: "-", movs: [] }
         ];
 
-        // Control de Pestañas
+        // CONTROL DE PESTAÑAS
         function cambiarPestana(tabId) {
             document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
             document.getElementById(tabId).classList.remove('hidden');
@@ -265,19 +334,19 @@
             activeBtn.classList.remove('text-slate-400');
         }
 
-        // Renderizado del tablero y tabla
+        // RENDERIZADO BARRILES Y TABLERO
         function renderizarBarriles() {
             const tbody = document.getElementById('tabla-barriles');
             tbody.innerHTML = "";
             
-            let llenos = 0, vacios = 0, clientes = 0, mantenimiento = 0;
+            let llenos = 0, vacios = 0, clientesCount = 0, mantenimiento = 0;
 
             barriles.forEach((b) => {
                 if (!b.conector) b.conector = "S"; 
 
                 if (b.estado.includes("Lleno")) llenos++;
                 if (b.estado.includes("Vacío")) vacios++;
-                if (b.estado === "Entregado en Cliente") clientes++;
+                if (b.estado === "Entregado en Cliente") clientesCount++;
                 if (b.estado.includes("Mantenimiento")) mantenimiento++;
 
                 let badgeColor = "bg-slate-800 text-slate-300 border-slate-700";
@@ -312,15 +381,25 @@
                 `;
             });
 
-            // Actualización de contadores
+            // Contadores Stock
             document.getElementById('stock-vacios').innerText = vacios;
             document.getElementById('stock-llenos').innerText = llenos;
-            document.getElementById('stock-clientes').innerText = clientes;
+            document.getElementById('stock-clientes').innerText = clientesCount;
             document.getElementById('stock-mantenimiento').innerText = mantenimiento;
 
+            // Dashboard
             document.getElementById('dash-total-barriles').innerText = barriles.length;
             document.getElementById('dash-llenos-barriles').innerText = llenos;
-            document.getElementById('dash-clientes-barriles').innerText = clientes;
+            document.getElementById('dash-clientes-barriles').innerText = clientesCount;
+
+            // Saldo total global CC
+            let totalSaldoGlobal = 0;
+            clientes.forEach(c => {
+                if(c.movs && c.movs.length > 0) {
+                    totalSaldoGlobal += c.movs[c.movs.length - 1].saldo;
+                }
+            });
+            document.getElementById('dash-saldo-cc').innerText = "$" + totalSaldoGlobal.toLocaleString('es-AR');
         }
 
         function registrarNuevoBarril() {
@@ -361,7 +440,7 @@
             document.getElementById('modal-fecha-entrega').value = b.fechaEntrega !== '-' ? b.fechaEntrega : new Date().toISOString().split('T')[0];
 
             const selectCliente = document.getElementById('modal-select-cliente');
-            selectCliente.innerHTML = listaClientes.map(c => `<option value="${c}">${c}</option>`).join('');
+            selectCliente.innerHTML = clientes.map(c => `<option value="${c.nombre}">${c.nombre}</option>`).join('');
             if(b.cliente && b.cliente !== 'Planta') selectCliente.value = b.cliente;
 
             evaluarCamposModalBarril();
@@ -413,8 +492,26 @@
             }
 
             if(nuevoEstado === 'Entregado en Cliente') {
-                b.cliente = document.getElementById('modal-select-cliente').value;
-                b.fechaEntrega = document.getElementById('modal-fecha-entrega').value || new Date().toISOString().split('T')[0];
+                const clienteNombre = document.getElementById('modal-select-cliente').value;
+                const precio = parseFloat(document.getElementById('modal-precio-entrega').value) || 0;
+                const fechaEntrega = document.getElementById('modal-fecha-entrega').value || new Date().toISOString().split('T')[0];
+
+                b.cliente = clienteNombre;
+                b.fechaEntrega = fechaEntrega;
+
+                // Registrar cargo automático en CC si tiene precio
+                if(precio > 0) {
+                    const cObj = clientes.find(c => c.nombre === clienteNombre);
+                    if(cObj) {
+                        const saldoActual = cObj.movs.length > 0 ? cObj.movs[cObj.movs.length - 1].saldo : 0;
+                        cObj.movs.push({
+                            fecha: fechaEntrega,
+                            concepto: `Entrega Barril ${b.id} (${b.cap} ${b.estilo})`,
+                            monto: precio,
+                            saldo: saldoActual + precio
+                        });
+                    }
+                }
             } else {
                 b.cliente = 'Planta';
                 b.fechaEntrega = '-';
@@ -424,12 +521,152 @@
             cerrarModalEstadoBarril();
         }
 
-        function guardarYRenderizar() {
-            localStorage.setItem('albardon_barriles', JSON.stringify(barriles));
-            renderizarBarriles();
+        // MÓDULO CLIENTES / CUENTAS CORRIENTES
+        function renderizarClientesCC() {
+            const cont = document.getElementById('lista-clientes-cc');
+            cont.innerHTML = "";
+
+            clientes.forEach(c => {
+                const saldoActual = c.movs.length > 0 ? c.movs[c.movs.length - 1].saldo : 0;
+                const esSeleccionado = c.id === clienteSeleccionadoId;
+
+                cont.innerHTML += `
+                    <div onclick="seleccionarClienteCC(${c.id})" class="p-3 rounded-lg border cursor-pointer transition-colors flex justify-between items-center ${esSeleccionado ? 'bg-amber-500/10 border-amber-500' : 'bg-slate-900 border-slate-800 hover:border-slate-700'}">
+                        <div>
+                            <div class="text-xs font-bold text-slate-200">${c.nombre}</div>
+                            <div class="text-[10px] text-slate-400">${c.contacto}</div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] text-slate-500 block">Saldo</span>
+                            <span class="text-xs font-mono font-bold ${saldoActual > 0 ? 'text-rose-400' : 'text-emerald-400'}">$${saldoActual.toLocaleString('es-AR')}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            if(clienteSeleccionadoId) {
+                seleccionarClienteCC(clienteSeleccionadoId);
+            }
         }
 
-        document.addEventListener('DOMContentLoaded', renderizarBarriles);
+        function registrarNuevoCliente() {
+            const nombre = prompt("Nombre del cliente / establecimiento:");
+            if(!nombre) return;
+            const contacto = prompt("Teléfono o contacto:", "-") || "-";
+
+            const nuevoId = clientes.length > 0 ? Math.max(...clientes.map(c=>c.id)) + 1 : 1;
+            clientes.push({ id: nuevoId, nombre, contacto, movs: [] });
+            
+            guardarYRenderizar();
+        }
+
+        function seleccionarClienteCC(id) {
+            clienteSeleccionadoId = id;
+            const c = clientes.find(item => item.id === id);
+            if(!c) return;
+
+            document.getElementById('cc-cliente-nombre').innerText = c.nombre;
+            document.getElementById('cc-cliente-contacto').innerText = "Contacto: " + c.contacto;
+            
+            const saldoActual = c.movs.length > 0 ? c.movs[c.movs.length - 1].saldo : 0;
+            const elSaldo = document.getElementById('cc-cliente-saldo');
+            elSaldo.innerText = "$" + saldoActual.toLocaleString('es-AR');
+            elSaldo.className = `text-xl font-bold font-mono ${saldoActual > 0 ? 'text-rose-400' : 'text-emerald-400'}`;
+
+            document.getElementById('btn-nuevo-pago').disabled = false;
+
+            // Barriles en poseción
+            const barrilesPoseidos = barriles.filter(b => b.cliente === c.nombre && b.estado === 'Entregado en Cliente');
+            const elPoseidos = document.getElementById('cc-barriles-poseidos');
+            if(barrilesPoseidos.length === 0) {
+                elPoseidos.innerHTML = `<span class="text-slate-500 italic">No registra barriles sin devolver.</span>`;
+            } else {
+                elPoseidos.innerHTML = barrilesPoseidos.map(b => `
+                    <span class="px-2 py-1 rounded bg-amber-950 text-amber-400 border border-amber-800 font-mono font-bold text-[11px]">
+                        ${b.id} (${b.cap} - ${b.estilo})
+                    </span>
+                `).join('');
+            }
+
+            // Movimientos
+            const tbody = document.getElementById('tabla-cc-movimientos');
+            tbody.innerHTML = "";
+            if(c.movs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-3 text-center text-slate-500">Sin movimientos registrados.</td></tr>`;
+            } else {
+                c.movs.slice().reverse().forEach(m => {
+                    const esPago = m.monto < 0;
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-800/40">
+                            <td class="p-2 font-mono text-slate-400">${m.fecha}</td>
+                            <td class="p-2">${m.concepto}</td>
+                            <td class="p-2 text-right font-mono font-bold ${esPago ? 'text-emerald-400' : 'text-rose-400'}">${esPago ? '' : '+'}$${m.monto.toLocaleString('es-AR')}</td>
+                            <td class="p-2 text-right font-mono text-slate-300">$${m.saldo.toLocaleString('es-AR')}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            renderizarClientesCCSinReentrancia();
+        }
+
+        function renderizarClientesCCSinReentrancia() {
+            const cont = document.getElementById('lista-clientes-cc');
+            cont.innerHTML = "";
+            clientes.forEach(c => {
+                const saldoActual = c.movs.length > 0 ? c.movs[c.movs.length - 1].saldo : 0;
+                const esSeleccionado = c.id === clienteSeleccionadoId;
+                cont.innerHTML += `
+                    <div onclick="seleccionarClienteCC(${c.id})" class="p-3 rounded-lg border cursor-pointer transition-colors flex justify-between items-center ${esSeleccionado ? 'bg-amber-500/10 border-amber-500' : 'bg-slate-900 border-slate-800 hover:border-slate-700'}">
+                        <div>
+                            <div class="text-xs font-bold text-slate-200">${c.nombre}</div>
+                            <div class="text-[10px] text-slate-400">${c.contacto}</div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] text-slate-500 block">Saldo</span>
+                            <span class="text-xs font-mono font-bold ${saldoActual > 0 ? 'text-rose-400' : 'text-emerald-400'}">$${saldoActual.toLocaleString('es-AR')}</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function registrarPagoCC() {
+            if(!clienteSeleccionadoId) return;
+            const c = clientes.find(item => item.id === clienteSeleccionadoId);
+            if(!c) return;
+
+            const montoInput = prompt("Monto del pago recibido ($):");
+            if(!montoInput) return;
+            const monto = parseFloat(montoInput);
+            if(isNaN(monto) || monto <= 0) return;
+
+            const saldoActual = c.movs.length > 0 ? c.movs[c.movs.length - 1].saldo : 0;
+            const fecha = new Date().toISOString().split('T')[0];
+
+            c.movs.push({
+                fecha,
+                concepto: "Pago recibido / Transferencia",
+                monto: -monto,
+                saldo: saldoActual - monto
+            });
+
+            guardarYRenderizar();
+            seleccionarClienteCC(c.id);
+        }
+
+        function guardarYRenderizar() {
+            localStorage.setItem('albardon_barriles', JSON.stringify(barriles));
+            localStorage.setItem('albardon_clientes', JSON.stringify(clientes));
+            renderizarBarriles();
+            renderizarClientesCC();
+        }
+
+        // INICIALIZACIÓN
+        document.addEventListener('DOMContentLoaded', () => {
+            renderizarBarriles();
+            renderizarClientesCC();
+        });
     </script>
 </body>
 </html>
