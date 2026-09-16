@@ -643,6 +643,54 @@
         </div>
     </div>
 
+    <!-- PLANTILLA OCULTA PARA IMPRESIÓN DE REMITO PDF -->
+    <div id="plantilla-pdf-remito" class="hidden bg-white text-slate-900 p-8 rounded font-sans text-xs max-w-xl mx-auto space-y-4">
+        <div class="flex justify-between items-center border-b border-slate-300 pb-3">
+            <div>
+                <h1 class="text-2xl font-bold text-amber-700 tracking-wider">ALBARDÓN</h1>
+                <p class="text-slate-500 font-bold text-[10px]">CERVEZA ARTESANAL SANTAFESINA</p>
+            </div>
+            <div class="text-right">
+                <h2 class="text-base font-bold text-slate-800">REMITO DE ENTREGA</h2>
+                <p class="text-slate-500" id="pdf-fecha">Fecha: --/--/----</p>
+            </div>
+        </div>
+
+        <div class="border-b border-slate-200 pb-3">
+            <p><strong>CLIENTE:</strong> <span id="pdf-cliente">--</span></p>
+            <p><strong>DIRECCIÓN:</strong> <span id="pdf-direccion">--</span></p>
+            <p><strong>TELÉFONO:</strong> <span id="pdf-telefono">--</span></p>
+        </div>
+
+        <table class="w-full text-left border-collapse my-2">
+            <thead>
+                <tr class="bg-amber-100 text-amber-900 border-b border-amber-200">
+                    <th class="p-2">Presentación</th>
+                    <th class="p-2">Estilo</th>
+                    <th class="p-2 text-center">Cant.</th>
+                    <th class="p-2 text-right">Precio U.</th>
+                    <th class="p-2 text-right">Subtotal</th>
+                </tr>
+            </thead>
+            <tbody id="pdf-items-body">
+            </tbody>
+        </table>
+
+        <div class="flex justify-between items-center pt-3 border-t border-slate-300 font-bold">
+            <span class="text-sm">TOTAL IMPORTE:</span>
+            <span id="pdf-total" class="text-base text-amber-800">$0</span>
+        </div>
+
+        <div class="pt-8 grid grid-cols-2 gap-8 text-center text-[10px] text-slate-500">
+            <div>
+                <p class="border-t border-slate-400 pt-1">Firma / Aclaración Cliente</p>
+            </div>
+            <div>
+                <p class="border-t border-slate-400 pt-1">Cervecería Albardón</p>
+            </div>
+        </div>
+    </div>
+
     <!-- LÓGICA JAVASCRIPT INTEGRADA -->
     <script>
         const recetasIniciales = {
@@ -688,7 +736,7 @@
         ];
 
         const clientesIniciales = [
-            { id: 'c1', nombre: 'Bar El Portal', telefono: '5493421234567', direccion: 'Av. Pellegrini 1500', saldo: -150000, movimientos: [] }
+            { id: 'c1', nombre: 'Bar El Portal', telefono: '5493421234567', direccion: 'Av. Pellegrini 1500', saldo: -150000, movimientos: [{ fecha: '2026-09-10', concepto: 'Entrega 2 Barriles 50L', monto: -150000, items: [] }] }
         ];
 
         let recetas = JSON.parse(localStorage.getItem('alb_recetas')) || recetasIniciales;
@@ -717,7 +765,7 @@
             if (tabId === 'cc') renderClientes();
         }
 
-        // --- RECETAS ---
+        // --- MÓDULO RECETAS ---
         function renderRecetas() {
             const container = document.getElementById('grilla-recetas');
             let html = '';
@@ -909,7 +957,7 @@
             cargarRecetaEnCoccion();
         }
 
-        // --- COCCIÓN ---
+        // --- MÓDULO COCCIÓN ---
         function cargarRecetaEnCoccion() {
             const key = document.getElementById('select-receta').value;
             const receta = recetas[key];
@@ -956,7 +1004,7 @@
             switchTab('fermentacion');
         }
 
-        // --- FERMENTACIÓN & PDF ---
+        // --- MÓDULO FERMENTACIÓN & PDF ---
         function renderTablaFermentacion() {
             const tbody = document.getElementById('tabla-dias-fermentacion');
             let html = '';
@@ -1024,15 +1072,393 @@
             html2pdf().set(opt).from(element).save().then(() => element.classList.add('hidden'));
         }
 
-        // --- BARRILES & CC ---
-        function renderBarriles() {}
-        function renderClientes() {}
-        function mostrarModalBarril() { document.getElementById('modal-barril').classList.remove('hidden'); }
+        // --- MÓDULO BARRILES ---
+        const etiquetasEstado = {
+            vacio_sucio: { texto: 'Vacío - Sucio', clase: 'bg-slate-700 text-slate-300' },
+            vacio_limpio: { texto: 'Vacío - Limpio', clase: 'bg-blue-500/20 text-blue-400 border border-blue-500/30' },
+            vacio_sanitizado: { texto: 'Vacío - Sanitizado', clase: 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' },
+            lleno_fabrica: { texto: 'Lleno en fábrica', clase: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' },
+            entregado_cliente: { texto: 'Entregado en cliente', clase: 'bg-amber-500/20 text-amber-400 border border-amber-500/30' },
+            mantenimiento: { texto: 'En Mantenimiento', clase: 'bg-red-500/20 text-red-400 border border-red-500/30' }
+        };
+
+        function renderBarriles() {
+            const container = document.getElementById('grilla-barriles');
+            let html = '';
+            barriles.forEach((b, idx) => {
+                const est = etiquetasEstado[b.estado] || { texto: b.estado, clase: 'bg-slate-700' };
+                const conector = b.conector || 'G';
+                
+                html += `
+                    <div class="card p-4 space-y-3 flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-center border-b border-slate-700 pb-2 mb-2">
+                                <span class="font-mono text-lg font-bold text-amber-400">${b.codigo}</span>
+                                <span class="text-xs px-2 py-0.5 rounded font-bold ${est.clase}">${est.texto}</span>
+                            </div>
+                            <div class="text-xs space-y-1 text-slate-300">
+                                <p>Capacidad: <span class="font-mono font-semibold">${b.capacidad}</span> | Conector: <span class="font-mono font-semibold text-emerald-400">${conector}</span></p>
+                                ${b.cerveza ? `<p>Cerveza: <span class="font-semibold text-slate-100">${b.cerveza}</span></p>` : ''}
+                                ${b.cliente ? `<p>Ubicación: <span class="text-amber-300 font-semibold">${b.cliente}</span></p>` : ''}
+                            </div>
+                        </div>
+                        <div class="pt-2 border-t border-slate-700 flex justify-end no-print">
+                            <button onclick="editarBarril(${idx})" class="text-xs bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded text-slate-200">Cambiar Estado</button>
+                        </div>
+                    </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function mostrarModalBarril() {
+            document.getElementById('barril-codigo').value = '';
+            document.getElementById('barril-cerveza').value = '';
+            document.getElementById('barril-conector').value = 'G';
+            toggleCamposEstadoBarril();
+            document.getElementById('modal-barril').classList.remove('hidden');
+        }
+
         function cerrarModalBarril() { document.getElementById('modal-barril').classList.add('hidden'); }
-        function mostrarModalCliente() { document.getElementById('modal-cliente').classList.remove('hidden'); }
+
+        function toggleCamposEstadoBarril() {
+            const estado = document.getElementById('barril-estado').value;
+            const campoCerveza = document.getElementById('campo-barril-cerveza');
+            const campoCliente = document.getElementById('campo-barril-cliente');
+
+            campoCerveza.classList.toggle('hidden', !(estado === 'lleno_fabrica' || estado === 'entregado_cliente'));
+            campoCliente.classList.toggle('hidden', estado !== 'entregado_cliente');
+
+            if (estado === 'entregado_cliente') {
+                const selectC = document.getElementById('barril-cliente-select');
+                selectC.innerHTML = clientes.map(c => `<option value="${c.nombre}">${c.nombre}</option>`).join('');
+            }
+        }
+
+        function editarBarril(idx) {
+            const b = barriles[idx];
+            document.getElementById('barril-codigo').value = b.codigo;
+            document.getElementById('barril-capacidad').value = b.capacidad;
+            document.getElementById('barril-conector').value = b.conector || 'G';
+            document.getElementById('barril-estado').value = b.estado;
+            document.getElementById('barril-cerveza').value = b.cerveza || '';
+            toggleCamposEstadoBarril();
+            document.getElementById('modal-barril').classList.remove('hidden');
+        }
+
+        function guardarBarril() {
+            const codigo = document.getElementById('barril-codigo').value.trim();
+            const capacidad = document.getElementById('barril-capacidad').value;
+            const conector = document.getElementById('barril-conector').value;
+            const estado = document.getElementById('barril-estado').value;
+            const cerveza = document.getElementById('barril-cerveza').value.trim();
+            const cliente = estado === 'entregado_cliente' ? document.getElementById('barril-cliente-select').value : '';
+
+            if (!codigo) return alert("Ingrese el código del barril.");
+
+            const idx = barriles.findIndex(b => b.codigo === codigo);
+            const obj = { codigo, capacidad, conector, estado, cerveza, cliente };
+
+            if (idx >= 0) barriles[idx] = obj;
+            else barriles.push(obj);
+
+            guardarStorage();
+            cerrarModalBarril();
+            renderBarriles();
+        }
+
+        // --- MÓDULO CLIENTES & CUENTAS CORRIENTES ---
+        function renderClientes() {
+            const container = document.getElementById('grilla-clientes');
+            let html = '';
+            clientes.forEach(c => {
+                html += `
+                    <div class="card p-4 space-y-3">
+                        <div class="flex flex-wrap justify-between items-center gap-2 border-b border-slate-700 pb-2">
+                            <div class="flex items-center gap-3">
+                                <div>
+                                    <h3 class="font-bold text-lg text-slate-100">${c.nombre}</h3>
+                                    <p class="text-xs text-slate-400">Tel: ${c.telefono} | Dir: ${c.direccion}</p>
+                                </div>
+                                <div class="flex gap-1 ml-2 no-print">
+                                    <button onclick="editarCliente('${c.id}')" title="Editar Cliente" class="bg-slate-700 hover:bg-slate-600 text-amber-400 text-xs px-2 py-1 rounded transition-colors">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </button>
+                                    <button onclick="eliminarCliente('${c.id}')" title="Eliminar Cliente" class="bg-red-500/20 hover:bg-red-500/40 text-red-400 text-xs px-2 py-1 rounded transition-colors">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs text-slate-400 block">Saldo CC</span>
+                                <span class="text-xl font-mono font-bold ${c.saldo < 0 ? 'text-red-400' : 'text-emerald-400'}">
+                                    $ ${c.saldo.toLocaleString()}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-1 text-xs">
+                            <span class="text-slate-400 font-semibold block">ÚLTIMOS MOVIMIENTOS & REMITOS:</span>
+                            ${c.movimientos && c.movimientos.length > 0 ? c.movimientos.map((m, mIdx) => `
+                                <div class="flex justify-between items-center py-1.5 border-b border-slate-800 text-slate-300">
+                                    <div>
+                                        <span class="font-semibold text-slate-200">${m.fecha}</span> - <span>${m.concepto}</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-mono font-bold ${m.monto < 0 ? 'text-red-400' : 'text-emerald-400'}">$ ${m.monto.toLocaleString()}</span>
+                                        ${m.items && m.items.length > 0 ? `
+                                            <button onclick="descargarRemitoPDF('${c.id}', ${mIdx})" title="Descargar Remito PDF" class="bg-amber-500 hover:bg-amber-600 text-slate-950 text-[10px] px-2 py-1 rounded font-bold flex items-center gap-1 no-print">
+                                                <i class="fa-solid fa-file-pdf"></i> Generar PDF
+                                            </button>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                            `).join('') : '<p class="text-slate-500 italic">Sin movimientos registrados.</p>'}
+                        </div>
+
+                        <div class="flex justify-end gap-2 pt-2 no-print">
+                            <button onclick="enviarWhatsapp('${c.id}')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1">
+                                <i class="fa-brands fa-whatsapp"></i> Enviar Remito WhatsApp
+                            </button>
+                        </div>
+                    </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function mostrarModalCliente() { 
+            document.getElementById('modal-cliente-titulo').innerText = 'Nuevo Cliente';
+            document.getElementById('cli-id-editar').value = '';
+            document.getElementById('cli-nombre').value = '';
+            document.getElementById('cli-telefono').value = '';
+            document.getElementById('cli-direccion').value = '';
+            document.getElementById('modal-cliente').classList.remove('hidden'); 
+        }
+
         function cerrarModalCliente() { document.getElementById('modal-cliente').classList.add('hidden'); }
-        function mostrarModalMovimiento() { document.getElementById('modal-movimiento').classList.remove('hidden'); }
+
+        function editarCliente(id) {
+            const cli = clientes.find(c => c.id === id);
+            if (!cli) return;
+
+            document.getElementById('modal-cliente-titulo').innerText = 'Editar Cliente';
+            document.getElementById('cli-id-editar').value = cli.id;
+            document.getElementById('cli-nombre').value = cli.nombre;
+            document.getElementById('cli-telefono').value = cli.telefono;
+            document.getElementById('cli-direccion').value = cli.direccion;
+            
+            document.getElementById('modal-cliente').classList.remove('hidden');
+        }
+
+        function guardarCliente() {
+            const editId = document.getElementById('cli-id-editar').value;
+            const nombre = document.getElementById('cli-nombre').value.trim();
+            const telefono = document.getElementById('cli-telefono').value.trim();
+            const direccion = document.getElementById('cli-direccion').value.trim();
+
+            if (!nombre) return alert("Ingrese el nombre del cliente.");
+
+            if (editId) {
+                const idx = clientes.findIndex(c => c.id === editId);
+                if (idx >= 0) {
+                    clientes[idx].nombre = nombre;
+                    clientes[idx].telefono = telefono;
+                    clientes[idx].direccion = direccion;
+                }
+            } else {
+                clientes.push({ id: 'c_' + Date.now(), nombre, telefono, direccion, saldo: 0, movimientos: [] });
+            }
+
+            guardarStorage();
+            cerrarModalCliente();
+            renderClientes();
+        }
+
+        function eliminarCliente(id) {
+            const cli = clientes.find(c => c.id === id);
+            if (!cli) return;
+
+            if (confirm(`¿Estás seguro de dar de baja al cliente "${cli.nombre}"?`)) {
+                clientes = clientes.filter(c => c.id !== id);
+                guardarStorage();
+                renderClientes();
+            }
+        }
+
+        const opcionesPresentaciones = [
+            'Botella 355 cc', 'Botella 500 cc', 'Botella 1000 cc',
+            'Barril 50L', 'Barril 30L', 'Barril 20L'
+        ];
+
+        function mostrarModalMovimiento() {
+            const select = document.getElementById('mov-cliente-select');
+            select.innerHTML = clientes.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
+            
+            document.getElementById('contenedor-filas-remito').innerHTML = '';
+            agregarFilaRemito();
+            toggleFormularioRemito();
+            document.getElementById('modal-movimiento').classList.remove('hidden');
+        }
+
         function cerrarModalMovimiento() { document.getElementById('modal-movimiento').classList.add('hidden'); }
+
+        function toggleFormularioRemito() {
+            const tipo = document.getElementById('mov-tipo').value;
+            const secRemito = document.getElementById('seccion-remito-items');
+            const secCobro = document.getElementById('seccion-cobro-directo');
+
+            if (tipo === 'entrega') {
+                secRemito.classList.remove('hidden');
+                secCobro.classList.add('hidden');
+            } else {
+                secRemito.classList.add('hidden');
+                secCobro.classList.remove('hidden');
+            }
+            calcularTotalMovimiento();
+        }
+
+        function agregarFilaRemito() {
+            const container = document.getElementById('contenedor-filas-remito');
+            const div = document.createElement('div');
+            div.className = 'grid grid-cols-12 gap-2 items-center fila-remito-item';
+
+            let optionsHTML = opcionesPresentaciones.map(op => `<option value="${op}">${op}</option>`).join('');
+
+            div.innerHTML = `
+                <select class="col-span-4 bg-slate-900 border border-slate-700 rounded p-2 text-xs item-presentacion">${optionsHTML}</select>
+                <input type="text" placeholder="Estilo (ej. IPA)" class="col-span-3 bg-slate-900 border border-slate-700 rounded p-2 text-xs item-estilo">
+                <input type="number" value="1" min="1" oninput="calcularTotalMovimiento()" placeholder="Cant" class="col-span-2 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-center item-cant">
+                <input type="number" value="0" min="0" oninput="calcularTotalMovimiento()" placeholder="Precio U." class="col-span-2 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-right font-mono item-precio">
+                <button onclick="this.parentElement.remove(); calcularTotalMovimiento();" class="col-span-1 text-red-400 hover:text-red-300 font-bold text-center">×</button>
+            `;
+            container.appendChild(div);
+            calcularTotalMovimiento();
+        }
+
+        function calcularTotalMovimiento() {
+            const tipo = document.getElementById('mov-tipo').value;
+            let total = 0;
+
+            if (tipo === 'entrega') {
+                document.querySelectorAll('.fila-remito-item').forEach(fila => {
+                    const cant = parseFloat(fila.querySelector('.item-cant').value) || 0;
+                    const precio = parseFloat(fila.querySelector('.item-precio').value) || 0;
+                    total += (cant * precio);
+                });
+            } else {
+                total = parseFloat(document.getElementById('mov-monto-cobro').value) || 0;
+            }
+
+            document.getElementById('mov-total-acumulado').innerText = `$ ${total.toLocaleString()}`;
+        }
+
+        function guardarMovimiento() {
+            const clienteId = document.getElementById('mov-cliente-select').value;
+            const tipo = document.getElementById('mov-tipo').value;
+            const cli = clientes.find(c => c.id === clienteId);
+            if (!cli) return;
+
+            let conceptoText = '';
+            let itemsArray = [];
+            let montoTotal = 0;
+
+            if (tipo === 'entrega') {
+                document.querySelectorAll('.fila-remito-item').forEach(fila => {
+                    const pres = fila.querySelector('.item-presentacion').value;
+                    const estilo = fila.querySelector('.item-estilo').value.trim() || 'Varios';
+                    const cant = parseFloat(fila.querySelector('.item-cant').value) || 0;
+                    const precio = parseFloat(fila.querySelector('.item-precio').value) || 0;
+                    const sub = cant * precio;
+
+                    if (cant > 0) {
+                        itemsArray.push({ presentacion: pres, estilo, cantidad: cant, precioUnitario: precio, subtotal: sub });
+                        montoTotal += sub;
+                    }
+                });
+
+                if (itemsArray.length === 0) return alert("Agregue al menos un ítem al remito.");
+                conceptoText = `Entrega de Cerveza (${itemsArray.length} descrip.)`;
+                montoTotal = -Math.abs(montoTotal);
+            } else {
+                conceptoText = document.getElementById('mov-concepto-cobro').value.trim() || 'Cobro / Pago recibido';
+                montoTotal = parseFloat(document.getElementById('mov-monto-cobro').value) || 0;
+                if (montoTotal <= 0) return alert("Ingrese un monto de cobro válido.");
+                montoTotal = Math.abs(montoTotal);
+            }
+
+            cli.saldo += montoTotal;
+            if (!cli.movimientos) cli.movimientos = [];
+            cli.movimientos.unshift({
+                fecha: new Date().toISOString().split('T')[0],
+                concepto: conceptoText,
+                monto: montoTotal,
+                items: itemsArray
+            });
+
+            guardarStorage();
+            cerrarModalMovimiento();
+            renderClientes();
+        }
+
+        function enviarWhatsapp(clienteId) {
+            const c = clientes.find(item => item.id === clienteId);
+            if (!c) return;
+
+            const ultMov = (c.movimientos && c.movimientos[0]) ? c.movimientos[0] : { concepto: 'Estado de Cuenta', monto: 0, items: [] };
+            
+            let texto = `*REMITO DE ENTREGA - CERVECERÍA ALBARDÓN*\n`;
+            texto += `*Cliente:* ${c.nombre}\n`;
+            texto += `*Fecha:* ${ultMov.fecha || new Date().toISOString().split('T')[0]}\n`;
+            texto += `-------------------------------------\n`;
+
+            if (ultMov.items && ultMov.items.length > 0) {
+                ultMov.items.forEach(it => {
+                    texto += `• ${it.cantidad}x ${it.presentacion} (${it.estilo}) - $${it.precioUnitario} c/u = $${it.subtotal.toLocaleString()}\n`;
+                });
+            } else {
+                texto += `*Detalle:* ${ultMov.concepto}\n`;
+                texto += `*Importe:* $${Math.abs(ultMov.monto).toLocaleString()}\n`;
+            }
+
+            texto += `-------------------------------------\n`;
+            texto += `*TOTAL ENTREGA:* $${Math.abs(ultMov.monto).toLocaleString()}\n`;
+            texto += `*SALDO ACUMULADO CC:* $${c.saldo.toLocaleString()}\n\n`;
+            texto += `¡Muchas gracias por elegir Albardón!`;
+
+            window.open(`https://wa.me/${c.telefono}?text=${encodeURIComponent(texto)}`, '_blank');
+        }
+
+        function descargarRemitoPDF(clienteId, movIdx) {
+            const c = clientes.find(item => item.id === clienteId);
+            if (!c || !c.movimientos[movIdx]) return;
+
+            const m = c.movimientos[movIdx];
+            
+            document.getElementById('pdf-fecha').innerText = `Fecha: ${m.fecha}`;
+            document.getElementById('pdf-cliente').innerText = c.nombre;
+            document.getElementById('pdf-direccion').innerText = c.direccion || 'N/A';
+            document.getElementById('pdf-telefono').innerText = c.telefono || 'N/A';
+
+            let bodyHTML = '';
+            m.items.forEach(it => {
+                bodyHTML += `
+                    <tr class="border-b border-slate-200">
+                        <td class="p-2">${it.presentacion}</td>
+                        <td class="p-2">${it.estilo}</td>
+                        <td class="p-2 text-center">${it.cantidad}</td>
+                        <td class="p-2 text-right">$${it.precioUnitario.toLocaleString()}</td>
+                        <td class="p-2 text-right font-bold">$${it.subtotal.toLocaleString()}</td>
+                    </tr>
+                `;
+            });
+            document.getElementById('pdf-items-body').innerHTML = bodyHTML;
+            document.getElementById('pdf-total').innerText = `$ ${Math.abs(m.monto).toLocaleString()}`;
+
+            const element = document.getElementById('plantilla-pdf-remito');
+            element.classList.remove('hidden');
+
+            const opt = { margin: 10, filename: `Remito_Albardon_${c.nombre.replace(/\s+/g, '_')}_${m.fecha}.pdf`, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4' } };
+            html2pdf().set(opt).from(element).save().then(() => element.classList.add('hidden'));
+        }
 
         // --- INICIALIZACIÓN ---
         document.getElementById('coc-fecha').valueAsDate = new Date();
