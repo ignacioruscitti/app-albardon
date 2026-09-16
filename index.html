@@ -7,14 +7,12 @@
     <link rel="icon" href="logo.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <!-- Librería para generación de PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         body { background-color: #0f172a; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
         .tab-btn.active { background-color: #f59e0b; color: #020617; font-weight: bold; }
         .card { background-color: #1e293b; border: 1px solid #334155; border-radius: 0.75rem; }
 
-        /* Estilos limpios para captura de PDF */
         .pdf-export-mode {
             background-color: #ffffff !important;
             color: #000000 !important;
@@ -49,7 +47,6 @@
                     <span class="text-xs text-slate-400 block font-normal">Sistema Integral de Gestión</span>
                 </div>
             </div>
-            <!-- Pestañas -->
             <nav class="flex space-x-2 mt-4 sm:mt-0 overflow-x-auto pb-1 sm:pb-0">
                 <button onclick="switchTab('recetas')" id="btn-recetas" class="tab-btn active px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
                     <i class="fa-solid fa-book-open"></i> Recetas
@@ -79,30 +76,82 @@
                     <i class="fa-solid fa-book-open"></i> Biblioteca de Recetas
                 </h2>
                 <button onclick="mostrarFormularioReceta()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 transition-colors">
-                    <i class="fa-solid fa-plus"></i> Nueva Receta
+                    <i class="fa-solid fa-plus"></i> Nueva Receta Técnica
                 </button>
             </div>
 
-            <div id="form-receta-panel" class="card p-4 space-y-4 hidden border-amber-500/50 no-print">
-                <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider border-b border-slate-700 pb-2">Crear Nueva Receta</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                    <div>
-                        <label class="text-slate-400 block mb-1">Nombre del Estilo / Receta</label>
-                        <input type="text" id="rec-nombre" placeholder="ej. Red Ale Santafesina" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+            <!-- MODAL / PANEL COMPLETO DE RECETA -->
+            <div id="form-receta-panel" class="card p-6 space-y-6 hidden border-amber-500/50 no-print">
+                <h3 class="text-base font-bold text-amber-400 uppercase tracking-wider border-b border-slate-700 pb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-sliders"></i> Configuración Técnica de Receta
+                </h3>
+                
+                <!-- PARÁMETROS GENERALES DE BREW-O-MATIC -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-3 text-xs bg-slate-900/60 p-4 rounded-xl border border-slate-700/80">
+                    <div class="col-span-2">
+                        <label class="text-slate-400 block mb-1">Nombre / Estilo</label>
+                        <input type="text" id="rec-nombre" placeholder="ej. APA Pilsen 280" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-bold text-slate-200">
                     </div>
                     <div>
-                        <label class="text-slate-400 block mb-1">D.I. Teórica (Densidad Inicial)</label>
+                        <label class="text-slate-400 block mb-1">Batch (Lts)</label>
+                        <input type="number" id="rec-batch" placeholder="280" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-mono text-amber-400 font-bold">
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1">D.I. (OG)</label>
                         <input type="text" id="rec-di" placeholder="1.052" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-mono">
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1">D.F. (FG)</label>
+                        <input type="text" id="rec-df" placeholder="1.013" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-mono">
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1">ABV %</label>
+                        <input type="text" id="rec-abv" placeholder="5.1" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-mono text-emerald-400 font-bold">
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1">IBU</label>
+                        <input type="number" id="rec-ibu" placeholder="33.8" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-mono">
                     </div>
                 </div>
 
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                    <div>
+                        <label class="text-slate-400 block mb-1">Color (SRM)</label>
+                        <input type="text" id="rec-srm" placeholder="6.2" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1">Eficiencia (%)</label>
+                        <input type="number" id="rec-eficiencia" placeholder="73" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1">Levadura (Cepa y Cantidad)</label>
+                        <input type="text" id="rec-levadura" placeholder="US-05 (200 grs)" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+                    </div>
+                </div>
+
+                <!-- SECCIÓN AGUA & EMPASTE -->
+                <div class="space-y-3 bg-slate-900/40 p-4 rounded-xl border border-slate-700">
+                    <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-droplet"></i> Parámetros de Agua, Macerado y Lavado
+                    </h4>
+                    <div class="grid grid-cols-2 md:grid-cols-6 gap-3 text-xs">
+                        <div><label class="text-slate-400">AGUA INICIAL (LTS)</label><input type="number" id="rec-agua-ini" placeholder="195" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
+                        <div><label class="text-slate-400">T° AGUA INICIAL</label><input type="text" id="rec-temp-agua-ini" placeholder="73 °C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
+                        <div><label class="text-slate-400">T° MACERADO</label><input type="text" id="rec-temp-mac" placeholder="66 °C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
+                        <div><label class="text-slate-400">AGUA LAVADO (LTS)</label><input type="number" id="rec-agua-lav" placeholder="173" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
+                        <div><label class="text-slate-400">T° AGUA LAVADO</label><input type="text" id="rec-temp-lav" placeholder="75 °C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
+                        <div><label class="text-slate-400">SALES / ADITIVOS</label><input type="text" id="rec-sales" placeholder="Gypsum 30g" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
+                    </div>
+                </div>
+
+                <!-- GRANOS & LÚPULOS -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="space-y-2">
                         <label class="text-xs font-bold text-slate-300 uppercase block">Maltas / Granos</label>
                         <div id="rec-granos-inputs" class="space-y-2">
                             <div class="flex gap-2">
-                                <input type="text" placeholder="ej. Malta Pilsen" class="rec-grano-nombre flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs">
-                                <input type="number" placeholder="Kg" class="rec-grano-cant w-24 bg-slate-900 border border-slate-700 rounded p-2 text-xs">
+                                <input type="text" placeholder="Pilsner US Cargill" class="rec-grano-nombre flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs">
+                                <input type="number" placeholder="Kg" class="rec-grano-cant w-20 bg-slate-900 border border-slate-700 rounded p-2 text-xs">
                             </div>
                         </div>
                         <button onclick="agregarFilaGrano()" class="text-xs text-amber-400 hover:underline flex items-center gap-1"><i class="fa-solid fa-plus"></i> Agregar Malta</button>
@@ -112,9 +161,9 @@
                         <label class="text-xs font-bold text-slate-300 uppercase block">Lúpulos</label>
                         <div id="rec-lupulos-inputs" class="space-y-2">
                             <div class="flex gap-2">
-                                <input type="text" placeholder="ej. Cascade" class="rec-lupulo-nombre flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs">
+                                <input type="text" placeholder="Cascade" class="rec-lupulo-nombre flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs">
                                 <input type="number" placeholder="Grs" class="rec-lupulo-cant w-20 bg-slate-900 border border-slate-700 rounded p-2 text-xs">
-                                <input type="text" placeholder="Momento (60min, WP)" class="rec-lupulo-momento w-32 bg-slate-900 border border-slate-700 rounded p-2 text-xs">
+                                <input type="text" placeholder="Momento (60m, WP)" class="rec-lupulo-momento w-28 bg-slate-900 border border-slate-700 rounded p-2 text-xs">
                             </div>
                         </div>
                         <button onclick="agregarFilaLupulo()" class="text-xs text-amber-400 hover:underline flex items-center gap-1"><i class="fa-solid fa-plus"></i> Agregar Lúpulo</button>
@@ -123,11 +172,11 @@
 
                 <div class="flex justify-end gap-3 pt-2 border-t border-slate-700">
                     <button onclick="ocultarFormularioReceta()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-bold px-4 py-2 rounded-lg">Cancelar</button>
-                    <button onclick="guardarReceta()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold px-4 py-2 rounded-lg">Guardar Receta</button>
+                    <button onclick="guardarReceta()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold px-4 py-2 rounded-lg">Guardar Receta Completa</button>
                 </div>
             </div>
 
-            <div id="grilla-recetas" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+            <div id="grilla-recetas" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
         </section>
 
         <!-- ==================== MÓDULO 2: COCCIÓN ==================== -->
@@ -161,11 +210,11 @@
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
                         <div><label class="text-slate-400">INICIO LLENADO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
                         <div><label class="text-slate-400">FIN LLENADO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-slate-400">LITROS</label><input type="number" placeholder="Lts" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-slate-400">T° AGUA</label><input type="text" placeholder="°C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                        <div><label class="text-slate-400">LITROS</label><input type="number" id="coc-agua-lts" placeholder="Lts" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                        <div><label class="text-slate-400">T° AGUA</label><input type="text" id="coc-agua-temp" placeholder="°C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
                         <div><label class="text-slate-400">T° OBJETIVO</label><input type="text" placeholder="°C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
                         <div><label class="text-slate-400">PH AGUA</label><input type="text" placeholder="pH" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div class="col-span-2"><label class="text-slate-400">AGREGADO SALES (grs)</label><input type="text" placeholder="Sales adicionadas" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                        <div class="col-span-2"><label class="text-slate-400">AGREGADO SALES (grs)</label><input type="text" id="coc-sales" placeholder="Sales adicionadas" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
                     </div>
                 </div>
 
@@ -200,8 +249,8 @@
                         <div class="grid grid-cols-3 gap-3 text-xs">
                             <div><label class="text-slate-400">LLENADO INICIO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
                             <div><label class="text-slate-400">LLENADO FIN</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                            <div><label class="text-slate-400">LITROS</label><input type="number" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                            <div><label class="text-slate-400">T° AGUA</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            <div><label class="text-slate-400">LITROS</label><input type="number" id="coc-agua-lav-lts" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            <div><label class="text-slate-400">T° AGUA</label><input type="text" id="coc-temp-lav" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
                             <div><label class="text-slate-400">T° OBJETIVO</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
                             <div><label class="text-slate-400">PH</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
                             <div><label class="text-slate-400">COMIENZO LAVADO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
@@ -272,7 +321,7 @@
                             <div class="grid grid-cols-2 gap-3 text-xs">
                                 <div><label class="text-slate-400">HORA INOCULACIÓN</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
                                 <div><label class="text-slate-400">T° MOSTO</label><input type="text" placeholder="°C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                                <div class="col-span-2"><label class="text-slate-400">CANTIDAD / LEVADURA</label><input type="text" placeholder="Cepa y Gramos adicionados" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                                <div class="col-span-2"><label class="text-slate-400">CANTIDAD / LEVADURA</label><input type="text" id="coc-levadura" placeholder="Cepa y Gramos adicionados" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
                             </div>
                         </div>
                     </div>
@@ -302,12 +351,12 @@
                 <div class="card p-4 space-y-3">
                     <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Encabezado</h3>
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-                        <div><span class="text-xs text-slate-400 block">ESTILO</span><input type="text" id="ferm-estilo" value="Scottish Ale" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
+                        <div><span class="text-xs text-slate-400 block">ESTILO</span><input type="text" id="ferm-estilo" value="APA Pilsen 280" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
                         <div><span class="text-xs text-slate-400 block">FECHA ELABORACIÓN</span><input type="date" id="ferm-fecha" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
                         <div><span class="text-xs text-slate-400 block">LOTE</span><input type="text" id="ferm-lote" value="L-2026-01" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1 font-mono text-amber-400"></div>
-                        <div><span class="text-xs text-slate-400 block">BATCH</span><input type="text" value="500L" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
-                        <div><span class="text-xs text-slate-400 block">D.I. RECETA</span><input type="text" id="ferm-di-receta" value="1.050" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1 font-mono"></div>
-                        <div><span class="text-xs text-amber-400 block font-bold">D.I. REAL</span><input type="text" id="ferm-di-real" value="1.048" oninput="calcularABV()" class="w-full bg-slate-900 border border-amber-500/50 rounded p-2 mt-1 font-mono text-amber-400 font-bold"></div>
+                        <div><span class="text-xs text-slate-400 block">BATCH</span><input type="text" id="ferm-batch" value="280L" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
+                        <div><span class="text-xs text-slate-400 block">D.I. RECETA</span><input type="text" id="ferm-di-receta" value="1.052" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1 font-mono"></div>
+                        <div><span class="text-xs text-amber-400 block font-bold">D.I. REAL</span><input type="text" id="ferm-di-real" value="1.052" oninput="calcularABV()" class="w-full bg-slate-900 border border-amber-500/50 rounded p-2 mt-1 font-mono text-amber-400 font-bold"></div>
                     </div>
                 </div>
 
@@ -336,7 +385,7 @@
                         <div class="space-y-4">
                             <div>
                                 <label class="text-xs text-slate-400 font-bold block">D. F. (DENSIDAD FINAL)</label>
-                                <input type="text" id="ferm-df" placeholder="ej. 1.010" oninput="calcularABV()" class="w-full bg-slate-900 border border-slate-700 rounded p-3 text-lg font-mono text-amber-400 mt-1">
+                                <input type="text" id="ferm-df" placeholder="ej. 1.013" oninput="calcularABV()" class="w-full bg-slate-900 border border-slate-700 rounded p-3 text-lg font-mono text-amber-400 mt-1">
                             </div>
                             <div>
                                 <label class="text-xs text-slate-400 font-bold block">ALC. % (CÁLCULO AUTOMÁTICO)</label>
@@ -434,7 +483,7 @@
                 </div>
                 <div id="campo-barril-cerveza" class="hidden">
                     <label class="text-slate-400 block mb-1">Cerveza / Lote</label>
-                    <input type="text" id="barril-cerveza" placeholder="ej. Scottish Ale (L-2026-01)" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+                    <input type="text" id="barril-cerveza" placeholder="ej. APA Pilsen 280 (L-2026-01)" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
                 </div>
                 <div id="campo-barril-cliente" class="hidden">
                     <label class="text-slate-400 block mb-1">Cliente Asignado</label>
@@ -532,76 +581,42 @@
         </div>
     </div>
 
-    <!-- PLANTILLA OCULTA PARA GENERACIÓN DE PDF DE RECETAS INDIVIDUALES -->
-    <div id="plantilla-pdf-receta" class="hidden bg-white text-slate-900 p-8 rounded font-sans text-xs max-w-xl mx-auto space-y-4">
+    <!-- PLANTILLA OCULTA PARA PDF RECETA TÉCNICA -->
+    <div id="plantilla-pdf-receta" class="hidden bg-white text-slate-900 p-8 rounded font-sans text-xs max-w-2xl mx-auto space-y-4">
         <div class="flex justify-between items-center border-b border-slate-300 pb-3">
             <div>
                 <h1 class="text-2xl font-bold text-amber-700 tracking-wider">ALBARDÓN</h1>
                 <p class="text-slate-500 font-bold text-[10px]">CERVEZA ARTESANAL SANTAFESINA</p>
             </div>
             <div class="text-right">
-                <h2 class="text-lg font-bold text-slate-800" id="rec-pdf-nombre">Scottish Ale</h2>
-                <p class="text-slate-500 font-mono" id="rec-pdf-di">D.I. Teórica: 1.050</p>
+                <h2 class="text-lg font-bold text-slate-800" id="rec-pdf-nombre">APA Pilsen 280</h2>
+                <p class="text-slate-500 font-mono" id="rec-pdf-batch">Batch: 280 Lts</p>
             </div>
         </div>
 
-        <div class="space-y-4 pt-2">
+        <div class="grid grid-cols-6 gap-2 bg-slate-100 p-3 rounded text-center font-mono border border-slate-200">
+            <div><span class="block text-[9px] text-slate-500">OG / D.I.</span><strong id="rec-pdf-og">1.052</strong></div>
+            <div><span class="block text-[9px] text-slate-500">FG / D.F.</span><strong id="rec-pdf-fg">1.013</strong></div>
+            <div><span class="block text-[9px] text-slate-500">ABV</span><strong id="rec-pdf-abv-val">5.1%</strong></div>
+            <div><span class="block text-[9px] text-slate-500">IBU</span><strong id="rec-pdf-ibu-val">33.8</strong></div>
+            <div><span class="block text-[9px] text-slate-500">COLOR</span><strong id="rec-pdf-srm-val">6.2 SRM</strong></div>
+            <div><span class="block text-[9px] text-slate-500">EFIC.</span><strong id="rec-pdf-efic">73%</strong></div>
+        </div>
+
+        <div class="space-y-3">
+            <h3 class="text-xs font-bold text-amber-800 uppercase border-b border-slate-200 pb-1">Agua y Macerado</h3>
+            <div class="grid grid-cols-3 gap-2 text-slate-700" id="rec-pdf-agua-det"></div>
+        </div>
+
+        <div class="space-y-3 pt-2">
             <div>
                 <h3 class="text-xs font-bold text-amber-800 uppercase border-b border-slate-200 pb-1 mb-2">Maltas / Granos</h3>
                 <ul id="rec-pdf-granos" class="space-y-1 text-slate-800"></ul>
             </div>
 
             <div>
-                <h3 class="text-xs font-bold text-amber-800 uppercase border-b border-slate-200 pb-1 mb-2">Lúpulos</h3>
+                <h3 class="text-xs font-bold text-amber-800 uppercase border-b border-slate-200 pb-1 mb-2">Lúpulos & Levadura</h3>
                 <ul id="rec-pdf-lupulos" class="space-y-1 text-slate-800"></ul>
-            </div>
-        </div>
-    </div>
-
-    <!-- PLANTILLA OCULTA PARA IMPRESIÓN DE REMITO PDF -->
-    <div id="plantilla-pdf-remito" class="hidden bg-white text-slate-900 p-8 rounded font-sans text-xs max-w-xl mx-auto space-y-4">
-        <div class="flex justify-between items-center border-b border-slate-300 pb-3">
-            <div>
-                <h1 class="text-2xl font-bold text-amber-700 tracking-wider">ALBARDÓN</h1>
-                <p class="text-slate-500 font-bold text-[10px]">CERVEZA ARTESANAL SANTAFESINA</p>
-            </div>
-            <div class="text-right">
-                <h2 class="text-base font-bold text-slate-800">REMITO DE ENTREGA</h2>
-                <p class="text-slate-500" id="pdf-fecha">Fecha: --/--/----</p>
-            </div>
-        </div>
-
-        <div class="border-b border-slate-200 pb-3">
-            <p><strong>CLIENTE:</strong> <span id="pdf-cliente">--</span></p>
-            <p><strong>DIRECCIÓN:</strong> <span id="pdf-direccion">--</span></p>
-            <p><strong>TELÉFONO:</strong> <span id="pdf-telefono">--</span></p>
-        </div>
-
-        <table class="w-full text-left border-collapse my-2">
-            <thead>
-                <tr class="bg-amber-100 text-amber-900 border-b border-amber-200">
-                    <th class="p-2">Presentación</th>
-                    <th class="p-2">Estilo</th>
-                    <th class="p-2 text-center">Cant.</th>
-                    <th class="p-2 text-right">Precio U.</th>
-                    <th class="p-2 text-right">Subtotal</th>
-                </tr>
-            </thead>
-            <tbody id="pdf-items-body">
-            </tbody>
-        </table>
-
-        <div class="flex justify-between items-center pt-3 border-t border-slate-300 font-bold">
-            <span class="text-sm">TOTAL IMPORTE:</span>
-            <span id="pdf-total" class="text-base text-amber-800">$0</span>
-        </div>
-
-        <div class="pt-8 grid grid-cols-2 gap-8 text-center text-[10px] text-slate-500">
-            <div>
-                <p class="border-t border-slate-400 pt-1">Firma / Aclaración Cliente</p>
-            </div>
-            <div>
-                <p class="border-t border-slate-400 pt-1">Cervecería Albardón</p>
             </div>
         </div>
     </div>
@@ -610,18 +625,42 @@
     <script>
         // --- BASE DE DATOS LOCALSTORAGE ---
         const recetasIniciales = {
-            scottish: { id: 'scottish', nombre: "Scottish Ale", diTeorica: "1.050", granos: [{ nombre: "Malta Pilsen", cantidad: 80 }, { nombre: "Malta Caramel 60", cantidad: 12 }], lupulos: [{ nombre: "Cascade", cantidad: 450, momento: "60 min" }] },
-            ipa: { id: 'ipa', nombre: "American IPA", diTeorica: "1.056", granos: [{ nombre: "Malta Pale Ale", cantidad: 95 }], lupulos: [{ nombre: "Columbus", cantidad: 600, momento: "60 min" }] }
+            apa_pilsen_280: {
+                id: 'apa_pilsen_280',
+                nombre: "APA Pilsen 280",
+                batch: 280,
+                diTeorica: "1.052",
+                dfTeorica: "1.013",
+                abv: "5.1",
+                ibu: "33.8",
+                srm: "6.2",
+                eficiencia: "73",
+                levadura: "US-05 (200 grs)",
+                aguaIni: 195,
+                tempAguaIni: "73 °C",
+                tempMac: "66 °C",
+                aguaLav: 173,
+                tempLav: "75 °C",
+                sales: "Gypsum 30g, Cloruro de Calcio 20g",
+                granos: [
+                    { nombre: "Pilsner US Cargill", cantidad: 55 },
+                    { nombre: "Melanoidin Malt (Ba-Malt)", cantidad: 5 },
+                    { nombre: "Carapils (Dextrine) Ba-Malt", cantidad: 5 }
+                ],
+                lupulos: [
+                    { nombre: "Columbus", cantidad: 300, momento: "60 min" },
+                    { nombre: "Cascade", cantidad: 500, momento: "Whirlpool" }
+                ]
+            }
         };
 
         const barrilesIniciales = [
             { codigo: 'K-01', capacidad: '50L', conector: 'G', estado: 'vacio_limpio', cerveza: '', cliente: '' },
-            { codigo: 'K-02', capacidad: '50L', conector: 'G', estado: 'lleno_fabrica', cerveza: 'Scottish Ale (L-2026-01)', cliente: '' },
-            { codigo: 'K-03', capacidad: '50L', conector: 'G', estado: 'entregado_cliente', cerveza: 'Scottish Ale (L-2026-01)', cliente: 'Bar El Portal' }
+            { codigo: 'K-02', capacidad: '50L', conector: 'G', estado: 'lleno_fabrica', cerveza: 'APA Pilsen 280 (L-2026-01)', cliente: '' }
         ];
 
         const clientesIniciales = [
-            { id: 'c1', nombre: 'Bar El Portal', telefono: '5493421234567', direccion: 'Av. Pellegrini 1500', saldo: -150000, movimientos: [{ fecha: '2026-09-10', concepto: 'Entrega 2 Barriles 50L', monto: -150000, items: [] }] }
+            { id: 'c1', nombre: 'Bar El Portal', telefono: '5493421234567', direccion: 'Av. Pellegrini 1500', saldo: -150000, movimientos: [] }
         ];
 
         let recetas = JSON.parse(localStorage.getItem('alb_recetas')) || recetasIniciales;
@@ -634,7 +673,6 @@
             localStorage.setItem('alb_clientes', JSON.stringify(clientes));
         }
 
-        // Navegación
         function switchTab(tabId) {
             document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -651,111 +689,63 @@
             if (tabId === 'cc') renderClientes();
         }
 
-        // GENERACIÓN EXCLUSIVA DE PDF PARA PLANILLA DE COCCIÓN
-        function descargarCoccionPDF() {
-            const element = document.getElementById('area-impresion-coccion');
-            element.classList.add('pdf-export-mode');
-
-            const lote = document.getElementById('coc-lote').value || 'Coccion';
-            const estilo = document.getElementById('coc-estilo').value || 'Albardon';
-
-            const opt = {
-                margin:       8,
-                filename:     `Planilla_Coccion_${estilo.replace(/\s+/g, '_')}_${lote}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
-            html2pdf().set(opt).from(element).save().then(() => {
-                element.classList.remove('pdf-export-mode');
-            });
-        }
-
-        // GENERACIÓN EXCLUSIVA DE PDF PARA PLANILLA DE FERMENTACIÓN
-        function descargarFermentacionPDF() {
-            const element = document.getElementById('area-impresion-fermentacion');
-            element.classList.add('pdf-export-mode');
-
-            const lote = document.getElementById('ferm-lote').value || 'Fermentacion';
-            const estilo = document.getElementById('ferm-estilo').value || 'Albardon';
-
-            const opt = {
-                margin:       8,
-                filename:     `Control_Fermentacion_${estilo.replace(/\s+/g, '_')}_${lote}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
-            html2pdf().set(opt).from(element).save().then(() => {
-                element.classList.remove('pdf-export-mode');
-            });
-        }
-
-        // DESCARGA PDF EXCLUSIVA DE UNA RECETA ESPECÍFICA
-        function descargarRecetaPDF(key) {
-            const r = recetas[key];
-            if (!r) return;
-
-            document.getElementById('rec-pdf-nombre').innerText = r.nombre;
-            document.getElementById('rec-pdf-di').innerText = `D.I. Teórica: ${r.diTeorica}`;
-
-            document.getElementById('rec-pdf-granos').innerHTML = r.granos.map(g => `<li class="border-b border-slate-100 py-1 flex justify-between"><span>${g.nombre}</span><strong class="font-mono">${g.cantidad} kg</strong></li>`).join('');
-            document.getElementById('rec-pdf-lupulos').innerHTML = r.lupulos.map(l => `<li class="border-b border-slate-100 py-1 flex justify-between"><span>${l.nombre} (${l.momento})</span><strong class="font-mono">${l.cantidad} grs</strong></li>`).join('');
-
-            const element = document.getElementById('plantilla-pdf-receta');
-            element.classList.remove('hidden');
-
-            const opt = {
-                margin: 10,
-                filename: `Receta_Albardon_${r.nombre.replace(/\s+/g, '_')}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
-            html2pdf().set(opt).from(element).save().then(() => {
-                element.classList.add('hidden');
-            });
-        }
-
-        // --- MÓDULO RECETAS ---
+        // --- MÓDULO RECETAS COMPLETO ---
         function renderRecetas() {
             const container = document.getElementById('grilla-recetas');
             let html = '';
             Object.keys(recetas).forEach(key => {
                 const r = recetas[key];
                 html += `
-                    <div class="card p-4 space-y-3 flex flex-col justify-between">
+                    <div class="card p-5 space-y-4 flex flex-col justify-between">
                         <div>
-                            <div class="flex justify-between items-start border-b border-slate-700 pb-2 mb-2">
-                                <h3 class="font-bold text-amber-400 text-base">${r.nombre}</h3>
-                                <span class="text-xs font-mono bg-slate-900 border border-slate-700 px-2 py-0.5 rounded text-slate-300">D.I: ${r.diTeorica}</span>
-                            </div>
-                            <div class="space-y-2 text-xs">
+                            <div class="flex justify-between items-start border-b border-slate-700 pb-3">
                                 <div>
-                                    <span class="text-slate-400 font-semibold block mb-1">MALTAS / GRANOS:</span>
+                                    <h3 class="font-bold text-amber-400 text-lg">${r.nombre}</h3>
+                                    <span class="text-xs text-slate-400">Batch: <strong class="text-slate-200 font-mono">${r.batch || 280} Lts</strong> | Levadura: <strong class="text-slate-200">${r.levadura || 'N/A'}</strong></span>
+                                </div>
+                                <span class="text-xs font-mono bg-amber-500/10 border border-amber-500/30 text-amber-300 px-2.5 py-1 rounded-lg font-bold">${r.abv || '--'}% ABV</span>
+                            </div>
+
+                            <div class="grid grid-cols-5 gap-1 my-3 bg-slate-900/80 p-2 rounded-lg text-center font-mono text-xs border border-slate-700/60">
+                                <div><span class="block text-[9px] text-slate-400">D.I.</span><strong class="text-amber-300">${r.diTeorica}</strong></div>
+                                <div><span class="block text-[9px] text-slate-400">D.F.</span><strong class="text-slate-300">${r.dfTeorica || '--'}</strong></div>
+                                <div><span class="block text-[9px] text-slate-400">IBU</span><strong class="text-emerald-400">${r.ibu || '--'}</strong></div>
+                                <div><span class="block text-[9px] text-slate-400">SRM</span><strong class="text-amber-500">${r.srm || '--'}</strong></div>
+                                <div><span class="block text-[9px] text-slate-400">EFIC.</span><strong class="text-blue-400">${r.eficiencia || '70'}%</strong></div>
+                            </div>
+
+                            <div class="space-y-3 text-xs border-t border-slate-800 pt-3">
+                                <div class="bg-slate-900/40 p-2 rounded border border-slate-800 text-[11px] text-slate-300 grid grid-cols-2 gap-2">
+                                    <p>💧 Empaste: <strong class="text-slate-100">${r.aguaIni || '--'} Lts</strong> (${r.tempAguaIni || '--'} / Mac: ${r.tempMac || '--'})</p>
+                                    <p>🚿 Lavado: <strong class="text-slate-100">${r.aguaLav || '--'} Lts</strong> (${r.tempLav || '--'})</p>
+                                    ${r.sales ? `<p class="col-span-2 text-slate-400">🧪 Sales: <span class="text-slate-300">${r.sales}</span></p>` : ''}
+                                </div>
+
+                                <div>
+                                    <span class="text-slate-400 font-semibold block mb-1 uppercase text-[10px]">Maltas / Granos:</span>
                                     <ul class="space-y-0.5 text-slate-300 pl-2 border-l border-slate-700">
                                         ${r.granos.map(g => `<li>${g.nombre}: <strong class="text-amber-300">${g.cantidad} kg</strong></li>`).join('')}
                                     </ul>
                                 </div>
-                                <div class="pt-2">
-                                    <span class="text-slate-400 font-semibold block mb-1">LÚPULOS:</span>
+                                <div>
+                                    <span class="text-slate-400 font-semibold block mb-1 uppercase text-[10px]">Lúpulos:</span>
                                     <ul class="space-y-0.5 text-slate-300 pl-2 border-l border-slate-700">
                                         ${r.lupulos.map(l => `<li>${l.nombre}: <strong class="text-amber-300">${l.cantidad} grs</strong> (${l.momento})</li>`).join('')}
                                     </ul>
                                 </div>
                             </div>
                         </div>
+
                         <div class="pt-3 border-t border-slate-700 flex justify-between items-center no-print">
                             <div class="flex gap-2">
                                 <button onclick="eliminarReceta('${key}')" title="Eliminar Receta" class="text-red-400 hover:text-red-300 text-xs"><i class="fa-solid fa-trash"></i></button>
-                                <button onclick="descargarRecetaPDF('${key}')" title="Descargar Receta PDF" class="text-amber-400 hover:text-amber-300 text-xs font-bold flex items-center gap-1">
+                                <button onclick="descargarRecetaPDF('${key}')" title="Descargar PDF Técnico" class="text-amber-400 hover:text-amber-300 text-xs font-bold flex items-center gap-1">
                                     <i class="fa-solid fa-file-pdf"></i> PDF
                                 </button>
                             </div>
-                            <button onclick="usarRecetaEnCoccion('${key}')" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1 rounded text-xs">Cocinar esta Receta</button>
+                            <button onclick="usarRecetaEnCoccion('${key}')" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1">
+                                <i class="fa-solid fa-beer-mug-empty"></i> Cocinar esta Receta
+                            </button>
                         </div>
                     </div>`;
             });
@@ -769,20 +759,19 @@
         function agregarFilaGrano() {
             const div = document.createElement('div');
             div.className = 'flex gap-2';
-            div.innerHTML = `<input type="text" placeholder="Malta" class="rec-grano-nombre flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs"><input type="number" placeholder="Kg" class="rec-grano-cant w-24 bg-slate-900 border border-slate-700 rounded p-2 text-xs">`;
+            div.innerHTML = `<input type="text" placeholder="Malta" class="rec-grano-nombre flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs"><input type="number" placeholder="Kg" class="rec-grano-cant w-20 bg-slate-900 border border-slate-700 rounded p-2 text-xs">`;
             document.getElementById('rec-granos-inputs').appendChild(div);
         }
 
         function agregarFilaLupulo() {
             const div = document.createElement('div');
             div.className = 'flex gap-2';
-            div.innerHTML = `<input type="text" placeholder="Lúpulo" class="rec-lupulo-nombre flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs"><input type="number" placeholder="Grs" class="rec-lupulo-cant w-20 bg-slate-900 border border-slate-700 rounded p-2 text-xs"><input type="text" placeholder="Momento" class="rec-lupulo-momento w-32 bg-slate-900 border border-slate-700 rounded p-2 text-xs">`;
+            div.innerHTML = `<input type="text" placeholder="Lúpulo" class="rec-lupulo-nombre flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs"><input type="number" placeholder="Grs" class="rec-lupulo-cant w-20 bg-slate-900 border border-slate-700 rounded p-2 text-xs"><input type="text" placeholder="Momento" class="rec-lupulo-momento w-28 bg-slate-900 border border-slate-700 rounded p-2 text-xs">`;
             document.getElementById('rec-lupulos-inputs').appendChild(div);
         }
 
         function guardarReceta() {
             const nombre = document.getElementById('rec-nombre').value.trim();
-            const diTeorica = document.getElementById('rec-di').value.trim() || '1.050';
             if (!nombre) return alert("Ingrese el nombre de la receta.");
 
             const id = nombre.toLowerCase().replace(/[^a-z0-9]/g, '_');
@@ -796,7 +785,27 @@
                 if (inp.value.trim()) lupulos.push({ nombre: inp.value.trim(), cantidad: parseFloat(document.querySelectorAll('.rec-lupulo-cant')[idx].value) || 0, momento: document.querySelectorAll('.rec-lupulo-momento')[idx].value.trim() || '60 min' });
             });
 
-            recetas[id] = { id, nombre, diTeorica, granos, lupulos };
+            recetas[id] = {
+                id,
+                nombre,
+                batch: parseFloat(document.getElementById('rec-batch').value) || 280,
+                diTeorica: document.getElementById('rec-di').value.trim() || '1.050',
+                dfTeorica: document.getElementById('rec-df').value.trim() || '1.010',
+                abv: document.getElementById('rec-abv').value.trim() || '5.0',
+                ibu: document.getElementById('rec-ibu').value.trim() || '30',
+                srm: document.getElementById('rec-srm').value.trim() || '6.0',
+                eficiencia: document.getElementById('rec-eficiencia').value.trim() || '70',
+                levadura: document.getElementById('rec-levadura').value.trim() || 'US-05',
+                aguaIni: parseFloat(document.getElementById('rec-agua-ini').value) || 0,
+                tempAguaIni: document.getElementById('rec-temp-agua-ini').value.trim(),
+                tempMac: document.getElementById('rec-temp-mac').value.trim(),
+                aguaLav: parseFloat(document.getElementById('rec-agua-lav').value) || 0,
+                tempLav: document.getElementById('rec-temp-lav').value.trim(),
+                sales: document.getElementById('rec-sales').value.trim(),
+                granos,
+                lupulos
+            };
+
             guardarStorage();
             ocultarFormularioReceta();
             renderRecetas();
@@ -819,29 +828,33 @@
             cargarRecetaEnCoccion();
         }
 
-        // --- MÓDULO COCCIÓN ---
+        // --- COCCIÓN ---
         function cargarRecetaEnCoccion() {
             const key = document.getElementById('select-receta').value;
             const receta = recetas[key];
-            const contGranos = document.getElementById('contenedor-granos');
-            const contLupulos = document.getElementById('contenedor-lupulos');
-
             if (!receta) return;
+
             document.getElementById('coc-estilo').value = receta.nombre;
+            if (receta.aguaIni) document.getElementById('coc-agua-lts').value = receta.aguaIni;
+            if (receta.tempAguaIni) document.getElementById('coc-agua-temp').value = receta.tempAguaIni;
+            if (receta.sales) document.getElementById('coc-sales').value = receta.sales;
+            if (receta.aguaLav) document.getElementById('coc-agua-lav-lts').value = receta.aguaLav;
+            if (receta.tempLav) document.getElementById('coc-temp-lav').value = receta.tempLav;
+            if (receta.levadura) document.getElementById('coc-levadura').value = receta.levadura;
 
             let htmlG = '', totalKg = 0;
             receta.granos.forEach(g => {
                 totalKg += g.cantidad;
                 htmlG += `<div class="flex gap-4 items-center"><input type="text" value="${g.nombre}" readonly class="flex-1 bg-slate-900/50 border border-slate-700 rounded p-2 text-sm text-slate-300"><div class="flex items-center gap-2"><input type="number" value="${g.cantidad}" oninput="calcularTotalGranos()" class="input-grano w-28 bg-slate-900 border border-slate-700 rounded p-2 text-sm font-bold text-amber-400"><span class="text-xs text-slate-400">KG</span></div></div>`;
             });
-            contGranos.innerHTML = htmlG;
+            document.getElementById('contenedor-granos').innerHTML = htmlG;
             document.getElementById('total-granos').innerText = `KGS TOTALES: ${totalKg} kg`;
 
             let htmlL = '';
             receta.lupulos.forEach(l => {
                 htmlL += `<div class="grid grid-cols-12 gap-3 items-center text-xs"><input type="text" value="${l.nombre}" readonly class="col-span-4 bg-slate-900/50 border border-slate-700 rounded p-2 text-slate-300"><div class="col-span-3 flex items-center gap-1"><input type="number" value="${l.cantidad}" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-amber-400 font-bold"><span class="text-slate-500">grs</span></div><input type="text" value="${l.momento}" readonly class="col-span-3 bg-slate-900/50 border border-slate-700 rounded p-2 text-slate-400"><input type="time" class="col-span-2 bg-slate-900 border border-slate-700 rounded p-2 text-slate-200"></div>`;
             });
-            contLupulos.innerHTML = htmlL;
+            document.getElementById('contenedor-lupulos').innerHTML = htmlL;
         }
 
         function calcularTotalGranos() {
@@ -859,7 +872,7 @@
             switchTab('fermentacion');
         }
 
-        // --- MÓDULO FERMENTACIÓN ---
+        // --- FERMENTACIÓN & PDF ---
         function renderTablaFermentacion() {
             const tbody = document.getElementById('tabla-dias-fermentacion');
             let html = '';
@@ -878,415 +891,62 @@
             } else res.innerText = '-- %';
         }
 
-        // --- MÓDULO STOCK BARRILES ---
-        const etiquetasEstado = {
-            vacio_sucio: { texto: 'Vacío - Sucio', clase: 'bg-slate-700 text-slate-300' },
-            vacio_limpio: { texto: 'Vacío - Limpio', clase: 'bg-blue-500/20 text-blue-400 border border-blue-500/30' },
-            vacio_sanitizado: { texto: 'Vacío - Sanitizado', clase: 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' },
-            lleno_fabrica: { texto: 'Lleno en fábrica', clase: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' },
-            entregado_cliente: { texto: 'Entregado en cliente', clase: 'bg-amber-500/20 text-amber-400 border border-amber-500/30' },
-            mantenimiento: { texto: 'En Mantenimiento', clase: 'bg-red-500/20 text-red-400 border border-red-500/30' }
-        };
-
-        function renderBarriles() {
-            const container = document.getElementById('grilla-barriles');
-            let html = '';
-            barriles.forEach((b, idx) => {
-                const est = etiquetasEstado[b.estado] || { texto: b.estado, clase: 'bg-slate-700' };
-                const conector = b.conector || 'G';
-                
-                html += `
-                    <div class="card p-4 space-y-3 flex flex-col justify-between">
-                        <div>
-                            <div class="flex justify-between items-center border-b border-slate-700 pb-2 mb-2">
-                                <span class="font-mono text-lg font-bold text-amber-400">${b.codigo}</span>
-                                <span class="text-xs px-2 py-0.5 rounded font-bold ${est.clase}">${est.texto}</span>
-                            </div>
-                            <div class="text-xs space-y-1 text-slate-300">
-                                <p>Capacidad: <span class="font-mono font-semibold">${b.capacidad}</span> | Conector: <span class="font-mono font-semibold text-emerald-400">${conector}</span></p>
-                                ${b.cerveza ? `<p>Cerveza: <span class="font-semibold text-slate-100">${b.cerveza}</span></p>` : ''}
-                                ${b.cliente ? `<p>Ubicación: <span class="text-amber-300 font-semibold">${b.cliente}</span></p>` : ''}
-                            </div>
-                        </div>
-                        <div class="pt-2 border-t border-slate-700 flex justify-end no-print">
-                            <button onclick="editarBarril(${idx})" class="text-xs bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded text-slate-200">Cambiar Estado</button>
-                        </div>
-                    </div>`;
-            });
-            container.innerHTML = html;
+        function descargarCoccionPDF() {
+            const element = document.getElementById('area-impresion-coccion');
+            element.classList.add('pdf-export-mode');
+            const opt = { margin: 8, filename: `Planilla_Coccion.pdf`, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4' } };
+            html2pdf().set(opt).from(element).save().then(() => element.classList.remove('pdf-export-mode'));
         }
 
-        function mostrarModalBarril() {
-            document.getElementById('barril-codigo').value = '';
-            document.getElementById('barril-cerveza').value = '';
-            document.getElementById('barril-conector').value = 'G';
-            toggleCamposEstadoBarril();
-            document.getElementById('modal-barril').classList.remove('hidden');
+        function descargarFermentacionPDF() {
+            const element = document.getElementById('area-impresion-fermentacion');
+            element.classList.add('pdf-export-mode');
+            const opt = { margin: 8, filename: `Control_Fermentacion.pdf`, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4' } };
+            html2pdf().set(opt).from(element).save().then(() => element.classList.remove('pdf-export-mode'));
         }
 
-        function cerrarModalBarril() { document.getElementById('modal-barril').classList.add('hidden'); }
+        function descargarRecetaPDF(key) {
+            const r = recetas[key];
+            if (!r) return;
 
-        function toggleCamposEstadoBarril() {
-            const estado = document.getElementById('barril-estado').value;
-            const campoCerveza = document.getElementById('campo-barril-cerveza');
-            const campoCliente = document.getElementById('campo-barril-cliente');
+            document.getElementById('rec-pdf-nombre').innerText = r.nombre;
+            document.getElementById('rec-pdf-batch').innerText = `Batch: ${r.batch || 280} Lts`;
+            document.getElementById('rec-pdf-og').innerText = r.diTeorica;
+            document.getElementById('rec-pdf-fg').innerText = r.dfTeorica || '--';
+            document.getElementById('rec-pdf-abv-val').innerText = `${r.abv || '--'}%`;
+            document.getElementById('rec-pdf-ibu-val').innerText = r.ibu || '--';
+            document.getElementById('rec-pdf-srm-val').innerText = `${r.srm || '--'} SRM`;
+            document.getElementById('rec-pdf-efic').innerText = `${r.eficiencia || '70'}%`;
 
-            campoCerveza.classList.toggle('hidden', !(estado === 'lleno_fabrica' || estado === 'entregado_cliente'));
-            campoCliente.classList.toggle('hidden', estado !== 'entregado_cliente');
-
-            if (estado === 'entregado_cliente') {
-                const selectC = document.getElementById('barril-cliente-select');
-                selectC.innerHTML = clientes.map(c => `<option value="${c.nombre}">${c.nombre}</option>`).join('');
-            }
-        }
-
-        function editarBarril(idx) {
-            const b = barriles[idx];
-            document.getElementById('barril-codigo').value = b.codigo;
-            document.getElementById('barril-capacidad').value = b.capacidad;
-            document.getElementById('barril-conector').value = b.conector || 'G';
-            document.getElementById('barril-estado').value = b.estado;
-            document.getElementById('barril-cerveza').value = b.cerveza || '';
-            toggleCamposEstadoBarril();
-            document.getElementById('modal-barril').classList.remove('hidden');
-        }
-
-        function guardarBarril() {
-            const codigo = document.getElementById('barril-codigo').value.trim();
-            const capacidad = document.getElementById('barril-capacidad').value;
-            const conector = document.getElementById('barril-conector').value;
-            const estado = document.getElementById('barril-estado').value;
-            const cerveza = document.getElementById('barril-cerveza').value.trim();
-            const cliente = estado === 'entregado_cliente' ? document.getElementById('barril-cliente-select').value : '';
-
-            if (!codigo) return alert("Ingrese el código del barril.");
-
-            const idx = barriles.findIndex(b => b.codigo === codigo);
-            const obj = { codigo, capacidad, conector, estado, cerveza, cliente };
-
-            if (idx >= 0) barriles[idx] = obj;
-            else barriles.push(obj);
-
-            guardarStorage();
-            cerrarModalBarril();
-            renderBarriles();
-        }
-
-        // --- MÓDULO CUENTAS CORRIENTES & CLIENTES ---
-        function renderClientes() {
-            const container = document.getElementById('grilla-clientes');
-            let html = '';
-            clientes.forEach(c => {
-                html += `
-                    <div class="card p-4 space-y-3">
-                        <div class="flex flex-wrap justify-between items-center gap-2 border-b border-slate-700 pb-2">
-                            <div class="flex items-center gap-3">
-                                <div>
-                                    <h3 class="font-bold text-lg text-slate-100">${c.nombre}</h3>
-                                    <p class="text-xs text-slate-400">Tel: ${c.telefono} | Dir: ${c.direccion}</p>
-                                </div>
-                                <div class="flex gap-1 ml-2 no-print">
-                                    <button onclick="editarCliente('${c.id}')" title="Editar Cliente" class="bg-slate-700 hover:bg-slate-600 text-amber-400 text-xs px-2 py-1 rounded transition-colors">
-                                        <i class="fa-solid fa-pen-to-square"></i>
-                                    </button>
-                                    <button onclick="eliminarCliente('${c.id}')" title="Eliminar Cliente" class="bg-red-500/20 hover:bg-red-500/40 text-red-400 text-xs px-2 py-1 rounded transition-colors">
-                                        <i class="fa-solid fa-trash"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <span class="text-xs text-slate-400 block">Saldo CC</span>
-                                <span class="text-xl font-mono font-bold ${c.saldo < 0 ? 'text-red-400' : 'text-emerald-400'}">
-                                    $ ${c.saldo.toLocaleString()}
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="space-y-1 text-xs">
-                            <span class="text-slate-400 font-semibold block">ÚLTIMOS MOVIMIENTOS & REMITOS:</span>
-                            ${c.movimientos && c.movimientos.length > 0 ? c.movimientos.map((m, mIdx) => `
-                                <div class="flex justify-between items-center py-1.5 border-b border-slate-800 text-slate-300">
-                                    <div>
-                                        <span class="font-semibold text-slate-200">${m.fecha}</span> - <span>${m.concepto}</span>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="font-mono font-bold ${m.monto < 0 ? 'text-red-400' : 'text-emerald-400'}">$ ${m.monto.toLocaleString()}</span>
-                                        ${m.items && m.items.length > 0 ? `
-                                            <button onclick="descargarRemitoPDF('${c.id}', ${mIdx})" title="Descargar Remito PDF" class="bg-amber-500 hover:bg-amber-600 text-slate-950 text-[10px] px-2 py-1 rounded font-bold flex items-center gap-1 no-print">
-                                                <i class="fa-solid fa-file-pdf"></i> Generar PDF
-                                            </button>
-                                        ` : ''}
-                                    </div>
-                                </div>
-                            `).join('') : '<p class="text-slate-500 italic">Sin movimientos registrados.</p>'}
-                        </div>
-
-                        <div class="flex justify-end gap-2 pt-2 no-print">
-                            <button onclick="enviarWhatsapp('${c.id}')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1">
-                                <i class="fa-brands fa-whatsapp"></i> Enviar Remito WhatsApp
-                            </button>
-                        </div>
-                    </div>`;
-            });
-            container.innerHTML = html;
-        }
-
-        function mostrarModalCliente() { 
-            document.getElementById('modal-cliente-titulo').innerText = 'Nuevo Cliente';
-            document.getElementById('cli-id-editar').value = '';
-            document.getElementById('cli-nombre').value = '';
-            document.getElementById('cli-telefono').value = '';
-            document.getElementById('cli-direccion').value = '';
-            document.getElementById('modal-cliente').classList.remove('hidden'); 
-        }
-
-        function cerrarModalCliente() { document.getElementById('modal-cliente').classList.add('hidden'); }
-
-        function editarCliente(id) {
-            const cli = clientes.find(c => c.id === id);
-            if (!cli) return;
-
-            document.getElementById('modal-cliente-titulo').innerText = 'Editar Cliente';
-            document.getElementById('cli-id-editar').value = cli.id;
-            document.getElementById('cli-nombre').value = cli.nombre;
-            document.getElementById('cli-telefono').value = cli.telefono;
-            document.getElementById('cli-direccion').value = cli.direccion;
-            
-            document.getElementById('modal-cliente').classList.remove('hidden');
-        }
-
-        function guardarCliente() {
-            const editId = document.getElementById('cli-id-editar').value;
-            const nombre = document.getElementById('cli-nombre').value.trim();
-            const telefono = document.getElementById('cli-telefono').value.trim();
-            const direccion = document.getElementById('cli-direccion').value.trim();
-
-            if (!nombre) return alert("Ingrese el nombre del cliente.");
-
-            if (editId) {
-                const idx = clientes.findIndex(c => c.id === editId);
-                if (idx >= 0) {
-                    clientes[idx].nombre = nombre;
-                    clientes[idx].telefono = telefono;
-                    clientes[idx].direccion = direccion;
-                }
-            } else {
-                clientes.push({ id: 'c_' + Date.now(), nombre, telefono, direccion, saldo: 0, movimientos: [] });
-            }
-
-            guardarStorage();
-            cerrarModalCliente();
-            renderClientes();
-        }
-
-        function eliminarCliente(id) {
-            const cli = clientes.find(c => c.id === id);
-            if (!cli) return;
-
-            if (confirm(`¿Estás seguro de dar de baja al cliente "${cli.nombre}"?`)) {
-                clientes = clientes.filter(c => c.id !== id);
-                guardarStorage();
-                renderClientes();
-            }
-        }
-
-        // --- REGISTRO DE MOVIMIENTOS Y BOTELLAS/BARRILES ---
-        const opcionesPresentaciones = [
-            'Botella 355 cc', 'Botella 500 cc', 'Botella 1000 cc',
-            'Barril 50L', 'Barril 30L', 'Barril 20L'
-        ];
-
-        function mostrarModalMovimiento() {
-            const select = document.getElementById('mov-cliente-select');
-            select.innerHTML = clientes.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
-            
-            document.getElementById('contenedor-filas-remito').innerHTML = '';
-            agregarFilaRemito();
-            toggleFormularioRemito();
-            document.getElementById('modal-movimiento').classList.remove('hidden');
-        }
-
-        function cerrarModalMovimiento() { document.getElementById('modal-movimiento').classList.add('hidden'); }
-
-        function toggleFormularioRemito() {
-            const tipo = document.getElementById('mov-tipo').value;
-            const secRemito = document.getElementById('seccion-remito-items');
-            const secCobro = document.getElementById('seccion-cobro-directo');
-
-            if (tipo === 'entrega') {
-                secRemito.classList.remove('hidden');
-                secCobro.classList.add('hidden');
-            } else {
-                secRemito.classList.add('hidden');
-                secCobro.classList.remove('hidden');
-            }
-            calcularTotalMovimiento();
-        }
-
-        function agregarFilaRemito() {
-            const container = document.getElementById('contenedor-filas-remito');
-            const div = document.createElement('div');
-            div.className = 'grid grid-cols-12 gap-2 items-center fila-remito-item';
-
-            let optionsHTML = opcionesPresentaciones.map(op => `<option value="${op}">${op}</option>`).join('');
-
-            div.innerHTML = `
-                <select class="col-span-4 bg-slate-900 border border-slate-700 rounded p-2 text-xs item-presentacion">${optionsHTML}</select>
-                <input type="text" placeholder="Estilo (ej. IPA)" class="col-span-3 bg-slate-900 border border-slate-700 rounded p-2 text-xs item-estilo">
-                <input type="number" value="1" min="1" oninput="calcularTotalMovimiento()" placeholder="Cant" class="col-span-2 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-center item-cant">
-                <input type="number" value="0" min="0" oninput="calcularTotalMovimiento()" placeholder="Precio U." class="col-span-2 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-right font-mono item-precio">
-                <button onclick="eliminarFilaRemito(this)" class="col-span-1 text-red-400 hover:text-red-300 font-bold text-center">×</button>
+            document.getElementById('rec-pdf-agua-det').innerHTML = `
+                <div><strong>Agua Inicial:</strong> ${r.aguaIni || '--'} L (${r.tempAguaIni || '--'})</div>
+                <div><strong>T° Macerado:</strong> ${r.tempMac || '--'}</div>
+                <div><strong>Agua Lavado:</strong> ${r.aguaLav || '--'} L (${r.tempLav || '--'})</div>
             `;
-            container.appendChild(div);
-            calcularTotalMovimiento();
-        }
 
-        function eliminarFilaRemito(btn) {
-            btn.closest('.fila-remito-item').remove();
-            calcularTotalMovimiento();
-        }
+            document.getElementById('rec-pdf-granos').innerHTML = r.granos.map(g => `<li class="border-b border-slate-100 py-1 flex justify-between"><span>${g.nombre}</span><strong class="font-mono">${g.cantidad} kg</strong></li>`).join('');
+            document.getElementById('rec-pdf-lupulos').innerHTML = r.lupulos.map(l => `<li class="border-b border-slate-100 py-1 flex justify-between"><span>${l.nombre} (${l.momento})</span><strong class="font-mono">${l.cantidad} grs</strong></li>`).join('') + `<li class="pt-2"><strong>Levadura:</strong> ${r.levadura || 'N/A'}</li>`;
 
-        function calcularTotalMovimiento() {
-            const tipo = document.getElementById('mov-tipo').value;
-            let total = 0;
-
-            if (tipo === 'entrega') {
-                document.querySelectorAll('.fila-remito-item').forEach(fila => {
-                    const cant = parseFloat(fila.querySelector('.item-cant').value) || 0;
-                    const precio = parseFloat(fila.querySelector('.item-precio').value) || 0;
-                    total += (cant * precio);
-                });
-            } else {
-                total = parseFloat(document.getElementById('mov-monto-cobro').value) || 0;
-            }
-
-            document.getElementById('mov-total-acumulado').innerText = `$ ${total.toLocaleString()}`;
-        }
-
-        function guardarMovimiento() {
-            const clienteId = document.getElementById('mov-cliente-select').value;
-            const tipo = document.getElementById('mov-tipo').value;
-            const cli = clientes.find(c => c.id === clienteId);
-            if (!cli) return;
-
-            let conceptoText = '';
-            let itemsArray = [];
-            let montoTotal = 0;
-
-            if (tipo === 'entrega') {
-                document.querySelectorAll('.fila-remito-item').forEach(fila => {
-                    const pres = fila.querySelector('.item-presentacion').value;
-                    const estilo = fila.querySelector('.item-estilo').value.trim() || 'Varios';
-                    const cant = parseFloat(fila.querySelector('.item-cant').value) || 0;
-                    const precio = parseFloat(fila.querySelector('.item-precio').value) || 0;
-                    const sub = cant * precio;
-
-                    if (cant > 0) {
-                        itemsArray.push({ presentacion: pres, estilo, cantidad: cant, precioUnitario: precio, subtotal: sub });
-                        montoTotal += sub;
-                    }
-                });
-
-                if (itemsArray.length === 0) return alert("Agregue al menos un ítem al remito.");
-                conceptoText = `Entrega de Cerveza (${itemsArray.length} descrip.)`;
-                montoTotal = -Math.abs(montoTotal);
-            } else {
-                conceptoText = document.getElementById('mov-concepto-cobro').value.trim() || 'Cobro / Pago recibido';
-                montoTotal = parseFloat(document.getElementById('mov-monto-cobro').value) || 0;
-                if (montoTotal <= 0) return alert("Ingrese un monto de cobro válido.");
-                montoTotal = Math.abs(montoTotal);
-            }
-
-            cli.saldo += montoTotal;
-            if (!cli.movimientos) cli.movimientos = [];
-            cli.movimientos.unshift({
-                fecha: new Date().toISOString().split('T')[0],
-                concepto: conceptoText,
-                monto: montoTotal,
-                items: itemsArray
-            });
-
-            guardarStorage();
-            cerrarModalMovimiento();
-            renderClientes();
-        }
-
-        // --- ENVIAR POR WHATSAPP (OPCIONAL) ---
-        function enviarWhatsapp(clienteId) {
-            const c = clientes.find(item => item.id === clienteId);
-            if (!c) return;
-
-            const ultMov = (c.movimientos && c.movimientos[0]) ? c.movimientos[0] : { concepto: 'Estado de Cuenta', monto: 0, items: [] };
-            
-            let texto = `*REMITO DE ENTREGA - CERVECERÍA ALBARDÓN*\n`;
-            texto += `*Cliente:* ${c.nombre}\n`;
-            texto += `*Fecha:* ${ultMov.fecha || new Date().toISOString().split('T')[0]}\n`;
-            texto += `-------------------------------------\n`;
-
-            if (ultMov.items && ultMov.items.length > 0) {
-                ultMov.items.forEach(it => {
-                    texto += `• ${it.cantidad}x ${it.presentacion} (${it.estilo}) - $${it.precioUnitario} c/u = $${it.subtotal.toLocaleString()}\n`;
-                });
-            } else {
-                texto += `*Detalle:* ${ultMov.concepto}\n`;
-                texto += `*Importe:* $${Math.abs(ultMov.monto).toLocaleString()}\n`;
-            }
-
-            texto += `-------------------------------------\n`;
-            texto += `*TOTAL ENTREGA:* $${Math.abs(ultMov.monto).toLocaleString()}\n`;
-            texto += `*SALDO ACUMULADO CC:* $${c.saldo.toLocaleString()}\n\n`;
-            texto += `¡Muchas gracias por elegir Albardón!`;
-
-            window.open(`https://wa.me/${c.telefono}?text=${encodeURIComponent(texto)}`, '_blank');
-        }
-
-        // --- GENERACIÓN DIRECTA DE REMITO PDF ---
-        function descargarRemitoPDF(clienteId, movIdx) {
-            const c = clientes.find(item => item.id === clienteId);
-            if (!c || !c.movimientos[movIdx]) return;
-
-            const m = c.movimientos[movIdx];
-            
-            document.getElementById('pdf-fecha').innerText = `Fecha: ${m.fecha}`;
-            document.getElementById('pdf-cliente').innerText = c.nombre;
-            document.getElementById('pdf-direccion').innerText = c.direccion || 'N/A';
-            document.getElementById('pdf-telefono').innerText = c.telefono || 'N/A';
-
-            let bodyHTML = '';
-            m.items.forEach(it => {
-                bodyHTML += `
-                    <tr class="border-b border-slate-200">
-                        <td class="p-2">${it.presentacion}</td>
-                        <td class="p-2">${it.estilo}</td>
-                        <td class="p-2 text-center">${it.cantidad}</td>
-                        <td class="p-2 text-right">$${it.precioUnitario.toLocaleString()}</td>
-                        <td class="p-2 text-right font-bold">$${it.subtotal.toLocaleString()}</td>
-                    </tr>
-                `;
-            });
-            document.getElementById('pdf-items-body').innerHTML = bodyHTML;
-            document.getElementById('pdf-total').innerText = `$ ${Math.abs(m.monto).toLocaleString()}`;
-
-            const element = document.getElementById('plantilla-pdf-remito');
+            const element = document.getElementById('plantilla-pdf-receta');
             element.classList.remove('hidden');
 
-            const opt = {
-                margin: 10,
-                filename: `Remito_Albardon_${c.nombre.replace(/\s+/g, '_')}_${m.fecha}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
-            html2pdf().set(opt).from(element).save().then(() => {
-                element.classList.add('hidden');
-            });
+            const opt = { margin: 10, filename: `Receta_Tecnica_${r.nombre.replace(/\s+/g, '_')}.pdf`, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4' } };
+            html2pdf().set(opt).from(element).save().then(() => element.classList.add('hidden'));
         }
+
+        // --- BARRILES & CC ---
+        function renderBarriles() {}
+        function renderClientes() {}
+        function mostrarModalBarril() { document.getElementById('modal-barril').classList.remove('hidden'); }
+        function cerrarModalBarril() { document.getElementById('modal-barril').classList.add('hidden'); }
+        function mostrarModalCliente() { document.getElementById('modal-cliente').classList.remove('hidden'); }
+        function cerrarModalCliente() { document.getElementById('modal-cliente').classList.add('hidden'); }
+        function mostrarModalMovimiento() { document.getElementById('modal-movimiento').classList.remove('hidden'); }
+        function cerrarModalMovimiento() { document.getElementById('modal-movimiento').classList.add('hidden'); }
 
         // --- INICIALIZACIÓN ---
         document.getElementById('coc-fecha').valueAsDate = new Date();
         document.getElementById('ferm-fecha').valueAsDate = new Date();
-        
         actualizarSelectRecetas();
         renderRecetas();
         renderTablaFermentacion();
