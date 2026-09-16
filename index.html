@@ -1,878 +1,563 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cervecería Albardón - Sistema de Gestión Integral</title>
-    <link rel="icon" href="logo.png">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <style>
-        body { background-color: #0f172a; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
-        .tab-btn.active { background-color: #f59e0b; color: #020617; font-weight: bold; }
-        .card { background-color: #1e293b; border: 1px solid #334155; border-radius: 0.75rem; page-break-inside: avoid; }
-
-        .pdf-export-mode {
-            background-color: #ffffff !important;
-            color: #000000 !important;
-            padding: 20px !important;
-        }
-        .pdf-export-mode .card {
-            background-color: #ffffff !important;
-            border: 1px solid #cccccc !important;
-            color: #000000 !important;
-            box-shadow: none !important;
-            margin-bottom: 15px !important;
-        }
-        .pdf-export-mode input, .pdf-export-mode select {
-            background-color: #f8fafc !important;
-            border: 1px solid #cbd5e1 !important;
-            color: #0f172a !important;
-        }
-        .pdf-export-mode h2, .pdf-export-mode h3, .pdf-export-mode label, .pdf-export-mode span, .pdf-export-mode th, .pdf-export-mode td {
-            color: #0f172a !important;
-        }
-
-        @media print {
-            .no-print { display: none !important; }
-            body { background-color: white !important; color: black !important; }
-            .remito-container { border: none !important; box-shadow: none !important; width: 100% !important; }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cervecería Albardón - Sistema de Gestión</title>
+  <link rel="icon" href="logo.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body { background-color: #0f172a; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
+    .tab-active { border-bottom: 3px solid #f59e0b; color: #f59e0b; font-weight: bold; }
+    .card { background-color: #1e293b; border: 1px solid #334155; border-radius: 0.75rem; }
+  </style>
 </head>
-<body class="pb-12">
+<body class="min-h-screen flex flex-col">
 
-    <!-- HEADER / NAVEGACIÓN -->
-    <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50 shadow-lg no-print">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <img src="logo.png" alt="Logo Albardón" class="h-10 w-10 object-contain rounded-full bg-slate-900 border border-slate-700" onerror="this.src='https://via.placeholder.com/40?text=A'">
-                <div>
-                    <h1 class="text-xl font-bold tracking-wider text-white">ALBARDÓN</h1>
-                    <span class="text-xs text-slate-400 block font-normal">Sistema Integral de Gestión</span>
-                </div>
-            </div>
-            <nav class="flex space-x-2 mt-4 sm:mt-0 overflow-x-auto pb-1 sm:pb-0">
-                <button onclick="switchTab('recetas')" id="btn-recetas" class="tab-btn active px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
-                    <i class="fa-solid fa-book-open"></i> Recetas
-                </button>
-                <button onclick="switchTab('coccion')" id="btn-coccion" class="tab-btn px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700 transition-colors flex items-center gap-2">
-                    <i class="fa-solid fa-clipboard-list"></i> Cocción
-                </button>
-                <button onclick="switchTab('fermentacion')" id="btn-fermentacion" class="tab-btn px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700 transition-colors flex items-center gap-2">
-                    <i class="fa-solid fa-temperature-half"></i> Fermentación
-                </button>
-                <button onclick="switchTab('stock')" id="btn-stock" class="tab-btn px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700 transition-colors flex items-center gap-2">
-                    <i class="fa-solid fa-boxes-stacked"></i> Stock Barriles
-                </button>
-                <button onclick="switchTab('cc')" id="btn-cc" class="tab-btn px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700 transition-colors flex items-center gap-2">
-                    <i class="fa-solid fa-users"></i> Cuentas Corrientes
-                </button>
-                <button onclick="switchTab('remito')" id="btn-remito" class="tab-btn px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700 transition-colors flex items-center gap-2">
-                    <i class="fa-solid fa-file-invoice"></i> Remito
-                </button>
-            </nav>
+  <!-- HEADER -->
+  <header class="bg-slate-900 border-b border-slate-800 p-4 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <img src="logo.png" alt="Albardón" class="h-10 w-10 object-contain rounded-full bg-slate-800" onerror="this.src='https://via.placeholder.com/40?text=A'">
+        <div>
+          <h1 class="font-bold text-lg text-amber-500 leading-tight">ALBARDÓN</h1>
+          <p class="text-xs text-slate-400">Cerveza Artesanal Santafesina</p>
         </div>
-    </header>
+      </div>
+      <div class="text-xs text-slate-400 text-right hidden sm:block">
+        <span id="system-status" class="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-1"></span> Sistema Listo
+      </div>
+    </div>
+  </header>
 
-    <main class="max-w-7xl mx-auto px-4 py-6">
+  <!-- NAVEGACIÓN PRINCIPAL -->
+  <nav class="bg-slate-900 border-b border-slate-800 px-4 overflow-x-auto">
+    <div class="max-w-7xl mx-auto flex space-x-6 whitespace-nowrap text-sm">
+      <button onclick="switchTab('recetas')" id="tab-recetas" class="py-3 px-1 tab-active flex items-center gap-2">
+        <i class="fa-solid fa-book-open text-amber-500"></i> Recetas
+      </button>
+      <button onclick="switchTab('produccion')" id="tab-produccion" class="py-3 px-1 text-slate-400 flex items-center gap-2">
+        <i class="fa-solid fa-beer-mug-empty text-amber-500"></i> Cocción
+      </button>
+      <button onclick="switchTab('fermentacion')" id="tab-fermentacion" class="py-3 px-1 text-slate-400 flex items-center gap-2">
+        <i class="fa-solid fa-flask text-amber-500"></i> Fermentación
+      </button>
+      <button onclick="switchTab('stock')" id="tab-stock" class="py-3 px-1 text-slate-400 flex items-center gap-2">
+        <i class="fa-solid fa-boxes-stacked text-amber-500"></i> Stock / Barriles
+      </button>
+      <button onclick="switchTab('cuentas')" id="tab-cuentas" class="py-3 px-1 text-slate-400 flex items-center gap-2">
+        <i class="fa-solid fa-users text-amber-500"></i> Cuentas Corrientes
+      </button>
+    </div>
+  </nav>
 
-        <!-- ==================== MÓDULO 1: RECETAS ==================== -->
-        <section id="tab-recetas" class="space-y-6">
-            <div class="card p-4 flex justify-between items-center no-print">
-                <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
-                    <i class="fa-solid fa-book-open"></i> Biblioteca de Recetas
-                </h2>
-                <button onclick="mostrarFormularioReceta()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 transition-colors">
-                    <i class="fa-solid fa-plus"></i> Nueva Receta Técnica
-                </button>
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
+
+    <!-- SECCIÓN: RECETAS -->
+    <section id="sec-recetas" class="space-y-6">
+      <div class="flex justify-between items-center">
+        <h2 class="text-xl font-bold text-slate-100"><i class="fa-solid fa-book-open text-amber-500 mr-2"></i>Biblioteca de Recetas Base</h2>
+        <button onclick="nuevaReceta()" class="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold px-4 py-2 rounded-lg text-sm transition">
+          <i class="fa-solid fa-plus mr-1"></i> Nueva Receta
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="lista-recetas">
+        <!-- Tarjetas dinámicas de recetas -->
+      </div>
+    </section>
+
+    <!-- SECCIÓN: PRODUCCIÓN / COCCIÓN -->
+    <section id="sec-produccion" class="hidden space-y-6">
+      <div class="flex justify-between items-center">
+        <h2 class="text-xl font-bold text-slate-100"><i class="fa-solid fa-beer-mug-empty text-amber-500 mr-2"></i>Registro de Cocción</h2>
+        <button onclick="guardarCocción()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg text-sm transition">
+          <i class="fa-solid fa-floppy-disk mr-1"></i> Guardar Cocción
+        </button>
+      </div>
+
+      <div class="card p-4 sm:p-6 space-y-4">
+        <h3 class="text-amber-500 font-bold text-md border-b border-slate-700 pb-2">1. Datos Generales y Carga de Receta</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Cargar desde Receta Base</label>
+            <select id="coc-select-receta" onchange="cargarDatosReceta(this.value)" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-amber-400">
+              <option value="">-- Seleccionar Receta --</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Fecha</label>
+            <input type="date" id="coc-fecha" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">N° de Lote</label>
+            <input type="text" id="coc-lote" placeholder="ej. 052026" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Estilo</label>
+            <input type="text" id="coc-estilo" placeholder="ej. Porter" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Batch (Lts)</label>
+            <input type="number" id="coc-batch" placeholder="ej. 280" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Horarios (Inicio / Fin)</label>
+            <div class="flex gap-2">
+              <input type="time" id="coc-h-inicio" class="w-1/2 bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+              <input type="time" id="coc-h-fin" class="w-1/2 bg-slate-900 border border-slate-700 rounded p-2 text-sm">
             </div>
+          </div>
+        </div>
 
-            <!-- MODAL / PANEL COMPLETO DE RECETA -->
-            <div id="form-receta-panel" class="card p-6 space-y-6 hidden border-amber-500/50 no-print">
-                <h3 class="text-base font-bold text-amber-400 uppercase tracking-wider border-b border-slate-700 pb-2 flex items-center gap-2">
-                    <i class="fa-solid fa-sliders"></i> Configuración Técnica de Receta
-                </h3>
-                
-                <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-3 text-xs bg-slate-900/60 p-4 rounded-xl border border-slate-700/80">
-                    <div class="col-span-2">
-                        <label class="text-slate-400 block mb-1">Nombre / Estilo</label>
-                        <input type="text" id="rec-nombre" placeholder="ej. APA Pilsen 280" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-bold text-slate-200">
-                    </div>
-                    <div>
-                        <label class="text-slate-400 block mb-1">Batch (Lts)</label>
-                        <input type="number" id="rec-batch" placeholder="280" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-mono text-amber-400 font-bold">
-                    </div>
-                    <div>
-                        <label class="text-slate-400 block mb-1">D.I. (OG)</label>
-                        <input type="text" id="rec-di" placeholder="1.052" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-mono">
-                    </div>
-                    <div>
-                        <label class="text-slate-400 block mb-1">D.F. (FG)</label>
-                        <input type="text" id="rec-df" placeholder="1.013" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-mono">
-                    </div>
-                    <div>
-                        <label class="text-slate-400 block mb-1">ABV %</label>
-                        <input type="text" id="rec-abv" placeholder="5.1" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-mono text-emerald-400 font-bold">
-                    </div>
-                    <div>
-                        <label class="text-slate-400 block mb-1">IBU</label>
-                        <input type="number" id="rec-ibu" placeholder="33.8" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-mono">
-                    </div>
-                </div>
+        <h3 class="text-amber-500 font-bold text-md border-b border-slate-700 pb-2 pt-4">2. Olla Licor & Sales</h3>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">T° Objetivo Agua (°C)</label>
+            <input type="number" id="coc-t-obj" placeholder="73" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">CaSO4 (g)</label>
+            <input type="number" step="0.1" id="coc-caso4" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">MgSO4 (g)</label>
+            <input type="number" step="0.1" id="coc-mgso4" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Ácido Fósfórico (ml)</label>
+            <input type="number" step="0.1" id="coc-ac-fosf" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+          </div>
+        </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-                    <div>
-                        <label class="text-slate-400 block mb-1">Color (SRM)</label>
-                        <input type="text" id="rec-srm" placeholder="6.2" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
-                    </div>
-                    <div>
-                        <label class="text-slate-400 block mb-1">Eficiencia (%)</label>
-                        <input type="number" id="rec-eficiencia" placeholder="73" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
-                    </div>
-                    <div>
-                        <label class="text-slate-400 block mb-1">Levadura (Cepa y Cantidad)</label>
-                        <input type="text" id="rec-levadura" placeholder="US-05 (200 grs)" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
-                    </div>
-                </div>
+        <h3 class="text-amber-500 font-bold text-md border-b border-slate-700 pb-2 pt-4">3. Control Hervido & Parámetros Finales</h3>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Lts Antes Hervor</label>
+            <input type="number" id="coc-lts-antes-herv" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Densidad Pre-Hervor</label>
+            <input type="number" id="coc-di-pre" placeholder="1039" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Lts Desp. Hervor</label>
+            <input type="number" id="coc-lts-desp-herv" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">D.I. Real Obtenida</label>
+            <input type="number" id="coc-di-real" placeholder="1050" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+          </div>
+        </div>
+      </div>
+    </section>
 
-                <!-- SECCIÓN AGUA, MACERADO Y LAVADO -->
-                <div class="space-y-4 bg-slate-900/40 p-4 rounded-xl border border-slate-700">
-                    <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
-                        <i class="fa-solid fa-droplet"></i> Parámetros de Agua, Macerado y Lavado
-                    </h4>
-                    <div class="grid grid-cols-2 md:grid-cols-5 gap-3 text-xs">
-                        <div><label class="text-slate-400">AGUA MACERADO (LTS)</label><input type="number" id="rec-agua-ini" placeholder="195" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
-                        <div><label class="text-slate-400">T° AGUA INICIAL</label><input type="text" id="rec-temp-agua-ini" placeholder="73 °C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
-                        <div><label class="text-slate-400">T° MACERADO</label><input type="text" id="rec-temp-mac" placeholder="66 °C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
-                        <div><label class="text-slate-400">AGUA LAVADO (LTS)</label><input type="number" id="rec-agua-lav" placeholder="173" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
-                        <div><label class="text-slate-400">T° AGUA LAVADO</label><input type="text" id="rec-temp-lav" placeholder="75 °C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
-                    </div>
+    <!-- SECCIÓN: FERMENTACIÓN -->
+    <section id="sec-fermentacion" class="hidden space-y-6">
+      <div class="flex justify-between items-center">
+        <h2 class="text-xl font-bold text-slate-100"><i class="fa-solid fa-flask text-amber-500 mr-2"></i>Seguimiento de Fermentación</h2>
+      </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                        <div class="space-y-2 bg-slate-950/40 p-3 rounded-lg border border-slate-800">
-                            <div class="flex justify-between items-center border-b border-slate-800 pb-1">
-                                <label class="text-xs font-bold text-amber-300 uppercase">Sales de Macerado</label>
-                                <button onclick="agregarFilaSal('macerado')" class="text-[11px] text-amber-400 hover:underline flex items-center gap-1"><i class="fa-solid fa-plus"></i> Agregar Sal</button>
-                            </div>
-                            <div id="rec-sales-mac-inputs" class="space-y-2"></div>
-                        </div>
+      <div class="card p-4 sm:p-6 space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Seleccionar Lote Activo</label>
+            <select id="ferm-select-lote" onchange="cargarSeguimientoLote(this.value)" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-amber-400">
+              <!-- Lotes guardados -->
+            </select>
+          </div>
+          <div class="bg-slate-900 p-3 rounded border border-slate-800">
+            <span class="block text-xs text-slate-400">D.I. Real</span>
+            <span id="ferm-di-val" class="text-lg font-bold text-slate-200">----</span>
+          </div>
+          <div class="bg-slate-900 p-3 rounded border border-slate-800">
+            <span class="block text-xs text-slate-400">D.F. Actual</span>
+            <span id="ferm-df-val" class="text-lg font-bold text-amber-400">----</span>
+          </div>
+          <div class="bg-slate-900 p-3 rounded border border-slate-800">
+            <span class="block text-xs text-slate-400">% Alcohol (ABV)</span>
+            <span id="ferm-abv-val" class="text-lg font-bold text-emerald-400">0.0 %</span>
+          </div>
+        </div>
 
-                        <div class="space-y-2 bg-slate-950/40 p-3 rounded-lg border border-slate-800">
-                            <div class="flex justify-between items-center border-b border-slate-800 pb-1">
-                                <label class="text-xs font-bold text-amber-300 uppercase">Sales de Lavado</label>
-                                <button onclick="agregarFilaSal('lavado')" class="text-[11px] text-amber-400 hover:underline flex items-center gap-1"><i class="fa-solid fa-plus"></i> Agregar Sal</button>
-                            </div>
-                            <div id="rec-sales-lav-inputs" class="space-y-2"></div>
-                        </div>
-                    </div>
-                </div>
+        <div class="overflow-x-auto pt-4">
+          <table class="w-full text-left text-sm border-collapse">
+            <thead>
+              <tr class="border-b border-slate-700 text-xs text-slate-400">
+                <th class="p-2">Día</th>
+                <th class="p-2">Densidad</th>
+                <th class="p-2">Temp (°C)</th>
+                <th class="p-2">SetPoint</th>
+                <th class="p-2">pH</th>
+                <th class="p-2">Purga / Cosecha / Notas</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-fermentacion-body">
+              <!-- Filas de días 1 a 18 -->
+            </tbody>
+          </table>
+        </div>
 
-                <!-- SECCIÓN HERVIDO Y ENFRIADO -->
-                <div class="space-y-3 bg-slate-900/40 p-4 rounded-xl border border-slate-700">
-                    <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
-                        <i class="fa-solid fa-fire"></i> Parámetros de Hervido y Enfriado
-                    </h4>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 text-xs">
-                        <div><label class="text-slate-400">DENS. PRE-HERVOR</label><input type="text" id="rec-dens-pre" placeholder="1.049" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1 font-mono"></div>
-                        <div><label class="text-slate-400">LTS PRE-HERVOR</label><input type="number" id="rec-lts-pre" placeholder="310" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1 font-mono"></div>
-                        <div><label class="text-slate-400">TIEMPO HERVOR (MIN)</label><input type="number" id="rec-tiempo-hervor" placeholder="60" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
-                        <div><label class="text-slate-400">EVAPORACIÓN (%)</label><input type="number" id="rec-evaporacion" placeholder="6" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
-                        <div><label class="text-slate-400">PÉRDIDA TRUB (LTS)</label><input type="number" id="rec-trub" placeholder="10" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
-                        <div><label class="text-slate-400">TIEMPO ENFRIADO (MIN)</label><input type="number" id="rec-tiempo-enfriado" placeholder="30" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
-                    </div>
-                </div>
+        <div class="pt-4 border-t border-slate-700 flex justify-end gap-3">
+          <button onclick="guardarSeguimientoFermentacion()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded text-sm font-bold">
+            Guardar Controles
+          </button>
+          <button onclick="abrirModalEmbarrilado()" class="bg-amber-600 hover:bg-amber-500 text-slate-950 px-4 py-2 rounded text-sm font-bold">
+            <i class="fa-solid fa-beer-mug-empty mr-1"></i> Registrar Embarrilado
+          </button>
+        </div>
+      </div>
+    </section>
 
-                <!-- GRANOS & LÚPULOS -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="space-y-2">
-                        <label class="text-xs font-bold text-slate-300 uppercase block">Maltas / Granos</label>
-                        <div id="rec-granos-inputs" class="space-y-2"></div>
-                        <button onclick="agregarFilaGrano()" class="text-xs text-amber-400 hover:underline flex items-center gap-1"><i class="fa-solid fa-plus"></i> Agregar Malta</button>
-                    </div>
+    <!-- SECCIÓN: STOCK Y BARRILES -->
+    <section id="sec-stock" class="hidden space-y-6">
+      <div class="flex justify-between items-center">
+        <h2 class="text-xl font-bold text-slate-100"><i class="fa-solid fa-boxes-stacked text-amber-500 mr-2"></i>Inventario de Barriles</h2>
+        <button onclick="nuevoBarril()" class="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold px-4 py-2 rounded-lg text-sm transition">
+          <i class="fa-solid fa-plus mr-1"></i> Agregar Barril
+        </button>
+      </div>
 
-                    <div class="space-y-2">
-                        <label class="text-xs font-bold text-slate-300 uppercase block">Lúpulos</label>
-                        <div id="rec-lupulos-inputs" class="space-y-2"></div>
-                        <button onclick="agregarFilaLupulo()" class="text-xs text-amber-400 hover:underline flex items-center gap-1"><i class="fa-solid fa-plus"></i> Agregar Lúpulo</button>
-                    </div>
-                </div>
+      <div class="card overflow-x-auto">
+        <table class="w-full text-left text-sm">
+          <thead class="bg-slate-900 text-xs text-slate-400 border-b border-slate-800">
+            <tr>
+              <th class="p-3">Código ID</th>
+              <th class="p-3">Capacidad</th>
+              <th class="p-3">Estado</th>
+              <th class="p-3">Estilo / Lote Contenido</th>
+              <th class="p-3">Cliente / Ubicación</th>
+              <th class="p-3 text-right">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-stock-body" class="divide-y divide-slate-800">
+            <!-- Items de barriles -->
+          </tbody>
+        </table>
+      </div>
+    </section>
 
-                <div class="flex justify-end gap-3 pt-2 border-t border-slate-700">
-                    <button onclick="ocultarFormularioReceta()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-bold px-4 py-2 rounded-lg">Cancelar</button>
-                    <button onclick="guardarReceta()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold px-4 py-2 rounded-lg">Guardar Receta Completa</button>
-                </div>
+    <!-- SECCIÓN: CUENTAS CORRIENTES -->
+    <section id="sec-cuentas" class="hidden space-y-6">
+      <div class="flex justify-between items-center">
+        <h2 class="text-xl font-bold text-slate-100"><i class="fa-solid fa-users text-amber-500 mr-2"></i>Cuentas Corrientes y Pagos</h2>
+        <button onclick="nuevoCliente()" class="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold px-4 py-2 rounded-lg text-sm transition">
+          <i class="fa-solid fa-plus mr-1"></i> Nuevo Cliente
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="card p-4 space-y-3 md:col-span-1">
+          <h3 class="font-bold text-amber-500 border-b border-slate-700 pb-2">Clientes</h3>
+          <ul id="lista-clientes-cc" class="space-y-2 text-sm">
+            <!-- Lista de clientes -->
+          </ul>
+        </div>
+
+        <div class="card p-4 space-y-4 md:col-span-2">
+          <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+            <div>
+              <h3 id="cc-cliente-nombre" class="font-bold text-lg text-slate-100">Seleccioná un cliente</h3>
+              <p id="cc-cliente-saldo" class="text-xs text-slate-400">Saldo Pendiente: $0</p>
             </div>
-
-            <div id="grilla-recetas" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
-        </section>
-
-        <!-- ==================== MÓDULO 2: COCCIÓN ==================== -->
-        <section id="tab-coccion" class="space-y-6 hidden">
-            <div class="card p-4 flex flex-wrap justify-between items-center gap-4 no-print">
-                <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
-                    <i class="fa-solid fa-clipboard-list"></i> Planilla Digital de Cocción
-                </h2>
-                <div class="flex items-center gap-3">
-                    <label class="text-sm text-slate-300 font-medium">Cargar Receta Base:</label>
-                    <select id="select-receta" onchange="cargarRecetaEnCoccion()" class="bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-lg p-2">
-                    </select>
-                    <button onclick="descargarCoccionPDF()" title="Descargar Planilla en PDF" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-2 rounded-lg text-xs flex items-center gap-1">
-                        <i class="fa-solid fa-file-pdf"></i> Generar PDF
-                    </button>
-                </div>
-            </div>
-
-            <div id="area-impresion-coccion" class="space-y-6">
-                <div class="card p-4 space-y-3">
-                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Encabezado</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div><label class="text-xs text-slate-400">ESTILO</label><input type="text" id="coc-estilo" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-xs text-slate-400">FECHA</label><input type="date" id="coc-fecha" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-xs text-slate-400">N° LOTE</label><input type="text" id="coc-lote" value="L-2026-01" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-mono text-amber-400 mt-1"></div>
-                    </div>
-                </div>
-
-                <div class="card p-4 space-y-3">
-                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Olla de Agua</h3>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
-                        <div><label class="text-slate-400">INICIO LLENADO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-slate-400">FIN LLENADO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-slate-400">LITROS</label><input type="number" id="coc-agua-lts" placeholder="Lts" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-slate-400">T° AGUA</label><input type="text" id="coc-agua-temp" placeholder="°C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-slate-400">T° OBJETIVO</label><input type="text" placeholder="°C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-slate-400">PH AGUA</label><input type="text" placeholder="pH" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div class="col-span-2"><label class="text-slate-400">AGREGADO SALES (grs)</label><input type="text" id="coc-sales" placeholder="Sales adicionadas" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                    </div>
-                </div>
-
-                <div class="card p-4 space-y-3">
-                    <div class="flex justify-between items-center border-b border-slate-700 pb-1">
-                        <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Granos / Molienda</h3>
-                        <span id="total-granos" class="text-sm font-mono text-amber-400 bg-slate-900 px-3 py-1 rounded border border-slate-700">KGS TOTALES: 0 kg</span>
-                    </div>
-                    <div id="contenedor-granos" class="space-y-2">
-                        <p class="text-xs text-slate-500 italic">Seleccione una receta para cargar los granos automáticamente.</p>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="card p-4 space-y-3">
-                        <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Macerado / Recirculado</h3>
-                        <div class="grid grid-cols-2 gap-3 text-xs">
-                            <div><label class="text-slate-400">COMIENZO LLENADO + MALTAS</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                            <div><label class="text-slate-400">FIN LLENADO + MALTAS</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                            <div><label class="text-slate-400">COMIENZO MACERADO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                            <div><label class="text-slate-400">FIN MACERADO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                            <div><label class="text-slate-400">PH MIN. 15</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                            <div><label class="text-slate-400">PH MIN. 60</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                            <div class="col-span-2"><label class="text-slate-400">1° MOSTO (DENSIDAD)</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 font-mono text-amber-400"></div>
-                            <div><label class="text-slate-400">RECIRCULADO COMIENZO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                            <div><label class="text-slate-400">RECIRCULADO FIN</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        </div>
-                    </div>
-
-                    <div class="card p-4 space-y-3">
-                        <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Lavado</h3>
-                        <div class="grid grid-cols-3 gap-3 text-xs">
-                            <div><label class="text-slate-400">LLENADO INICIO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                            <div><label class="text-slate-400">LLENADO FIN</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                            <div><label class="text-slate-400">LITROS</label><input type="number" id="coc-agua-lav-lts" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                            <div><label class="text-slate-400">T° AGUA</label><input type="text" id="coc-temp-lav" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                            <div><label class="text-slate-400">T° OBJETIVO</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                            <div><label class="text-slate-400">PH</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                            <div><label class="text-slate-400">COMIENZO LAVADO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                            <div><label class="text-slate-400">FIN LAVADO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                            <div><label class="text-slate-400">SALES (grs)</label><input type="text" id="coc-sales-lav" placeholder="grs" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card p-4 space-y-3">
-                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Hervido</h3>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
-                        <div><label class="text-slate-400">ENCENDIDO OLLA</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-slate-400">LTS ANTES HERVOR</label><input type="number" id="coc-lts-pre" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 font-mono"></div>
-                        <div><label class="text-slate-400">PH ANTES HERVOR</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-slate-400">DENS. ANTES HERVOR</label><input type="text" id="coc-dens-pre" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 font-mono"></div>
-                        <div><label class="text-slate-400">COMIENZO HERVOR</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-slate-400">LTS DESPUES HERVOR</label><input type="number" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-slate-400">PH DESPUES HERVOR</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div>
-                            <label class="text-amber-400 font-bold">D.I. REAL (DESPUES HERVOR)</label>
-                            <input type="text" id="di-real-coccion" placeholder="ej. 1.048" class="w-full bg-slate-900 border border-amber-500/50 rounded p-2 text-sm mt-1 font-mono text-amber-400 font-bold">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card p-4 space-y-3">
-                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Lúpulos</h3>
-                    <div id="contenedor-lupulos" class="space-y-2">
-                        <p class="text-xs text-slate-500 italic">Seleccione una receta para autocompletar adiciones de lúpulo.</p>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="space-y-6">
-                        <div class="card p-4 space-y-3">
-                            <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Varios</h3>
-                            <div class="grid grid-cols-2 gap-3 text-xs">
-                                <div><label class="text-slate-400">IRISH MOSS (CANT)</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                                <div><label class="text-slate-400">IRISH MOSS (HORA)</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                                <div><label class="text-slate-400">NUTRIENTE LEVA (CANT)</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                                <div><label class="text-slate-400">NUTRIENTE LEVA (HORA)</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                            </div>
-                        </div>
-
-                        <div class="card p-4 space-y-3">
-                            <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Whirlpool y Reposo</h3>
-                            <div class="grid grid-cols-2 gap-3 text-xs">
-                                <div><label class="text-slate-400">WP COMIENZO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                                <div><label class="text-slate-400">WP T° / VELOC</label><input type="text" placeholder="T° / RPM" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                                <div><label class="text-slate-400">REPOSO COMIENZO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                                <div><label class="text-slate-400">REPOSO FIN</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="space-y-6">
-                        <div class="card p-4 space-y-3">
-                            <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Enfriado</h3>
-                            <div class="grid grid-cols-2 gap-3 text-xs">
-                                <div><label class="text-slate-400">COMIENZO / FIN</label><input type="text" placeholder="00:00 - 00:00" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                                <div><label class="text-slate-400">T° ENTRADA / SALIDA</label><input type="text" placeholder="Entrada / Salida °C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                            </div>
-                        </div>
-
-                        <div class="card p-4 space-y-3">
-                            <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Inoculación</h3>
-                            <div class="grid grid-cols-2 gap-3 text-xs">
-                                <div><label class="text-slate-400">HORA INOCULACIÓN</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                                <div><label class="text-slate-400">T° MOSTO</label><input type="text" placeholder="°C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                                <div class="col-span-2"><label class="text-slate-400">CANTIDAD / LEVADURA</label><input type="text" id="coc-levadura" placeholder="Cepa y Gramos adicionados" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <button onclick="guardarCoccion()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg transition-colors no-print mt-6">
-                <i class="fa-solid fa-floppy-disk"></i> Guardar Cocción y Pasar a Fermentación
+            <button onclick="registrarPagoCliente()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded text-xs">
+              <i class="fa-solid fa-hand-holding-dollar mr-1"></i> Registrar Pago
             </button>
-        </section>
+          </div>
 
-        <!-- ==================== MÓDULO 3: FERMENTACIÓN ==================== -->
-        <section id="tab-fermentacion" class="space-y-6 hidden">
-            <div class="card p-4 flex flex-wrap justify-between items-center gap-4 no-print">
-                <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
-                    <i class="fa-solid fa-temperature-half"></i> Control de Fermentación
-                </h2>
-                <div class="flex items-center gap-3">
-                    <label class="text-sm text-slate-300 font-medium">Lote Activo:</label>
-                    <select id="select-lote-fermentacion" onchange="cargarLoteFermentacion()" class="bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-lg p-2">
-                        <option value="">Seleccione un Lote...</option>
-                    </select>
-                </div>
-            </div>
+          <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Historial de Movimientos</h4>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-900 text-slate-400">
+                <tr>
+                  <th class="p-2">Fecha</th>
+                  <th class="p-2">Concepto / Detalle</th>
+                  <th class="p-2 text-right">Monto</th>
+                  <th class="p-2 text-right">Saldo</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-cc-movimientos" class="divide-y divide-slate-800">
+                <!-- Movimientos contables -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="card p-4 space-y-4">
-                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Datos del Fermentador</h3>
-                    <div class="space-y-2 text-xs">
-                        <div><label class="text-slate-400">FERMENTADOR / TANQUE</label><input type="text" id="ferm-tanque" placeholder="F1" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
-                        <div><label class="text-slate-400">ESTILO / RECETA</label><input type="text" id="ferm-estilo" readonly class="w-full bg-slate-900/50 border border-slate-800 rounded p-2 mt-1 font-bold text-amber-400"></div>
-                        <div><label class="text-slate-400">DENSIDAD INICIAL (D.I.)</label><input type="text" id="ferm-di" readonly class="w-full bg-slate-900/50 border border-slate-800 rounded p-2 mt-1 font-mono"></div>
-                    </div>
-                </div>
+  </main>
 
-                <div class="card p-4 space-y-4 md:col-span-2">
-                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Nuevo Registro diario</h3>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                        <div><label class="text-slate-400">FECHA</label><input type="date" id="ferm-reg-fecha" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
-                        <div><label class="text-slate-400">TEMP (°C)</label><input type="text" id="ferm-reg-temp" placeholder="18 °C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
-                        <div><label class="text-slate-400">DENSIDAD</label><input type="text" id="ferm-reg-densidad" placeholder="1.020" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1 font-mono"></div>
-                        <div><label class="text-slate-400">PH</label><input type="text" id="ferm-reg-ph" placeholder="4.4" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
-                        <div class="col-span-2 sm:col-span-4"><label class="text-slate-400">OBSERVACIONES / DRY HOPPING / PURGA</label><input type="text" id="ferm-reg-obs" placeholder="ej. Purga de barro / Dry Hop Cascade 500g" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
-                    </div>
-                    <button onclick="agregarRegistroFermentacion()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-4 py-2 rounded-lg text-xs w-full">Agregar Medición</button>
-                </div>
-            </div>
+  <!-- LÓGICA DE LA APLICACIÓN -->
+  <script>
+    // ESTADO DE LA APLICACIÓN EN LOCALSTORAGE
+    let db = JSON.parse(localStorage.getItem('albardon_db')) || {
+      recetas: [
+        { id: 1, nombre: 'Porter', batch: 190, caso4: 2.1, mgso4: 3.2, di: 1050, df: 1012 },
+        { id: 2, nombre: 'Scottish', batch: 280, caso4: 4.1, mgso4: 2.8, di: 1048, df: 1010 }
+      ],
+      cocciones: [],
+      barriles: [
+        { id: 'R-01', capacidad: '50L', estado: 'Vacío', contenido: '-', cliente: '-' }
+      ],
+      clientes: [
+        { id: 1, nombre: 'Bar Central', saldo: 45000, movimientos: [{ fecha: '2026-09-01', concepto: 'Entrega 1x50L Scottish', monto: 45000, saldo: 45000 }] }
+      ]
+    };
 
-            <div class="card p-4 space-y-3">
-                <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Historial de Fermentación</h3>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-xs text-left">
-                        <thead class="bg-slate-900 text-slate-400 uppercase">
-                            <tr>
-                                <th class="p-2">Fecha</th>
-                                <th class="p-2">T° (°C)</th>
-                                <th class="p-2">Densidad</th>
-                                <th class="p-2">pH</th>
-                                <th class="p-2">Acciones / Notas</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabla-historial-fermentacion" class="divide-y divide-slate-800">
-                            <tr><td colspan="5" class="p-3 text-slate-500 italic text-center">Sin registros cargados.</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
+    function saveDB() {
+      localStorage.setItem('albardon_db', JSON.stringify(db));
+    }
 
-        <!-- ==================== MÓDULO 4: STOCK BARRILES ==================== -->
-        <section id="tab-stock" class="space-y-6 hidden">
-            <div class="card p-4 flex flex-wrap justify-between items-center gap-4 no-print">
-                <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
-                    <i class="fa-solid fa-boxes-stacked"></i> Gestión de Inventario & Barriles
-                </h2>
-                <button onclick="registrarNuevoBarril()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1">
-                    <i class="fa-solid fa-plus"></i> Añadir Barril
-                </button>
-            </div>
+    // NAVEGACIÓN
+    function switchTab(tab) {
+      ['recetas', 'produccion', 'fermentacion', 'stock', 'cuentas'].forEach(t => {
+        document.getElementById(`sec-${t}`).classList.add('hidden');
+        document.getElementById(`tab-${t}`).classList.remove('tab-active');
+        document.getElementById(`tab-${t}`).classList.add('text-slate-400');
+      });
+      document.getElementById(`sec-${tab}`).classList.remove('hidden');
+      document.getElementById(`tab-${tab}`).classList.add('tab-active');
+      document.getElementById(`tab-${tab}`).classList.remove('text-slate-400');
 
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div class="card p-4 border-l-4 border-emerald-500">
-                    <span class="text-xs text-slate-400 uppercase block">Llenos / Listos</span>
-                    <span id="stock-llenos" class="text-2xl font-bold text-emerald-400 font-mono">0</span>
-                </div>
-                <div class="card p-4 border-l-4 border-amber-500">
-                    <span class="text-xs text-slate-400 uppercase block">En Clientes</span>
-                    <span id="stock-clientes" class="text-2xl font-bold text-amber-400 font-mono">0</span>
-                </div>
-                <div class="card p-4 border-l-4 border-blue-500">
-                    <span class="text-xs text-slate-400 uppercase block">Vacíos en Planta</span>
-                    <span id="stock-vacios" class="text-2xl font-bold text-blue-400 font-mono">0</span>
-                </div>
-                <div class="card p-4 border-l-4 border-rose-500">
-                    <span class="text-xs text-slate-400 uppercase block">Para Sanitizar</span>
-                    <span id="stock-sucio" class="text-2xl font-bold text-rose-400 font-mono">0</span>
-                </div>
-            </div>
+      if(tab === 'recetas') renderRecetas();
+      if(tab === 'produccion') renderProduccionSelects();
+      if(tab === 'fermentacion') renderFermentacionSelects();
+      if(tab === 'stock') renderStock();
+      if(tab === 'cuentas') renderCuentas();
+    }
 
-            <div class="card p-4 space-y-3">
-                <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Listado General de Barriles</h3>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-xs text-left">
-                        <thead class="bg-slate-900 text-slate-400 uppercase">
-                            <tr>
-                                <th class="p-2">Código</th>
-                                <th class="p-2">Capacidad</th>
-                                <th class="p-2">Estilo Contenido</th>
-                                <th class="p-2">Estado</th>
-                                <th class="p-2">Ubicación / Cliente</th>
-                                <th class="p-2 text-right">Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabla-barriles" class="divide-y divide-slate-800">
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
+    // MÓDULO RECETAS
+    function renderRecetas() {
+      const container = document.getElementById('lista-recetas');
+      container.innerHTML = db.recetas.map(r => `
+        <div class="card p-4 space-y-2">
+          <div class="flex justify-between items-center">
+            <h3 class="font-bold text-amber-500 text-lg">${r.nombre}</h3>
+            <span class="text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded border border-slate-700">${r.batch} Lts</span>
+          </div>
+          <p class="text-xs text-slate-400">D.I. Esperada: <strong>${r.di}</strong> | D.F.: <strong>${r.df}</strong></p>
+          <div class="text-xs text-slate-400 pt-2 border-t border-slate-800 flex justify-between">
+            <span>Sales CaSO4: ${r.caso4}g</span>
+            <span>MgSO4: ${r.mgso4}g</span>
+          </div>
+        </div>
+      `).join('');
+    }
 
-        <!-- ==================== MÓDULO 5: CUENTAS CORRIENTES ==================== -->
-        <section id="tab-cc" class="space-y-6 hidden">
-            <div class="card p-4 flex flex-wrap justify-between items-center gap-4 no-print">
-                <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
-                    <i class="fa-solid fa-users"></i> Cuentas Corrientes de Clientes
-                </h2>
-                <button onclick="nuevoMovimientoCC()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1">
-                    <i class="fa-solid fa-plus"></i> Registrar Cobro / Entrega
-                </button>
-            </div>
+    function nuevaReceta() {
+      const nombre = prompt('Nombre del Estilo / Receta:');
+      if (!nombre) return;
+      const batch = prompt('Batch base (Lts):', '280');
+      db.recetas.push({ id: Date.now(), nombre, batch: Number(batch), caso4: 5, mgso4: 2, di: 1045, df: 1010 });
+      saveDB();
+      renderRecetas();
+    }
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="card p-4 space-y-3">
-                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Seleccionar Cliente</h3>
-                    <select id="select-cliente-cc" onchange="cargarDetalleCC()" class="w-full bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-lg p-2">
-                        <option value="Cliente Generico">Cliente Genérico</option>
-                    </select>
-                </div>
+    // MÓDULO COCCIÓN
+    function renderProduccionSelects() {
+      const select = document.getElementById('coc-select-receta');
+      select.innerHTML = '<option value="">-- Seleccionar Receta --</option>' + 
+        db.recetas.map(r => `<option value="${r.id}">${r.nombre} (${r.batch}L)</option>`).join('');
+    }
 
-                <div class="card p-4 space-y-1 border-l-4 border-amber-500 md:col-span-2 flex flex-col justify-center">
-                    <span class="text-xs text-slate-400 uppercase">Saldo Pendiente del Cliente</span>
-                    <span id="saldo-cliente-monto" class="text-3xl font-bold font-mono text-amber-400">$ 0.00</span>
-                </div>
-            </div>
+    function cargarDatosReceta(id) {
+      const receta = db.recetas.find(r => r.id == id);
+      if (!receta) return;
+      document.getElementById('coc-estilo').value = receta.nombre;
+      document.getElementById('coc-batch').value = receta.batch;
+      document.getElementById('coc-caso4').value = receta.caso4;
+      document.getElementById('coc-mgso4').value = receta.mgso4;
+    }
 
-            <div class="card p-4 space-y-3">
-                <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Historial de Movimientos</h3>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-xs text-left">
-                        <thead class="bg-slate-900 text-slate-400 uppercase">
-                            <tr>
-                                <th class="p-2">Fecha</th>
-                                <th class="p-2">Concepto / Detalle</th>
-                                <th class="p-2 text-right">Debe ($)</th>
-                                <th class="p-2 text-right">Haber ($)</th>
-                                <th class="p-2 text-right">Saldo ($)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabla-movimientos-cc" class="divide-y divide-slate-800">
-                            <tr><td colspan="5" class="p-3 text-slate-500 italic text-center">Seleccione un cliente para ver sus movimientos.</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
+    function guardarCocción() {
+      const lote = document.getElementById('coc-lote').value;
+      if (!lote) { alert('Ingresá el N° de Lote'); return; }
 
-        <!-- ==================== MÓDULO 6: REMITO ==================== -->
-        <section id="tab-remito" class="space-y-6 hidden">
-            <div class="card p-4 flex flex-wrap justify-between items-center gap-4 no-print">
-                <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
-                    <i class="fa-solid fa-file-invoice"></i> Generador de Remito
-                </h2>
-                <button onclick="window.print()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-2 rounded-lg text-xs flex items-center gap-1">
-                    <i class="fa-solid fa-print"></i> Imprimir Remito
-                </button>
-            </div>
+      const nuevaCoccion = {
+        lote,
+        estilo: document.getElementById('coc-estilo').value,
+        fecha: document.getElementById('coc-fecha').value || new Date().toISOString().split('T')[0],
+        batch: document.getElementById('coc-batch').value,
+        diReal: document.getElementById('coc-di-real').value || 1045,
+        dfReal: 1010,
+        dias: Array.from({length: 14}, (_, i) => ({ dia: i + 1, den: '', temp: '', set: '', ph: '', notas: '' }))
+      };
 
-            <div id="area-remito" class="remito-container card p-6 bg-white text-slate-900 space-y-6 max-w-3xl mx-auto border border-slate-300">
-                <div class="flex justify-between items-start border-b border-slate-300 pb-4">
-                    <div>
-                        <h1 class="text-2xl font-black tracking-wider text-slate-900">CERVECERÍA ALBARDÓN</h1>
-                        <p class="text-xs text-slate-600">Santa Fe, Argentina | Producción Artesanal</p>
-                    </div>
-                    <div class="text-right">
-                        <span class="text-lg font-bold text-slate-800 block">REMITO</span>
-                        <span class="text-xs text-slate-500 font-mono">N° 0001-00000124</span>
-                    </div>
-                </div>
+      db.cocciones.push(nuevaCoccion);
+      saveDB();
+      alert(`Cocción Lote #${lote} guardada con éxito.`);
+      switchTab('fermentacion');
+    }
 
-                <div class="grid grid-cols-2 gap-4 text-xs">
-                    <div>
-                        <label class="text-slate-500 font-bold block">CLIENTE / RAZÓN SOCIAL</label>
-                        <input type="text" value="Bar Central Santa Fe" class="w-full bg-slate-50 border border-slate-300 rounded p-1 font-semibold text-slate-800">
-                    </div>
-                    <div>
-                        <label class="text-slate-500 font-bold block">FECHA DE ENTREGA</label>
-                        <input type="date" class="w-full bg-slate-50 border border-slate-300 rounded p-1 text-slate-800">
-                    </div>
-                </div>
+    // MÓDULO FERMENTACIÓN
+    let clienteSeleccionadoId = null;
 
-                <table class="w-full text-xs text-left border-collapse">
-                    <thead>
-                        <tr class="border-b-2 border-slate-800 text-slate-800">
-                            <th class="py-2">CANT.</th>
-                            <th class="py-2">DESCRIPCIÓN / ESTILO</th>
-                            <th class="py-2">BARRIL N°</th>
-                            <th class="py-2 text-right">PRECIO UNT.</th>
-                            <th class="py-2 text-right">TOTAL</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-200">
-                        <tr>
-                            <td class="py-2"><input type="number" value="2" class="w-12 border p-1 rounded"></td>
-                            <td class="py-2"><input type="text" value="Barril 50L - APA Pilsen" class="w-full border p-1 rounded"></td>
-                            <td class="py-2"><input type="text" value="B-08, B-12" class="w-full border p-1 rounded"></td>
-                            <td class="py-2 text-right"><input type="text" value="85000" class="w-20 border p-1 rounded text-right"></td>
-                            <td class="py-2 text-right font-bold">$ 170.000</td>
-                        </tr>
-                    </tbody>
-                </table>
+    function renderFermentacionSelects() {
+      const select = document.getElementById('ferm-select-lote');
+      select.innerHTML = db.cocciones.map(c => `<option value="${c.lote}">Lote #${c.lote} - ${c.estilo}</option>`).join('');
+      if (db.cocciones.length > 0) cargarSeguimientoLote(db.cocciones[0].lote);
+    }
 
-                <div class="pt-12 grid grid-cols-2 gap-8 text-center text-xs">
-                    <div class="border-t border-slate-400 pt-1 text-slate-600">Firma Entregado / Conductor</div>
-                    <div class="border-t border-slate-400 pt-1 text-slate-600">Firma Recibido / Cliente</div>
-                </div>
-            </div>
-        </section>
+    function cargarSeguimientoLote(lote) {
+      const coccion = db.cocciones.find(c => c.lote == lote);
+      if (!coccion) return;
 
-    </main>
+      document.getElementById('ferm-di-val').innerText = coccion.diReal;
+      document.getElementById('ferm-df-val').innerText = coccion.dfReal || '----';
+      
+      // Calcular ABV
+      if (coccion.diReal && coccion.dfReal) {
+        const abv = ((coccion.diReal - coccion.dfReal) * 0.13125).toFixed(1);
+        document.getElementById('ferm-abv-val').innerText = `${abv} %`;
+      }
 
-    <!-- LOGICA JAVASCRIPT PRINCIPAL -->
-    <script>
-        // Datos Iniciales / Persistencia
-        let recetas = JSON.parse(localStorage.getItem('albardon_recetas')) || [
-            {
-                nombre: "APA Pilsen 280",
-                batch: 280,
-                di: "1.052",
-                df: "1.013",
-                abv: "5.1",
-                ibu: 33.8,
-                srm: "6.2",
-                eficiencia: 73,
-                levadura: "US-05 (200 grs)",
-                granos: [{ nombre: "Malta Pilsen", cant: 60 }],
-                lupulos: [{ nombre: "Cascade", cant: 250, tiempo: "60 min" }]
-            }
-        ];
+      const tbody = document.getElementById('tabla-fermentacion-body');
+      tbody.innerHTML = coccion.dias.map((d, idx) => `
+        <tr class="border-b border-slate-800">
+          <td class="p-2 font-bold text-amber-500">Día ${d.dia}</td>
+          <td class="p-2"><input type="number" value="${d.den}" onchange="actualizarDiaFerm('${lote}', ${idx}, 'den', this.value)" class="w-20 bg-slate-900 border border-slate-700 rounded p-1 text-xs"></td>
+          <td class="p-2"><input type="number" value="${d.temp}" onchange="actualizarDiaFerm('${lote}', ${idx}, 'temp', this.value)" class="w-16 bg-slate-900 border border-slate-700 rounded p-1 text-xs"></td>
+          <td class="p-2"><input type="number" value="${d.set}" onchange="actualizarDiaFerm('${lote}', ${idx}, 'set', this.value)" class="w-16 bg-slate-900 border border-slate-700 rounded p-1 text-xs"></td>
+          <td class="p-2"><input type="number" step="0.1" value="${d.ph}" onchange="actualizarDiaFerm('${lote}', ${idx}, 'ph', this.value)" class="w-16 bg-slate-900 border border-slate-700 rounded p-1 text-xs"></td>
+          <td class="p-2"><input type="text" value="${d.notas}" onchange="actualizarDiaFerm('${lote}', ${idx}, 'notas', this.value)" class="w-full bg-slate-900 border border-slate-700 rounded p-1 text-xs"></td>
+        </tr>
+      `).join('');
+    }
 
-        let cocciones = JSON.parse(localStorage.getItem('albardon_cocciones')) || [];
-        let barriles = JSON.parse(localStorage.getItem('albardon_barriles')) || [
-            { id: "B-01", cap: "50L", estilo: "APA Pilsen", estado: "Lleno", cliente: "Planta" },
-            { id: "B-02", cap: "50L", estilo: "-", estado: "Vacío", cliente: "Planta" }
-        ];
+    function actualizarDiaFerm(lote, idx, field, val) {
+      const coc = db.cocciones.find(c => c.lote == lote);
+      if (coc) {
+        coc.dias[idx][field] = val;
+        if (field === 'den' && val !== '') coc.dfReal = val;
+        saveDB();
+      }
+    }
 
-        // Cambio de Solapas
-        function switchTab(tabId) {
-            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-                btn.classList.add('text-slate-300');
-            });
+    function guardarSeguimientoFermentacion() {
+      saveDB();
+      alert('Controles de fermentación actualizados.');
+    }
 
-            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-            const activeBtn = document.getElementById(`btn-${tabId}`);
-            if (activeBtn) {
-                activeBtn.classList.add('active');
-                activeBtn.classList.remove('text-slate-300');
-            }
+    function abrirModalEmbarrilado() {
+      const lote = document.getElementById('ferm-select-lote').value;
+      const barrilId = prompt(`Ingrese el ID del barril a cargar con el Lote #${lote}:`, 'R-01');
+      if (!barrilId) return;
 
-            if(tabId === 'coccion') popularSelectRecetas();
-            if(tabId === 'fermentacion') popularSelectLotes();
-            if(tabId === 'stock') renderizarBarriles();
-        }
+      let b = db.barriles.find(x => x.id === barrilId);
+      if (!b) {
+        b = { id: barrilId, capacidad: '50L', estado: 'Lleno', contenido: `Lote #${lote}`, cliente: 'Planta' };
+        db.barriles.push(b);
+      } else {
+        b.estado = 'Lleno';
+        b.contenido = `Lote #${lote}`;
+      }
+      saveDB();
+      alert(`Barril ${barrilId} asignado al Lote #${lote}.`);
+    }
 
-        // --- GESTIÓN DE RECETAS ---
-        function mostrarFormularioReceta() {
-            document.getElementById('form-receta-panel').classList.remove('hidden');
-        }
+    // MÓDULO STOCK
+    function renderStock() {
+      const tbody = document.getElementById('tabla-stock-body');
+      tbody.innerHTML = db.barriles.map(b => `
+        <tr>
+          <td class="p-3 font-bold text-amber-500">${b.id}</td>
+          <td class="p-3">${b.capacidad}</td>
+          <td class="p-3"><span class="px-2 py-1 text-xs rounded ${b.estado === 'Lleno' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-slate-800 text-slate-400'}">${b.estado}</span></td>
+          <td class="p-3">${b.contenido}</td>
+          <td class="p-3">${b.cliente}</td>
+          <td class="p-3 text-right">
+            <button onclick="liberarBarril('${b.id}')" class="text-xs bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded text-slate-300">Vaciar / Recibir</button>
+          </td>
+        </tr>
+      `).join('');
+    }
 
-        function ocultarFormularioReceta() {
-            document.getElementById('form-receta-panel').classList.add('hidden');
-        }
+    function nuevoBarril() {
+      const id = prompt('Código / ID del Barril:', 'R-02');
+      if (!id) return;
+      db.barriles.push({ id, capacidad: '50L', estado: 'Vacío', contenido: '-', cliente: '-' });
+      saveDB();
+      renderStock();
+    }
 
-        function agregarFilaGrano() {
-            const cont = document.getElementById('rec-granos-inputs');
-            const div = document.createElement('div');
-            div.className = "flex gap-2 items-center";
-            div.innerHTML = `
-                <input type="text" placeholder="Nombre Malta" class="w-2/3 bg-slate-900 border border-slate-700 rounded p-1 text-xs">
-                <input type="number" placeholder="Kg" class="w-1/3 bg-slate-900 border border-slate-700 rounded p-1 text-xs">
-            `;
-            cont.appendChild(div);
-        }
+    function liberarBarril(id) {
+      const b = db.barriles.find(x => x.id === id);
+      if (b) {
+        b.estado = 'Vacío';
+        b.contenido = '-';
+        b.cliente = '-';
+        saveDB();
+        renderStock();
+      }
+    }
 
-        function agregarFilaLupulo() {
-            const cont = document.getElementById('rec-lupulos-inputs');
-            const div = document.createElement('div');
-            div.className = "flex gap-2 items-center";
-            div.innerHTML = `
-                <input type="text" placeholder="Variedad Lúpulo" class="w-1/2 bg-slate-900 border border-slate-700 rounded p-1 text-xs">
-                <input type="number" placeholder="Gramos" class="w-1/4 bg-slate-900 border border-slate-700 rounded p-1 text-xs">
-                <input type="text" placeholder="Minutos" class="w-1/4 bg-slate-900 border border-slate-700 rounded p-1 text-xs">
-            `;
-            cont.appendChild(div);
-        }
+    // MÓDULO CUENTAS CORRIENTES Y PAGOS
+    function renderCuentas() {
+      const lista = document.getElementById('lista-clientes-cc');
+      lista.innerHTML = db.clientes.map(c => `
+        <li onclick="seleccionarCliente(${c.id})" class="p-3 card cursor-pointer hover:border-amber-500/50 flex justify-between items-center ${clienteSeleccionadoId === c.id ? 'border-amber-500 bg-slate-800' : ''}">
+          <span class="font-medium text-slate-200">${c.nombre}</span>
+          <span class="font-bold text-xs ${c.saldo > 0 ? 'text-rose-400' : 'text-emerald-400'}">$${c.saldo.toLocaleString()}</span>
+        </li>
+      `).join('');
 
-        function agregarFilaSal(seccion) {
-            const cont = document.getElementById(seccion === 'macerado' ? 'rec-sales-mac-inputs' : 'rec-sales-lav-inputs');
-            const div = document.createElement('div');
-            div.className = "flex gap-2 items-center";
-            div.innerHTML = `
-                <input type="text" placeholder="Sal (ej. CaCl2)" class="w-2/3 bg-slate-900 border border-slate-700 rounded p-1 text-xs">
-                <input type="number" placeholder="Gramos" class="w-1/3 bg-slate-900 border border-slate-700 rounded p-1 text-xs">
-            `;
-            cont.appendChild(div);
-        }
+      if (clienteSeleccionadoId) seleccionarCliente(clienteSeleccionadoId);
+    }
 
-        function guardarReceta() {
-            const nuevaReceta = {
-                nombre: document.getElementById('rec-nombre').value || "Nueva Receta",
-                batch: document.getElementById('rec-batch').value || 0,
-                di: document.getElementById('rec-di').value || "1.000",
-                df: document.getElementById('rec-df').value || "1.000",
-                abv: document.getElementById('rec-abv').value || "0",
-                ibu: document.getElementById('rec-ibu').value || 0,
-                srm: document.getElementById('rec-srm').value || "0",
-                levadura: document.getElementById('rec-levadura').value || "-",
-                granos: [],
-                lupulos: []
-            };
+    function seleccionarCliente(id) {
+      clienteSeleccionadoId = id;
+      const c = db.clientes.find(x => x.id === id);
+      if (!c) return;
 
-            recetas.push(nuevaReceta);
-            localStorage.setItem('albardon_recetas', JSON.stringify(recetas));
-            ocultarFormularioReceta();
-            renderizarRecetas();
-        }
+      document.getElementById('cc-cliente-nombre').innerText = c.nombre;
+      document.getElementById('cc-cliente-saldo').innerText = `Saldo Pendiente: $${c.saldo.toLocaleString()}`;
 
-        function renderizarRecetas() {
-            const grilla = document.getElementById('grilla-recetas');
-            grilla.innerHTML = "";
-            recetas.forEach((r, idx) => {
-                grilla.innerHTML += `
-                    <div class="card p-5 space-y-3 relative border-l-4 border-amber-500">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-amber-400 text-base">${r.nombre}</h3>
-                                <span class="text-xs text-slate-400">Batch: ${r.batch} Lts</span>
-                            </div>
-                            <span class="text-xs font-mono bg-slate-900 px-2 py-1 rounded text-emerald-400 font-bold">${r.abv}% ABV</span>
-                        </div>
-                        <div class="grid grid-cols-4 gap-2 text-center text-xs bg-slate-900/60 p-2 rounded">
-                            <div><span class="text-slate-500 block">D.I.</span><b>${r.di}</b></div>
-                            <div><span class="text-slate-500 block">D.F.</span><b>${r.df}</b></div>
-                            <div><span class="text-slate-500 block">IBU</span><b>${r.ibu}</b></div>
-                            <div><span class="text-slate-500 block">SRM</span><b>${r.srm}</b></div>
-                        </div>
-                    </div>
-                `;
-            });
-        }
+      const tbody = document.getElementById('tabla-cc-movimientos');
+      tbody.innerHTML = c.movimientos.map(m => `
+        <tr>
+          <td class="p-2 text-slate-400">${m.fecha}</td>
+          <td class="p-2 text-slate-200">${m.concepto}</td>
+          <td class="p-2 text-right font-bold ${m.monto < 0 ? 'text-emerald-400' : 'text-slate-200'}">${m.monto < 0 ? '-' : ''}$${Math.abs(m.monto).toLocaleString()}</td>
+          <td class="p-2 text-right text-slate-400">$${m.saldo.toLocaleString()}</td>
+        </tr>
+      `).join('');
+    }
 
-        // --- GESTIÓN DE COCCIÓN ---
-        function popularSelectRecetas() {
-            const select = document.getElementById('select-receta');
-            select.innerHTML = `<option value="">-- Seleccionar --</option>`;
-            recetas.forEach((r, index) => {
-                select.innerHTML += `<option value="${index}">${r.nombre}</option>`;
-            });
-        }
+    function registrarPagoCliente() {
+      if (!clienteSeleccionadoId) { alert('Seleccioná un cliente primero'); return; }
+      const c = db.clientes.find(x => x.id === clienteSeleccionadoId);
+      
+      const monto = prompt(`Registrar PAGO de ${c.nombre}.\nIngrese el monto cobrado ($):`);
+      if (!monto || isNaN(monto) || Number(monto) <= 0) return;
 
-        function cargarRecetaEnCoccion() {
-            const index = document.getElementById('select-receta').value;
-            if (index === "") return;
-            const r = recetas[index];
-            document.getElementById('coc-estilo').value = r.nombre;
-            document.getElementById('coc-agua-lts').value = r.batch * 0.7; 
-            document.getElementById('coc-levadura').value = r.levadura;
-        }
+      const pago = Number(monto);
+      c.saldo -= pago;
+      c.movimientos.push({
+        fecha: new Date().toISOString().split('T')[0],
+        concepto: 'Pago / Entrega a cuenta (Efectivo/Transf.)',
+        monto: -pago,
+        saldo: c.saldo
+      });
 
-        function guardarCoccion() {
-            const lote = document.getElementById('coc-lote').value;
-            const estilo = document.getElementById('coc-estilo').value;
-            const diReal = document.getElementById('di-real-coccion').value || "1.050";
+      saveDB();
+      renderCuentas();
+    }
 
-            if (!lote || !estilo) {
-                alert("Por favor ingrese estilo y N° de lote.");
-                return;
-            }
+    function nuevoCliente() {
+      const nombre = prompt('Nombre del nuevo Cliente / Bar:');
+      if (!nombre) return;
+      db.clientes.push({ id: Date.now(), nombre, saldo: 0, movimientos: [] });
+      saveDB();
+      renderCuentas();
+    }
 
-            const nuevaCoccion = { lote, estilo, diReal, historialFermentacion: [] };
-            cocciones.push(nuevaCoccion);
-            localStorage.setItem('albardon_cocciones', JSON.stringify(cocciones));
-            alert("Cocción guardada exitosamente y transferida a Fermentación.");
-            switchTab('fermentacion');
-        }
-
-        function descargarCoccionPDF() {
-            const elemento = document.getElementById('area-impresion-coccion');
-            elemento.classList.add('pdf-export-mode');
-            const opt = {
-                margin:       0.5,
-                filename:     `Coccion_${document.getElementById('coc-lote').value}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 },
-                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-            };
-            html2pdf().set(opt).from(elemento).save().then(() => {
-                elemento.classList.remove('pdf-export-mode');
-            });
-        }
-
-        // --- GESTIÓN DE FERMENTACIÓN ---
-        function popularSelectLotes() {
-            const select = document.getElementById('select-lote-fermentacion');
-            select.innerHTML = `<option value="">-- Seleccione un Lote --</option>`;
-            cocciones.forEach((c, index) => {
-                select.innerHTML += `<option value="${index}">${c.lote} - ${c.estilo}</option>`;
-            });
-        }
-
-        function cargarLoteFermentacion() {
-            const index = document.getElementById('select-lote-fermentacion').value;
-            if(index === "") return;
-            const c = cocciones[index];
-            document.getElementById('ferm-estilo').value = c.estilo;
-            document.getElementById('ferm-di').value = c.diReal;
-            renderizarHistorialFermentacion(c.historialFermentacion || []);
-        }
-
-        function agregarRegistroFermentacion() {
-            const index = document.getElementById('select-lote-fermentacion').value;
-            if(index === "") { alert("Seleccione un lote."); return; }
-
-            const fecha = document.getElementById('ferm-reg-fecha').value;
-            const temp = document.getElementById('ferm-reg-temp').value;
-            const densidad = document.getElementById('ferm-reg-densidad').value;
-            const ph = document.getElementById('ferm-reg-ph').value;
-            const obs = document.getElementById('ferm-reg-obs').value;
-
-            cocciones[index].historialFermentacion.push({ fecha, temp, densidad, ph, obs });
-            localStorage.setItem('albardon_cocciones', JSON.stringify(cocciones));
-            cargarLoteFermentacion();
-        }
-
-        function renderizarHistorialFermentacion(historial) {
-            const tbody = document.getElementById('tabla-historial-fermentacion');
-            tbody.innerHTML = "";
-            if (historial.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-slate-500 italic text-center">Sin registros cargados.</td></tr>`;
-                return;
-            }
-            historial.forEach(h => {
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-800/50">
-                        <td class="p-2">${h.fecha}</td>
-                        <td class="p-2">${h.temp}</td>
-                        <td class="p-2 font-mono text-amber-400">${h.densidad}</td>
-                        <td class="p-2">${h.ph}</td>
-                        <td class="p-2 text-slate-400">${h.obs}</td>
-                    </tr>
-                `;
-            });
-        }
-
-        // --- GESTIÓN DE BARRILES ---
-        function renderizarBarriles() {
-            const tbody = document.getElementById('tabla-barriles');
-            tbody.innerHTML = "";
-            let llenos = 0, vacios = 0, clientes = 0, sucios = 0;
-
-            barriles.forEach((b) => {
-                if(b.estado === 'Lleno') llenos++;
-                if(b.estado === 'Vacío') vacios++;
-                if(b.estado === 'En Cliente') clientes++;
-                if(b.estado === 'Para Sanitizar') sucios++;
-
-                tbody.innerHTML += `
-                    <tr>
-                        <td class="p-2 font-bold text-amber-400">${b.id}</td>
-                        <td class="p-2">${b.cap}</td>
-                        <td class="p-2">${b.estilo}</td>
-                        <td class="p-2"><span class="px-2 py-0.5 rounded text-[10px] uppercase font-bold bg-slate-800 border">${b.estado}</span></td>
-                        <td class="p-2">${b.cliente}</td>
-                        <td class="p-2 text-right">
-                            <button onclick="cambiarEstadoBarril('${b.id}')" class="text-amber-400 hover:underline">Cambiar Estado</button>
-                        </td>
-                    </tr>
-                `;
-            });
-
-            document.getElementById('stock-llenos').innerText = llenos;
-            document.getElementById('stock-vacios').innerText = vacios;
-            document.getElementById('stock-clientes').innerText = clientes;
-            document.getElementById('stock-sucio').innerText = sucios;
-        }
-
-        function registrarNuevoBarril() {
-            const id = prompt("Identificador del barril (ej. B-05):");
-            if (!id) return;
-            barriles.push({ id, cap: "50L", estilo: "-", estado: "Vacío", cliente: "Planta" });
-            localStorage.setItem('albardon_barriles', JSON.stringify(barriles));
-            renderizarBarriles();
-        }
-
-        function cambiarEstadoBarril(id) {
-            const b = barriles.find(item => item.id === id);
-            if(b) {
-                const nuevoEstado = prompt("Nuevo estado: Lleno, Vacío, En Cliente, Para Sanitizar", b.estado);
-                if(nuevoEstado) {
-                    b.estado = nuevoEstado;
-                    localStorage.setItem('albardon_barriles', JSON.stringify(barriles));
-                    renderizarBarriles();
-                }
-            }
-        }
-
-        // Inicialización al cargar la ventana
-        window.onload = function() {
-            renderizarRecetas();
-            document.getElementById('coc-fecha').valueToDate = new Date();
-        };
-    </script>
+    // CARGA INICIAL
+    window.onload = () => {
+      document.getElementById('coc-fecha').value = new Date().toISOString().split('T')[0];
+      renderRecetas();
+    };
+  </script>
 </body>
 </html>
