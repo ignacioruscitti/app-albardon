@@ -33,6 +33,9 @@
                 <button onclick="switchTab('fermentacion')" id="btn-fermentacion" class="tab-btn px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700 transition-colors flex items-center gap-2">
                     <i class="fa-solid fa-temperature-half"></i> Fermentación (3B)
                 </button>
+                <button onclick="switchTab('recetas')" id="btn-recetas" class="tab-btn px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700 transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-book-open"></i> Recetas
+                </button>
                 <button onclick="switchTab('stock')" id="btn-stock" class="tab-btn px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700 transition-colors flex items-center gap-2">
                     <i class="fa-solid fa-boxes-stacked"></i> Stock & Remitos
                 </button>
@@ -53,11 +56,8 @@
                 </h2>
                 <div class="flex items-center gap-3">
                     <label class="text-sm text-slate-300 font-medium">Receta Base:</label>
-                    <select id="select-receta" onchange="cargarReceta()" class="bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-lg p-2">
-                        <option value="">-- Seleccionar Receta --</option>
-                        <option value="scottish">Scottish Ale</option>
-                        <option value="ipa">American IPA</option>
-                        <option value="golden">Golden Ale</option>
+                    <select id="select-receta" onchange="cargarRecetaEnCoccion()" class="bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-lg p-2">
+                        <!-- Cargado dinámicamente -->
                     </select>
                 </div>
             </div>
@@ -282,7 +282,71 @@
             </div>
         </section>
 
-        <!-- ==================== MÓDULO 3: STOCK ==================== -->
+        <!-- ==================== MÓDULO 3: RECETAS (NUEVO) ==================== -->
+        <section id="tab-recetas" class="space-y-6 hidden">
+            <div class="card p-4 flex justify-between items-center">
+                <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
+                    <i class="fa-solid fa-book-open"></i> Biblioteca de Recetas
+                </h2>
+                <button onclick="mostrarFormularioReceta()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 transition-colors">
+                    <i class="fa-solid fa-plus"></i> Nueva Receta
+                </button>
+            </div>
+
+            <!-- FORMULARIO CREAR RECETA (Oculto por defecto) -->
+            <div id="form-receta-panel" class="card p-4 space-y-4 hidden border-amber-500/50">
+                <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider border-b border-slate-700 pb-2">Crear Nueva Receta</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    <div>
+                        <label class="text-slate-400 block mb-1">Nombre del Estilo / Receta</label>
+                        <input type="text" id="rec-nombre" placeholder="ej. Red Ale Santafesina" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1">D.I. Teórica (Densidad Inicial)</label>
+                        <input type="text" id="rec-di" placeholder="1.052" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-mono">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Maltas -->
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-slate-300 uppercase block">Maltas / Granos</label>
+                        <div id="rec-granos-inputs" class="space-y-2">
+                            <div class="flex gap-2">
+                                <input type="text" placeholder="ej. Malta Pilsen" class="rec-grano-nombre flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs">
+                                <input type="number" placeholder="Kg" class="rec-grano-cant w-24 bg-slate-900 border border-slate-700 rounded p-2 text-xs">
+                            </div>
+                        </div>
+                        <button onclick="agregarFilaGrano()" class="text-xs text-amber-400 hover:underline flex items-center gap-1"><i class="fa-solid fa-plus"></i> Agregar Malta</button>
+                    </div>
+
+                    <!-- Lúpulos -->
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-slate-300 uppercase block">Lúpulos</label>
+                        <div id="rec-lupulos-inputs" class="space-y-2">
+                            <div class="flex gap-2">
+                                <input type="text" placeholder="ej. Cascade" class="rec-lupulo-nombre flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs">
+                                <input type="number" placeholder="Grs" class="rec-lupulo-cant w-20 bg-slate-900 border border-slate-700 rounded p-2 text-xs">
+                                <input type="text" placeholder="Momento (60min, WP)" class="rec-lupulo-momento w-32 bg-slate-900 border border-slate-700 rounded p-2 text-xs">
+                            </div>
+                        </div>
+                        <button onclick="agregarFilaLupulo()" class="text-xs text-amber-400 hover:underline flex items-center gap-1"><i class="fa-solid fa-plus"></i> Agregar Lúpulo</button>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-2 border-t border-slate-700">
+                    <button onclick="ocultarFormularioReceta()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-bold px-4 py-2 rounded-lg">Cancelar</button>
+                    <button onclick="guardarReceta()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold px-4 py-2 rounded-lg">Guardar Receta</button>
+                </div>
+            </div>
+
+            <!-- GRILLA DE RECETAS GUARDADAS -->
+            <div id="grilla-recetas" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Renderizado dinámico desde JS -->
+            </div>
+        </section>
+
+        <!-- ==================== MÓDULO 4: STOCK ==================== -->
         <section id="tab-stock" class="space-y-6 hidden">
             <div class="card p-4 flex justify-between items-center">
                 <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2"><i class="fa-solid fa-boxes-stacked"></i> Inventario de Barriles</h2>
@@ -304,7 +368,7 @@
             </div>
         </section>
 
-        <!-- ==================== MÓDULO 4: CUENTAS CORRIENTES ==================== -->
+        <!-- ==================== MÓDULO 5: CUENTAS CORRIENTES ==================== -->
         <section id="tab-cc" class="space-y-6 hidden">
             <div class="card p-4 flex justify-between items-center">
                 <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2"><i class="fa-solid fa-users"></i> Cuentas Corrientes</h2>
@@ -328,27 +392,37 @@
 
     <!-- LÓGICA DE INTERACCIÓN -->
     <script>
-        // Recetas Base de Ejemplo
-        const recetas = {
+        // Recetas por defecto
+        const recetasIniciales = {
             scottish: {
+                id: 'scottish',
                 nombre: "Scottish Ale",
+                diTeorica: "1.050",
                 granos: [{ nombre: "Malta Pilsen", cantidad: 80 }, { nombre: "Malta Caramel 60", cantidad: 12 }, { nombre: "Malta Chocolate", cantidad: 2.5 }],
-                lupulos: [{ nombre: "Cascade", cantidad: 450, momento: "60 min" }, { nombre: "Kent Goldings", cantidad: 200, momento: "15 min" }],
-                diTeorica: "1.050"
+                lupulos: [{ nombre: "Cascade", cantidad: 450, momento: "60 min" }, { nombre: "Kent Goldings", cantidad: 200, momento: "15 min" }]
             },
             ipa: {
+                id: 'ipa',
                 nombre: "American IPA",
+                diTeorica: "1.056",
                 granos: [{ nombre: "Malta Pale Ale", cantidad: 95 }, { nombre: "Malta Carapils", cantidad: 5 }],
-                lupulos: [{ nombre: "Columbus", cantidad: 600, momento: "60 min" }, { nombre: "Mosaic", cantidad: 800, momento: "Whirlpool" }],
-                diTeorica: "1.056"
+                lupulos: [{ nombre: "Columbus", cantidad: 600, momento: "60 min" }, { nombre: "Mosaic", cantidad: 800, momento: "Whirlpool" }]
             },
             golden: {
+                id: 'golden',
                 nombre: "Golden Ale",
+                diTeorica: "1.044",
                 granos: [{ nombre: "Malta Pilsen", cantidad: 85 }, { nombre: "Wheat Malt", cantidad: 10 }],
-                lupulos: [{ nombre: "Cascade", cantidad: 300, momento: "60 min" }],
-                diTeorica: "1.044"
+                lupulos: [{ nombre: "Cascade", cantidad: 300, momento: "60 min" }]
             }
         };
+
+        // Cargar desde localStorage o usar iniciales
+        let recetas = JSON.parse(localStorage.getItem('alb_recetas')) || recetasIniciales;
+
+        function guardarRecetasEnStorage() {
+            localStorage.setItem('alb_recetas', JSON.stringify(recetas));
+        }
 
         // Cambio de Pestañas
         function switchTab(tabId) {
@@ -361,10 +435,156 @@
             document.getElementById('tab-' + tabId).classList.remove('hidden');
             const activeBtn = document.getElementById('btn-' + tabId);
             activeBtn.classList.add('active');
+
+            if (tabId === 'recetas') {
+                renderRecetas();
+            }
         }
 
-        // Cargar Receta Base
-        function cargarReceta() {
+        // --- MÓDULO RECETAS ---
+        function renderRecetas() {
+            const container = document.getElementById('grilla-recetas');
+            let html = '';
+
+            Object.keys(recetas).forEach(key => {
+                const r = recetas[key];
+                html += `
+                    <div class="card p-4 space-y-3 flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start border-b border-slate-700 pb-2 mb-2">
+                                <h3 class="font-bold text-amber-400 text-base">${r.nombre}</h3>
+                                <span class="text-xs font-mono bg-slate-900 border border-slate-700 px-2 py-0.5 rounded text-slate-300">D.I: ${r.diTeorica}</span>
+                            </div>
+                            
+                            <div class="space-y-2 text-xs">
+                                <div>
+                                    <span class="text-slate-400 font-semibold block mb-1">MALTAS / GRANOS:</span>
+                                    <ul class="space-y-0.5 text-slate-300 pl-2 border-l border-slate-700">
+                                        ${r.granos.map(g => `<li>${g.nombre}: <strong class="text-amber-300">${g.cantidad} kg</strong></li>`).join('')}
+                                    </ul>
+                                </div>
+                                <div class="pt-2">
+                                    <span class="text-slate-400 font-semibold block mb-1">LÚPULOS:</span>
+                                    <ul class="space-y-0.5 text-slate-300 pl-2 border-l border-slate-700">
+                                        ${r.lupulos.map(l => `<li>${l.nombre}: <strong class="text-amber-300">${l.cantidad} grs</strong> (${l.momento})</li>`).join('')}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-3 border-t border-slate-700 flex justify-between items-center">
+                            <button onclick="eliminarReceta('${key}')" class="text-red-400 hover:text-red-300 text-xs flex items-center gap-1">
+                                <i class="fa-solid fa-trash"></i> Eliminar
+                            </button>
+                            <button onclick="usarRecetaEnCoccion('${key}')" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1 rounded text-xs transition-colors">
+                                Cocinar esta Receta
+                            </button>
+                        </div>
+                    </div>`;
+            });
+
+            container.innerHTML = html;
+            actualizarSelectRecetas();
+        }
+
+        function mostrarFormularioReceta() {
+            document.getElementById('form-receta-panel').classList.remove('hidden');
+        }
+
+        function ocultarFormularioReceta() {
+            document.getElementById('form-receta-panel').classList.add('hidden');
+        }
+
+        function agregarFilaGrano() {
+            const div = document.createElement('div');
+            div.className = 'flex gap-2';
+            div.innerHTML = `
+                <input type="text" placeholder="Malta" class="rec-grano-nombre flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs">
+                <input type="number" placeholder="Kg" class="rec-grano-cant w-24 bg-slate-900 border border-slate-700 rounded p-2 text-xs">`;
+            document.getElementById('rec-granos-inputs').appendChild(div);
+        }
+
+        function agregarFilaLupulo() {
+            const div = document.createElement('div');
+            div.className = 'flex gap-2';
+            div.innerHTML = `
+                <input type="text" placeholder="Lúpulo" class="rec-lupulo-nombre flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs">
+                <input type="number" placeholder="Grs" class="rec-lupulo-cant w-20 bg-slate-900 border border-slate-700 rounded p-2 text-xs">
+                <input type="text" placeholder="Momento" class="rec-lupulo-momento w-32 bg-slate-900 border border-slate-700 rounded p-2 text-xs">`;
+            document.getElementById('rec-lupulos-inputs').appendChild(div);
+        }
+
+        function guardarReceta() {
+            const nombre = document.getElementById('rec-nombre').value.trim();
+            const diTeorica = document.getElementById('rec-di').value.trim() || '1.050';
+
+            if (!nombre) {
+                alert("Por favor ingrese el nombre del estilo.");
+                return;
+            }
+
+            const id = nombre.toLowerCase().replace(/[^a-z0-9]/g, '_');
+
+            // Leer granos
+            const granos = [];
+            const nombresG = document.querySelectorAll('.rec-grano-nombre');
+            const cantsG = document.querySelectorAll('.rec-grano-cant');
+            nombresG.forEach((inp, idx) => {
+                if (inp.value.trim()) {
+                    granos.push({ nombre: inp.value.trim(), cantidad: parseFloat(cantsG[idx].value) || 0 });
+                }
+            });
+
+            // Leer lúpulos
+            const lupulos = [];
+            const nombresL = document.querySelectorAll('.rec-lupulo-nombre');
+            const cantsL = document.querySelectorAll('.rec-lupulo-cant');
+            const momentosL = document.querySelectorAll('.rec-lupulo-momento');
+            nombresL.forEach((inp, idx) => {
+                if (inp.value.trim()) {
+                    lupulos.push({
+                        nombre: inp.value.trim(),
+                        cantidad: parseFloat(cantsL[idx].value) || 0,
+                        momento: momentosL[idx].value.trim() || '60 min'
+                    });
+                }
+            });
+
+            recetas[id] = { id, nombre, diTeorica, granos, lupulos };
+            guardarRecetasEnStorage();
+            ocultarFormularioReceta();
+            renderRecetas();
+
+            // Limpiar inputs
+            document.getElementById('rec-nombre').value = '';
+            document.getElementById('rec-di').value = '';
+        }
+
+        function eliminarReceta(key) {
+            if (confirm("¿Estás seguro de eliminar esta receta?")) {
+                delete recetas[key];
+                guardarRecetasEnStorage();
+                renderRecetas();
+            }
+        }
+
+        function actualizarSelectRecetas() {
+            const select = document.getElementById('select-receta');
+            let html = '<option value="">-- Seleccionar Receta --</option>';
+            Object.keys(recetas).forEach(key => {
+                html += `<option value="${key}">${recetas[key].nombre}</option>`;
+            });
+            select.innerHTML = html;
+        }
+
+        function usarRecetaEnCoccion(key) {
+            switchTab('coccion');
+            document.getElementById('select-receta').value = key;
+            cargarRecetaEnCoccion();
+        }
+
+        // --- MÓDULO COCCIÓN ---
+        function cargarRecetaEnCoccion() {
             const key = document.getElementById('select-receta').value;
             const receta = recetas[key];
             
@@ -422,7 +642,7 @@
             document.getElementById('total-granos').innerText = `KGS TOTALES: ${total} kg`;
         }
 
-        // Render Grilla 18 días en Fermentación
+        // --- MÓDULO FERMENTACIÓN ---
         function renderTablaFermentacion() {
             const tbody = document.getElementById('tabla-dias-fermentacion');
             let html = '';
@@ -441,7 +661,6 @@
             tbody.innerHTML = html;
         }
 
-        // Cálculo Automático de ABV
         function calcularABV() {
             const di = parseFloat(document.getElementById('ferm-di-real').value);
             const df = parseFloat(document.getElementById('ferm-df').value);
@@ -466,6 +685,7 @@
 
         // Inicialización
         document.getElementById('coc-fecha').valueAsDate = new Date();
+        actualizarSelectRecetas();
         renderTablaFermentacion();
     </script>
 </body>
