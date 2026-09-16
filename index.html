@@ -14,14 +14,26 @@
         .tab-btn.active { background-color: #f59e0b; color: #020617; font-weight: bold; }
         .card { background-color: #1e293b; border: 1px solid #334155; border-radius: 0.75rem; }
 
-        @media print {
-            body { background-color: #ffffff !important; color: #000000 !important; }
-            header, nav, button, .no-print { display: none !important; }
-            main { max-width: 100% !important; padding: 0 !important; }
-            section { display: block !important; }
-            .card { background-color: #ffffff !important; border: 1px solid #ccc !important; color: #000000 !important; box-shadow: none !important; }
-            input, select, textarea { border: 1px solid #999 !important; background-color: #fff !important; color: #000 !important; }
-            .text-amber-400, .text-emerald-400, .text-slate-300, .text-slate-400 { color: #000000 !important; }
+        /* Estilos limpios para captura de PDF */
+        .pdf-export-mode {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+            padding: 20px !important;
+        }
+        .pdf-export-mode .card {
+            background-color: #ffffff !important;
+            border: 1px solid #cccccc !important;
+            color: #000000 !important;
+            box-shadow: none !important;
+            margin-bottom: 15px !important;
+        }
+        .pdf-export-mode input, .pdf-export-mode select {
+            background-color: #f8fafc !important;
+            border: 1px solid #cbd5e1 !important;
+            color: #0f172a !important;
+        }
+        .pdf-export-mode h2, .pdf-export-mode h3, .pdf-export-mode label, .pdf-export-mode span {
+            color: #0f172a !important;
         }
     </style>
 </head>
@@ -120,168 +132,166 @@
 
         <!-- ==================== MÓDULO 2: COCCIÓN ==================== -->
         <section id="tab-coccion" class="space-y-6 hidden">
-            <div class="card p-4 flex flex-wrap justify-between items-center gap-4">
+            <div class="card p-4 flex flex-wrap justify-between items-center gap-4 no-print">
                 <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
                     <i class="fa-solid fa-clipboard-list"></i> Planilla Digital de Cocción
                 </h2>
-                <div class="flex items-center gap-3 no-print">
+                <div class="flex items-center gap-3">
                     <label class="text-sm text-slate-300 font-medium">Cargar Receta Base:</label>
                     <select id="select-receta" onchange="cargarRecetaEnCoccion()" class="bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-lg p-2">
                     </select>
-                    <button onclick="imprimirSeccion('tab-coccion')" title="Imprimir Planilla" class="bg-slate-700 hover:bg-slate-600 text-amber-400 font-bold px-3 py-2 rounded-lg text-xs flex items-center gap-1">
-                        <i class="fa-solid fa-print"></i> Imprimir / PDF
+                    <button onclick="descargarCoccionPDF()" title="Descargar Planilla en PDF" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-2 rounded-lg text-xs flex items-center gap-1">
+                        <i class="fa-solid fa-file-pdf"></i> Generar PDF
                     </button>
                 </div>
             </div>
 
-            <div class="card p-4 space-y-3">
-                <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Encabezado</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div><label class="text-xs text-slate-400">ESTILO</label><input type="text" id="coc-estilo" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                    <div><label class="text-xs text-slate-400">FECHA</label><input type="date" id="coc-fecha" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                    <div><label class="text-xs text-slate-400">N° LOTE</label><input type="text" id="coc-lote" value="L-2026-01" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-mono text-amber-400 mt-1"></div>
-                </div>
-            </div>
-
-            <div class="card p-4 space-y-3">
-                <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Olla de Agua</h3>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
-                    <div><label class="text-slate-400">INICIO LLENADO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                    <div><label class="text-slate-400">FIN LLENADO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                    <div><label class="text-slate-400">LITROS</label><input type="number" placeholder="Lts" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                    <div><label class="text-slate-400">T° AGUA</label><input type="text" placeholder="°C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                    <div><label class="text-slate-400">T° OBJETIVO</label><input type="text" placeholder="°C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                    <div><label class="text-slate-400">PH AGUA</label><input type="text" placeholder="pH" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                    <div class="col-span-2"><label class="text-slate-400">AGREGADO SALES (grs)</label><input type="text" placeholder="Sales adicionadas" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                </div>
-            </div>
-
-            <div class="card p-4 space-y-3">
-                <div class="flex justify-between items-center border-b border-slate-700 pb-1">
-                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Granos / Molienda</h3>
-                    <span id="total-granos" class="text-sm font-mono text-amber-400 bg-slate-900 px-3 py-1 rounded border border-slate-700">KGS TOTALES: 0 kg</span>
-                </div>
-                <div id="contenedor-granos" class="space-y-2">
-                    <p class="text-xs text-slate-500 italic">Seleccione una receta para cargar los granos automáticamente.</p>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- CONTENEDOR EXCLUSIVO PARA EXPORTAR COCCIÓN -->
+            <div id="area-impresion-coccion" class="space-y-6">
                 <div class="card p-4 space-y-3">
-                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Macerado / Recirculado</h3>
-                    <div class="grid grid-cols-2 gap-3 text-xs">
-                        <div><label class="text-slate-400">COMIENZO LLENADO + MALTAS</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-slate-400">FIN LLENADO + MALTAS</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-slate-400">COMIENZO MACERADO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-slate-400">FIN MACERADO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-slate-400">PH MIN. 15</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-slate-400">PH MIN. 60</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div class="col-span-2"><label class="text-slate-400">1° MOSTO (DENSIDAD)</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 font-mono text-amber-400"></div>
-                        <div><label class="text-slate-400">RECIRCULADO COMIENZO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-slate-400">RECIRCULADO FIN</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Encabezado</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div><label class="text-xs text-slate-400">ESTILO</label><input type="text" id="coc-estilo" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                        <div><label class="text-xs text-slate-400">FECHA</label><input type="date" id="coc-fecha" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                        <div><label class="text-xs text-slate-400">N° LOTE</label><input type="text" id="coc-lote" value="L-2026-01" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-mono text-amber-400 mt-1"></div>
                     </div>
                 </div>
 
                 <div class="card p-4 space-y-3">
-                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Lavado</h3>
-                    <div class="grid grid-cols-3 gap-3 text-xs">
-                        <div><label class="text-slate-400">LLENADO INICIO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-slate-400">LLENADO FIN</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-slate-400">LITROS</label><input type="number" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-slate-400">T° AGUA</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-slate-400">T° OBJETIVO</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-slate-400">PH</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-slate-400">COMIENZO LAVADO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-slate-400">FIN LAVADO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-slate-400">SALES (grs)</label><input type="text" placeholder="grs" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Olla de Agua</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+                        <div><label class="text-slate-400">INICIO LLENADO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                        <div><label class="text-slate-400">FIN LLENADO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                        <div><label class="text-slate-400">LITROS</label><input type="number" placeholder="Lts" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                        <div><label class="text-slate-400">T° AGUA</label><input type="text" placeholder="°C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                        <div><label class="text-slate-400">T° OBJETIVO</label><input type="text" placeholder="°C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                        <div><label class="text-slate-400">PH AGUA</label><input type="text" placeholder="pH" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                        <div class="col-span-2"><label class="text-slate-400">AGREGADO SALES (grs)</label><input type="text" placeholder="Sales adicionadas" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
                     </div>
                 </div>
-            </div>
 
-            <div class="card p-4 space-y-3">
-                <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Hervido</h3>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
-                    <div><label class="text-slate-400">ENCENDIDO OLLA</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                    <div><label class="text-slate-400">LTS ANTES HERVOR</label><input type="number" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                    <div><label class="text-slate-400">PH ANTES HERVOR</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                    <div><label class="text-slate-400">DENS. ANTES HERVOR</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 font-mono"></div>
-                    <div><label class="text-slate-400">COMIENZO HERVOR</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                    <div><label class="text-slate-400">LTS DESPUES HERVOR</label><input type="number" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                    <div><label class="text-slate-400">PH DESPUES HERVOR</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                    <div>
-                        <label class="text-amber-400 font-bold">D.I. REAL (DESPUES HERVOR)</label>
-                        <input type="text" id="di-real-coccion" placeholder="ej. 1.048" class="w-full bg-slate-900 border border-amber-500/50 rounded p-2 text-sm mt-1 font-mono text-amber-400 font-bold">
+                <div class="card p-4 space-y-3">
+                    <div class="flex justify-between items-center border-b border-slate-700 pb-1">
+                        <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Granos / Molienda</h3>
+                        <span id="total-granos" class="text-sm font-mono text-amber-400 bg-slate-900 px-3 py-1 rounded border border-slate-700">KGS TOTALES: 0 kg</span>
+                    </div>
+                    <div id="contenedor-granos" class="space-y-2">
+                        <p class="text-xs text-slate-500 italic">Seleccione una receta para cargar los granos automáticamente.</p>
                     </div>
                 </div>
-            </div>
 
-            <div class="card p-4 space-y-3">
-                <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Lúpulos</h3>
-                <div id="contenedor-lupulos" class="space-y-2">
-                    <p class="text-xs text-slate-500 italic">Seleccione una receta para autocompletar adiciones de lúpulo.</p>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="card p-4 space-y-3">
-                        <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Varios</h3>
+                        <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Macerado / Recirculado</h3>
                         <div class="grid grid-cols-2 gap-3 text-xs">
-                            <div><label class="text-slate-400">IRISH MOSS (CANT)</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                            <div><label class="text-slate-400">IRISH MOSS (HORA)</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                            <div><label class="text-slate-400">NUTRIENTE LEVA (CANT)</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                            <div><label class="text-slate-400">NUTRIENTE LEVA (HORA)</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            <div><label class="text-slate-400">COMIENZO LLENADO + MALTAS</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            <div><label class="text-slate-400">FIN LLENADO + MALTAS</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            <div><label class="text-slate-400">COMIENZO MACERADO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            <div><label class="text-slate-400">FIN MACERADO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            <div><label class="text-slate-400">PH MIN. 15</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            <div><label class="text-slate-400">PH MIN. 60</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            <div class="col-span-2"><label class="text-slate-400">1° MOSTO (DENSIDAD)</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 font-mono text-amber-400"></div>
+                            <div><label class="text-slate-400">RECIRCULADO COMIENZO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            <div><label class="text-slate-400">RECIRCULADO FIN</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
                         </div>
                     </div>
 
                     <div class="card p-4 space-y-3">
-                        <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Whirlpool y Reposo</h3>
-                        <div class="grid grid-cols-2 gap-3 text-xs">
-                            <div><label class="text-slate-400">WP COMIENZO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                            <div><label class="text-slate-400">WP T° / VELOC</label><input type="text" placeholder="T° / RPM" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                            <div><label class="text-slate-400">REPOSO COMIENZO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                            <div><label class="text-slate-400">REPOSO FIN</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                        <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Lavado</h3>
+                        <div class="grid grid-cols-3 gap-3 text-xs">
+                            <div><label class="text-slate-400">LLENADO INICIO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            <div><label class="text-slate-400">LLENADO FIN</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            <div><label class="text-slate-400">LITROS</label><input type="number" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            <div><label class="text-slate-400">T° AGUA</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            <div><label class="text-slate-400">T° OBJETIVO</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            <div><label class="text-slate-400">PH</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            <div><label class="text-slate-400">COMIENZO LAVADO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            <div><label class="text-slate-400">FIN LAVADO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            <div><label class="text-slate-400">SALES (grs)</label><input type="text" placeholder="grs" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
                         </div>
                     </div>
                 </div>
 
-                <div class="space-y-6">
-                    <div class="card p-4 space-y-3">
-                        <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Enfriado</h3>
-                        <div class="grid grid-cols-2 gap-3 text-xs">
-                            <div><label class="text-slate-400">COMIENZO / FIN</label><input type="text" placeholder="00:00 - 00:00" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                            <div><label class="text-slate-400">T° ENTRADA / SALIDA</label><input type="text" placeholder="Entrada / Salida °C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                <div class="card p-4 space-y-3">
+                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Hervido</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+                        <div><label class="text-slate-400">ENCENDIDO OLLA</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                        <div><label class="text-slate-400">LTS ANTES HERVOR</label><input type="number" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                        <div><label class="text-slate-400">PH ANTES HERVOR</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                        <div><label class="text-slate-400">DENS. ANTES HERVOR</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 font-mono"></div>
+                        <div><label class="text-slate-400">COMIENZO HERVOR</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                        <div><label class="text-slate-400">LTS DESPUES HERVOR</label><input type="number" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                        <div><label class="text-slate-400">PH DESPUES HERVOR</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                        <div>
+                            <label class="text-amber-400 font-bold">D.I. REAL (DESPUES HERVOR)</label>
+                            <input type="text" id="di-real-coccion" placeholder="ej. 1.048" class="w-full bg-slate-900 border border-amber-500/50 rounded p-2 text-sm mt-1 font-mono text-amber-400 font-bold">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card p-4 space-y-3">
+                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Lúpulos</h3>
+                    <div id="contenedor-lupulos" class="space-y-2">
+                        <p class="text-xs text-slate-500 italic">Seleccione una receta para autocompletar adiciones de lúpulo.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-6">
+                        <div class="card p-4 space-y-3">
+                            <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Varios</h3>
+                            <div class="grid grid-cols-2 gap-3 text-xs">
+                                <div><label class="text-slate-400">IRISH MOSS (CANT)</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                                <div><label class="text-slate-400">IRISH MOSS (HORA)</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                                <div><label class="text-slate-400">NUTRIENTE LEVA (CANT)</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                                <div><label class="text-slate-400">NUTRIENTE LEVA (HORA)</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            </div>
+                        </div>
+
+                        <div class="card p-4 space-y-3">
+                            <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Whirlpool y Reposo</h3>
+                            <div class="grid grid-cols-2 gap-3 text-xs">
+                                <div><label class="text-slate-400">WP COMIENZO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                                <div><label class="text-slate-400">WP T° / VELOC</label><input type="text" placeholder="T° / RPM" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                                <div><label class="text-slate-400">REPOSO COMIENZO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                                <div><label class="text-slate-400">REPOSO FIN</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="card p-4 space-y-3">
-                        <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Inoculación</h3>
-                        <div class="grid grid-cols-2 gap-3 text-xs">
-                            <div><label class="text-slate-400">HORA INOCULACIÓN</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                            <div><label class="text-slate-400">T° MOSTO</label><input type="text" placeholder="°C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                            <div class="col-span-2"><label class="text-slate-400">CANTIDAD / LEVADURA</label><input type="text" placeholder="Cepa y Gramos adicionados" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                    <div class="space-y-6">
+                        <div class="card p-4 space-y-3">
+                            <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Enfriado</h3>
+                            <div class="grid grid-cols-2 gap-3 text-xs">
+                                <div><label class="text-slate-400">COMIENZO / FIN</label><input type="text" placeholder="00:00 - 00:00" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                                <div><label class="text-slate-400">T° ENTRADA / SALIDA</label><input type="text" placeholder="Entrada / Salida °C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            </div>
+                        </div>
+
+                        <div class="card p-4 space-y-3">
+                            <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Inoculación</h3>
+                            <div class="grid grid-cols-2 gap-3 text-xs">
+                                <div><label class="text-slate-400">HORA INOCULACIÓN</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                                <div><label class="text-slate-400">T° MOSTO</label><input type="text" placeholder="°C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                                <div class="col-span-2"><label class="text-slate-400">CANTIDAD / LEVADURA</label><input type="text" placeholder="Cepa y Gramos adicionados" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            </div>
                         </div>
                     </div>
-
-                    <button onclick="guardarCoccion()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg transition-colors no-print">
-                        <i class="fa-solid fa-floppy-disk"></i> Guardar Cocción y Pasar a Fermentación
-                    </button>
                 </div>
             </div>
+
+            <button onclick="guardarCoccion()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg transition-colors no-print mt-6">
+                <i class="fa-solid fa-floppy-disk"></i> Guardar Cocción y Pasar a Fermentación
+            </button>
         </section>
 
         <!-- ==================== MÓDULO 3: FERMENTACIÓN ==================== -->
         <section id="tab-fermentacion" class="space-y-6 hidden">
-            <div class="card p-4 flex justify-between items-center">
+            <div class="card p-4 flex justify-between items-center no-print">
                 <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
                     <i class="fa-solid fa-temperature-half"></i> Control de Fermentación
                 </h2>
-                <div class="flex items-center gap-3">
-                    <span class="text-xs font-mono bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/20">Fermentador #1 (Activo)</span>
-                    <button onclick="imprimirSeccion('tab-fermentacion')" title="Imprimir Control" class="bg-slate-700 hover:bg-slate-600 text-amber-400 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 no-print">
-                        <i class="fa-solid fa-print"></i> Imprimir / PDF
-                    </button>
-                </div>
+                <span class="text-xs font-mono bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/20">Fermentador #1 (Activo)</span>
             </div>
 
             <div class="card p-4 space-y-3">
@@ -344,18 +354,13 @@
 
         <!-- ==================== MÓDULO 4: STOCK DE BARRILES ==================== -->
         <section id="tab-stock" class="space-y-6 hidden">
-            <div class="card p-4 flex flex-wrap justify-between items-center gap-4">
+            <div class="card p-4 flex flex-wrap justify-between items-center gap-4 no-print">
                 <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
                     <i class="fa-solid fa-boxes-stacked"></i> Inventario & Control de Barriles
                 </h2>
-                <div class="flex gap-2">
-                    <button onclick="imprimirSeccion('tab-stock')" title="Imprimir Inventario" class="bg-slate-700 hover:bg-slate-600 text-amber-400 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 no-print">
-                        <i class="fa-solid fa-print"></i> Imprimir / PDF
-                    </button>
-                    <button onclick="mostrarModalBarril()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 transition-colors no-print">
-                        <i class="fa-solid fa-plus"></i> Nuevo Barril
-                    </button>
-                </div>
+                <button onclick="mostrarModalBarril()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 transition-colors">
+                    <i class="fa-solid fa-plus"></i> Nuevo Barril
+                </button>
             </div>
 
             <div id="grilla-barriles" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
@@ -363,11 +368,11 @@
 
         <!-- ==================== MÓDULO 5: CUENTAS CORRIENTES & CLIENTES ==================== -->
         <section id="tab-cc" class="space-y-6 hidden">
-            <div class="card p-4 flex flex-wrap justify-between items-center gap-4">
+            <div class="card p-4 flex flex-wrap justify-between items-center gap-4 no-print">
                 <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
                     <i class="fa-solid fa-users"></i> Cuentas Corrientes & Clientes
                 </h2>
-                <div class="flex gap-2 no-print">
+                <div class="flex gap-2">
                     <button onclick="mostrarModalCliente()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 transition-colors">
                         <i class="fa-solid fa-user-plus"></i> Nuevo Cliente
                     </button>
@@ -640,8 +645,25 @@
             if (tabId === 'cc') renderClientes();
         }
 
-        function imprimirSeccion(seccionId) {
-            window.print();
+        // GENERACIÓN EXCLUSIVA DE PDF PARA PLANILLA DE COCCIÓN
+        function descargarCoccionPDF() {
+            const element = document.getElementById('area-impresion-coccion');
+            element.classList.add('pdf-export-mode');
+
+            const lote = document.getElementById('coc-lote').value || 'Coccion';
+            const estilo = document.getElementById('coc-estilo').value || 'Albardon';
+
+            const opt = {
+                margin:       8,
+                filename:     `Planilla_Coccion_${estilo.replace(/\s+/g, '_')}_${lote}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                element.classList.remove('pdf-export-mode');
+            });
         }
 
         // DESCARGA PDF EXCLUSIVA DE UNA RECETA ESPECÍFICA
