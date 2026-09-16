@@ -1,289 +1,1157 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Remito - Albardón Cerveza Artesanal</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: Arial, Helvetica, sans-serif;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cervecería Albardón - Sistema de Gestión Integral</title>
+    <link rel="icon" href="logo.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
+        .tab-btn.active { background-color: #f59e0b; color: #020617; font-weight: bold; }
+        .card { background-color: #1e293b; border: 1px solid #334155; border-radius: 0.75rem; }
 
-    body {
-      background-color: #f4f4f4;
-      padding: 20px;
-      color: #333;
-    }
+        .pdf-export-mode {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+            padding: 20px !important;
+        }
+        .pdf-export-mode .card {
+            background-color: #ffffff !important;
+            border: 1px solid #cccccc !important;
+            color: #000000 !important;
+            box-shadow: none !important;
+            margin-bottom: 15px !important;
+        }
+        .pdf-export-mode input, .pdf-export-mode select {
+            background-color: #f8fafc !important;
+            border: 1px solid #cbd5e1 !important;
+            color: #0f172a !important;
+        }
+        .pdf-export-mode h2, .pdf-export-mode h3, .pdf-export-mode label, .pdf-export-mode span, .pdf-export-mode th, .pdf-export-mode td {
+            color: #0f172a !important;
+        }
 
-    .remito-container {
-      max-width: 800px;
-      margin: 0 auto;
-      background: #ffffff;
-      padding: 30px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-
-    /* Encabezado */
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 2px solid #000;
-      padding-bottom: 15px;
-      margin-bottom: 20px;
-    }
-
-    .brand-section {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-
-    .logo {
-      height: 60px;
-      width: auto;
-      object-fit: contain;
-    }
-
-    .marca-nombre {
-      font-size: 28px;
-      font-weight: bold;
-      color: #000000; /* Texto en color negro */
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .remito-tipo {
-      text-align: right;
-    }
-
-    .remito-tipo .letra-r {
-      display: inline-block;
-      font-size: 24px;
-      font-weight: bold;
-      border: 2px solid #000;
-      padding: 5px 12px;
-      margin-bottom: 5px;
-    }
-
-    .remito-tipo p {
-      font-size: 14px;
-      font-weight: bold;
-    }
-
-    /* Datos del cliente y fecha */
-    .info-section {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 25px;
-      gap: 20px;
-    }
-
-    .campo-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-bottom: 10px;
-    }
-
-    .campo-group label {
-      font-size: 13px;
-      font-weight: bold;
-      color: #555;
-    }
-
-    .campo-group input {
-      padding: 8px 10px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 14px;
-    }
-
-    .col-left {
-      flex: 2;
-    }
-
-    .col-right {
-      flex: 1;
-    }
-
-    /* Tabla de productos/barriles */
-    .tabla-items {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 30px;
-    }
-
-    .tabla-items th, 
-    .tabla-items td {
-      border: 1px solid #ddd;
-      padding: 10px;
-      text-align: left;
-      font-size: 14px;
-    }
-
-    .tabla-items th {
-      background-color: #f8f8f8;
-      font-weight: bold;
-      color: #000;
-    }
-
-    .text-center {
-      text-align: center;
-    }
-
-    /* Firma y observaciones */
-    .footer-section {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      margin-top: 40px;
-      padding-top: 20px;
-    }
-
-    .observaciones {
-      width: 55%;
-    }
-
-    .observaciones textarea {
-      width: 100%;
-      height: 80px;
-      padding: 8px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      resize: none;
-      font-size: 13px;
-    }
-
-    .firma-box {
-      width: 35%;
-      border-top: 1px dashed #000;
-      text-align: center;
-      padding-top: 8px;
-      font-size: 13px;
-      font-weight: bold;
-    }
-
-    /* Ocultar elementos innecesarios al imprimir */
-    @media print {
-      body {
-        background-color: #fff;
-        padding: 0;
-      }
-      .remito-container {
-        border: none;
-        box-shadow: none;
-        width: 100%;
-        max-width: 100%;
-        padding: 0;
-      }
-      input, textarea {
-        border: none !important;
-        background: transparent !important;
-      }
-    }
-  </style>
+        /* Estilos específicos para Impresión / PDF del Remito */
+        @media print {
+            .no-print { display: none !important; }
+            body { background-color: white !important; color: black !important; }
+            .remito-container { border: none !important; box-shadow: none !important; width: 100% !important; }
+        }
+    </style>
 </head>
-<body>
+<body class="pb-12">
 
-  <div class="remito-container">
-    
-    <!-- ENCABEZADO CON LOGO Y MARCA EN NEGRO -->
-    <header class="header">
-      <div class="brand-section">
-        <!-- Reemplazá 'logo.png' por la ruta/nombre de tu archivo de imagen en la carpeta del proyecto -->
-        <img src="logo.png" alt="Logo Albardón" class="logo">
-        <span class="marca-nombre">Albardón</span>
-      </div>
-      <div class="remito-tipo">
-        <span class="letra-r">R</span>
-        <p>REMITO</p>
-      </div>
+    <!-- HEADER / NAVEGACIÓN -->
+    <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50 shadow-lg no-print">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <img src="logo.png" alt="Logo Albardón" class="h-10 w-10 object-contain rounded-full bg-slate-900 border border-slate-700">
+                <div>
+                    <h1 class="text-xl font-bold tracking-wider text-white">ALBARDÓN</h1>
+                    <span class="text-xs text-slate-400 block font-normal">Sistema Integral de Gestión</span>
+                </div>
+            </div>
+            <nav class="flex space-x-2 mt-4 sm:mt-0 overflow-x-auto pb-1 sm:pb-0">
+                <button onclick="switchTab('recetas')" id="btn-recetas" class="tab-btn active px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-book-open"></i> Recetas
+                </button>
+                <button onclick="switchTab('coccion')" id="btn-coccion" class="tab-btn px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700 transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-clipboard-list"></i> Cocción
+                </button>
+                <button onclick="switchTab('fermentacion')" id="btn-fermentacion" class="tab-btn px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700 transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-temperature-half"></i> Fermentación
+                </button>
+                <button onclick="switchTab('stock')" id="btn-stock" class="tab-btn px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700 transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-boxes-stacked"></i> Stock Barriles
+                </button>
+                <button onclick="switchTab('cc')" id="btn-cc" class="tab-btn px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700 transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-users"></i> Cuentas Corrientes
+                </button>
+                <button onclick="switchTab('remito')" id="btn-remito" class="tab-btn px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700 transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-file-invoice"></i> Remito
+                </button>
+            </nav>
+        </div>
     </header>
 
-    <!-- DATOS DE ENTREGA Y FECHA EDITABLE -->
-    <section class="info-section">
-      <div class="col-left">
-        <div class="campo-group">
-          <label for="cliente">Cliente / Estilo / Lugar:</label>
-          <input type="text" id="cliente" placeholder="Nombre del cliente o bar">
-        </div>
-        <div class="campo-group">
-          <label for="direccion">Dirección de Entrega:</label>
-          <input type="text" id="direccion" placeholder="Calle y número">
-        </div>
-      </div>
+    <main class="max-w-7xl mx-auto px-4 py-6">
 
-      <div class="col-right">
-        <!-- Campo para seleccionar manualmente la fecha de entrega real -->
-        <div class="campo-group">
-          <label for="fecha">Fecha de Entrega:</label>
-          <input type="date" id="fecha" name="fecha">
-        </div>
-        <div class="campo-group">
-          <label for="numero-remito">N° de Remito:</label>
-          <input type="text" id="numero-remito" value="0001-00000001">
-        </div>
-      </div>
-    </section>
+        <!-- ==================== MÓDULO 1: RECETAS ==================== -->
+        <section id="tab-recetas" class="space-y-6">
+            <div class="card p-4 flex justify-between items-center no-print">
+                <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
+                    <i class="fa-solid fa-book-open"></i> Biblioteca de Recetas
+                </h2>
+                <button onclick="mostrarFormularioReceta()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 transition-colors">
+                    <i class="fa-solid fa-plus"></i> Nueva Receta Técnica
+                </button>
+            </div>
 
-    <!-- DETALLE DE BARRILES O PRODUCTOS -->
-    <table class="tabla-items">
-      <thead>
-        <tr>
-          <th class="text-center" style="width: 10%;">Cant.</th>
-          <th style="width: 60%;">Descripción / Estilo de Cerveza</th>
-          <th class="text-center" style="width: 30%;">Capacidad / Nº Barril</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><input type="number" style="width: 100%; text-align: center;" value="1"></td>
-          <td><input type="text" style="width: 100%;" placeholder="Ej: Honey / IPA / Stout"></td>
-          <td><input type="text" style="width: 100%; text-align: center;" placeholder="Ej: Barril 50L #12"></td>
-        </tr>
-        <tr>
-          <td><input type="number" style="width: 100%; text-align: center;"></td>
-          <td><input type="text" style="width: 100%;"></td>
-          <td><input type="text" style="width: 100%; text-align: center;"></td>
-        </tr>
-        <tr>
-          <td><input type="number" style="width: 100%; text-align: center;"></td>
-          <td><input type="text" style="width: 100%;"></td>
-          <td><input type="text" style="width: 100%; text-align: center;"></td>
-        </tr>
-      </tbody>
-    </table>
+            <!-- MODAL / PANEL COMPLETO DE RECETA -->
+            <div id="form-receta-panel" class="card p-6 space-y-6 hidden border-amber-500/50 no-print">
+                <h3 class="text-base font-bold text-amber-400 uppercase tracking-wider border-b border-slate-700 pb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-sliders"></i> Configuración Técnica de Receta
+                </h3>
+                
+                <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-3 text-xs bg-slate-900/60 p-4 rounded-xl border border-slate-700/80">
+                    <div class="col-span-2">
+                        <label class="text-slate-400 block mb-1">Nombre / Estilo</label>
+                        <input type="text" id="rec-nombre" placeholder="ej. APA Pilsen 280" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-bold text-slate-200">
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1">Batch (Lts)</label>
+                        <input type="number" id="rec-batch" placeholder="280" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-mono text-amber-400 font-bold">
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1">D.I. (OG)</label>
+                        <input type="text" id="rec-di" placeholder="1.052" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-mono">
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1">D.F. (FG)</label>
+                        <input type="text" id="rec-df" placeholder="1.013" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-mono">
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1">ABV %</label>
+                        <input type="text" id="rec-abv" placeholder="5.1" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-mono text-emerald-400 font-bold">
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1">IBU</label>
+                        <input type="number" id="rec-ibu" placeholder="33.8" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-mono">
+                    </div>
+                </div>
 
-    <!-- OBSERVACIONES Y FIRMA -->
-    <footer class="footer-section">
-      <div class="observaciones">
-        <div class="campo-group">
-          <label for="obs">Observaciones / Estado del barril:</label>
-          <textarea id="obs" placeholder="Aclaraciones sobre la entrega, devolución de conector, etc."></textarea>
-        </div>
-      </div>
-      <div class="firma-box">
-        Firma y Aclaración de Conformidad
-      </div>
-    </footer>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                    <div>
+                        <label class="text-slate-400 block mb-1">Color (SRM)</label>
+                        <input type="text" id="rec-srm" placeholder="6.2" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1">Eficiencia (%)</label>
+                        <input type="number" id="rec-eficiencia" placeholder="73" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1">Levadura (Cepa y Cantidad)</label>
+                        <input type="text" id="rec-levadura" placeholder="US-05 (200 grs)" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+                    </div>
+                </div>
 
-  </div>
+                <!-- SECCIÓN AGUA, MACERADO Y LAVADO -->
+                <div class="space-y-4 bg-slate-900/40 p-4 rounded-xl border border-slate-700">
+                    <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-droplet"></i> Parámetros de Agua, Macerado y Lavado
+                    </h4>
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-3 text-xs">
+                        <div><label class="text-slate-400">AGUA MACERADO (LTS)</label><input type="number" id="rec-agua-ini" placeholder="195" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
+                        <div><label class="text-slate-400">T° AGUA INICIAL</label><input type="text" id="rec-temp-agua-ini" placeholder="73 °C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
+                        <div><label class="text-slate-400">T° MACERADO</label><input type="text" id="rec-temp-mac" placeholder="66 °C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
+                        <div><label class="text-slate-400">AGUA LAVADO (LTS)</label><input type="number" id="rec-agua-lav" placeholder="173" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
+                        <div><label class="text-slate-400">T° AGUA LAVADO</label><input type="text" id="rec-temp-lav" placeholder="75 °C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
+                    </div>
 
-  <script>
-    // Asigna automáticamente la fecha del día de hoy por defecto, 
-    // pero permite cambiarla en todo momento antes de imprimir o guardar.
-    document.addEventListener('DOMContentLoaded', () => {
-      const fechaInput = document.getElementById('fecha');
-      const hoy = new Date().toISOString().split('T')[0];
-      fechaInput.value = hoy;
-    });
-  </script>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                        <div class="space-y-2 bg-slate-950/40 p-3 rounded-lg border border-slate-800">
+                            <div class="flex justify-between items-center border-b border-slate-800 pb-1">
+                                <label class="text-xs font-bold text-amber-300 uppercase">Sales de Macerado</label>
+                                <button onclick="agregarFilaSal('macerado')" class="text-[11px] text-amber-400 hover:underline flex items-center gap-1"><i class="fa-solid fa-plus"></i> Agregar Sal</button>
+                            </div>
+                            <div id="rec-sales-mac-inputs" class="space-y-2"></div>
+                        </div>
 
+                        <div class="space-y-2 bg-slate-950/40 p-3 rounded-lg border border-slate-800">
+                            <div class="flex justify-between items-center border-b border-slate-800 pb-1">
+                                <label class="text-xs font-bold text-amber-300 uppercase">Sales de Lavado</label>
+                                <button onclick="agregarFilaSal('lavado')" class="text-[11px] text-amber-400 hover:underline flex items-center gap-1"><i class="fa-solid fa-plus"></i> Agregar Sal</button>
+                            </div>
+                            <div id="rec-sales-lav-inputs" class="space-y-2"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN HERVIDO Y ENFRIADO -->
+                <div class="space-y-3 bg-slate-900/40 p-4 rounded-xl border border-slate-700">
+                    <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-fire"></i> Parámetros de Hervido y Enfriado
+                    </h4>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 text-xs">
+                        <div><label class="text-slate-400">DENS. PRE-HERVOR</label><input type="text" id="rec-dens-pre" placeholder="1.049" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1 font-mono"></div>
+                        <div><label class="text-slate-400">LTS PRE-HERVOR</label><input type="number" id="rec-lts-pre" placeholder="310" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1 font-mono"></div>
+                        <div><label class="text-slate-400">TIEMPO HERVOR (MIN)</label><input type="number" id="rec-tiempo-hervor" placeholder="60" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
+                        <div><label class="text-slate-400">EVAPORACIÓN (%)</label><input type="number" id="rec-evaporacion" placeholder="6" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
+                        <div><label class="text-slate-400">PÉRDIDA TRUB (LTS)</label><input type="number" id="rec-trub" placeholder="10" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
+                        <div><label class="text-slate-400">TIEMPO ENFRIADO (MIN)</label><input type="number" id="rec-tiempo-enfriado" placeholder="30" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
+                    </div>
+                </div>
+
+                <!-- GRANOS & LÚPULOS -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-slate-300 uppercase block">Maltas / Granos</label>
+                        <div id="rec-granos-inputs" class="space-y-2"></div>
+                        <button onclick="agregarFilaGrano()" class="text-xs text-amber-400 hover:underline flex items-center gap-1"><i class="fa-solid fa-plus"></i> Agregar Malta</button>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-slate-300 uppercase block">Lúpulos</label>
+                        <div id="rec-lupulos-inputs" class="space-y-2"></div>
+                        <button onclick="agregarFilaLupulo()" class="text-xs text-amber-400 hover:underline flex items-center gap-1"><i class="fa-solid fa-plus"></i> Agregar Lúpulo</button>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-2 border-t border-slate-700">
+                    <button onclick="ocultarFormularioReceta()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-bold px-4 py-2 rounded-lg">Cancelar</button>
+                    <button onclick="guardarReceta()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold px-4 py-2 rounded-lg">Guardar Receta Completa</button>
+                </div>
+            </div>
+
+            <div id="grilla-recetas" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+        </section>
+
+        <!-- ==================== MÓDULO 2: COCCIÓN ==================== -->
+        <section id="tab-coccion" class="space-y-6 hidden">
+            <div class="card p-4 flex flex-wrap justify-between items-center gap-4 no-print">
+                <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
+                    <i class="fa-solid fa-clipboard-list"></i> Planilla Digital de Cocción
+                </h2>
+                <div class="flex items-center gap-3">
+                    <label class="text-sm text-slate-300 font-medium">Cargar Receta Base:</label>
+                    <select id="select-receta" onchange="cargarRecetaEnCoccion()" class="bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-lg p-2">
+                    </select>
+                    <button onclick="descargarCoccionPDF()" title="Descargar Planilla en PDF" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-2 rounded-lg text-xs flex items-center gap-1">
+                        <i class="fa-solid fa-file-pdf"></i> Generar PDF
+                    </button>
+                </div>
+            </div>
+
+            <div id="area-impresion-coccion" class="space-y-6">
+                <div class="card p-4 space-y-3">
+                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Encabezado</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div><label class="text-xs text-slate-400">ESTILO</label><input type="text" id="coc-estilo" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                        <div><label class="text-xs text-slate-400">FECHA</label><input type="date" id="coc-fecha" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                        <div><label class="text-xs text-slate-400">N° LOTE</label><input type="text" id="coc-lote" value="L-2026-01" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-mono text-amber-400 mt-1"></div>
+                    </div>
+                </div>
+
+                <div class="card p-4 space-y-3">
+                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Olla de Agua</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+                        <div><label class="text-slate-400">INICIO LLENADO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                        <div><label class="text-slate-400">FIN LLENADO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                        <div><label class="text-slate-400">LITROS</label><input type="number" id="coc-agua-lts" placeholder="Lts" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                        <div><label class="text-slate-400">T° AGUA</label><input type="text" id="coc-agua-temp" placeholder="°C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                        <div><label class="text-slate-400">T° OBJETIVO</label><input type="text" placeholder="°C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                        <div><label class="text-slate-400">PH AGUA</label><input type="text" placeholder="pH" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                        <div class="col-span-2"><label class="text-slate-400">AGREGADO SALES (grs)</label><input type="text" id="coc-sales" placeholder="Sales adicionadas" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                    </div>
+                </div>
+
+                <div class="card p-4 space-y-3">
+                    <div class="flex justify-between items-center border-b border-slate-700 pb-1">
+                        <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Granos / Molienda</h3>
+                        <span id="total-granos" class="text-sm font-mono text-amber-400 bg-slate-900 px-3 py-1 rounded border border-slate-700">KGS TOTALES: 0 kg</span>
+                    </div>
+                    <div id="contenedor-granos" class="space-y-2">
+                        <p class="text-xs text-slate-500 italic">Seleccione una receta para cargar los granos automáticamente.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="card p-4 space-y-3">
+                        <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Macerado / Recirculado</h3>
+                        <div class="grid grid-cols-2 gap-3 text-xs">
+                            <div><label class="text-slate-400">COMIENZO LLENADO + MALTAS</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            <div><label class="text-slate-400">FIN LLENADO + MALTAS</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            <div><label class="text-slate-400">COMIENZO MACERADO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            <div><label class="text-slate-400">FIN MACERADO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            <div><label class="text-slate-400">PH MIN. 15</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            <div><label class="text-slate-400">PH MIN. 60</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            <div class="col-span-2"><label class="text-slate-400">1° MOSTO (DENSIDAD)</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 font-mono text-amber-400"></div>
+                            <div><label class="text-slate-400">RECIRCULADO COMIENZO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            <div><label class="text-slate-400">RECIRCULADO FIN</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                        </div>
+                    </div>
+
+                    <div class="card p-4 space-y-3">
+                        <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Lavado</h3>
+                        <div class="grid grid-cols-3 gap-3 text-xs">
+                            <div><label class="text-slate-400">LLENADO INICIO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            <div><label class="text-slate-400">LLENADO FIN</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            <div><label class="text-slate-400">LITROS</label><input type="number" id="coc-agua-lav-lts" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            <div><label class="text-slate-400">T° AGUA</label><input type="text" id="coc-temp-lav" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            <div><label class="text-slate-400">T° OBJETIVO</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            <div><label class="text-slate-400">PH</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            <div><label class="text-slate-400">COMIENZO LAVADO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            <div><label class="text-slate-400">FIN LAVADO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            <div><label class="text-slate-400">SALES (grs)</label><input type="text" id="coc-sales-lav" placeholder="grs" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card p-4 space-y-3">
+                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Hervido</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+                        <div><label class="text-slate-400">ENCENDIDO OLLA</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                        <div><label class="text-slate-400">LTS ANTES HERVOR</label><input type="number" id="coc-lts-pre" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 font-mono"></div>
+                        <div><label class="text-slate-400">PH ANTES HERVOR</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                        <div><label class="text-slate-400">DENS. ANTES HERVOR</label><input type="text" id="coc-dens-pre" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 font-mono"></div>
+                        <div><label class="text-slate-400">COMIENZO HERVOR</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                        <div><label class="text-slate-400">LTS DESPUES HERVOR</label><input type="number" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                        <div><label class="text-slate-400">PH DESPUES HERVOR</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                        <div>
+                            <label class="text-amber-400 font-bold">D.I. REAL (DESPUES HERVOR)</label>
+                            <input type="text" id="di-real-coccion" placeholder="ej. 1.048" class="w-full bg-slate-900 border border-amber-500/50 rounded p-2 text-sm mt-1 font-mono text-amber-400 font-bold">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card p-4 space-y-3">
+                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Lúpulos</h3>
+                    <div id="contenedor-lupulos" class="space-y-2">
+                        <p class="text-xs text-slate-500 italic">Seleccione una receta para autocompletar adiciones de lúpulo.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-6">
+                        <div class="card p-4 space-y-3">
+                            <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Varios</h3>
+                            <div class="grid grid-cols-2 gap-3 text-xs">
+                                <div><label class="text-slate-400">IRISH MOSS (CANT)</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                                <div><label class="text-slate-400">IRISH MOSS (HORA)</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                                <div><label class="text-slate-400">NUTRIENTE LEVA (CANT)</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                                <div><label class="text-slate-400">NUTRIENTE LEVA (HORA)</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            </div>
+                        </div>
+
+                        <div class="card p-4 space-y-3">
+                            <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Whirlpool y Reposo</h3>
+                            <div class="grid grid-cols-2 gap-3 text-xs">
+                                <div><label class="text-slate-400">WP COMIENZO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                                <div><label class="text-slate-400">WP T° / VELOC</label><input type="text" placeholder="T° / RPM" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                                <div><label class="text-slate-400">REPOSO COMIENZO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                                <div><label class="text-slate-400">REPOSO FIN</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div class="card p-4 space-y-3">
+                            <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Enfriado</h3>
+                            <div class="grid grid-cols-2 gap-3 text-xs">
+                                <div><label class="text-slate-400">COMIENZO / FIN</label><input type="text" placeholder="00:00 - 00:00" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                                <div><label class="text-slate-400">T° ENTRADA / SALIDA</label><input type="text" placeholder="Entrada / Salida °C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            </div>
+                        </div>
+
+                        <div class="card p-4 space-y-3">
+                            <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Inoculación</h3>
+                            <div class="grid grid-cols-2 gap-3 text-xs">
+                                <div><label class="text-slate-400">HORA INOCULACIÓN</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                                <div><label class="text-slate-400">T° MOSTO</label><input type="text" placeholder="°C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                                <div class="col-span-2"><label class="text-slate-400">CANTIDAD / LEVADURA</label><input type="text" id="coc-levadura" placeholder="Cepa y Gramos adicionados" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="guardarCoccion()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg transition-colors no-print mt-6">
+                <i class="fa-solid fa-floppy-disk"></i> Guardar Cocción y Pasar a Fermentación
+            </button>
+        </section>
+
+        <!-- ==================== MÓDULO 3: FERMENTACIÓN ==================== -->
+        <section id="tab-fermentacion" class="space-y-6 hidden">
+            <div class="card p-4 flex flex-wrap justify-between items-center gap-4 no-print">
+                <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
+                    <i class="fa-solid fa-temperature-half"></i> Control de Fermentación
+                </h2>
+                <div class="flex items-center gap-3">
+                    <span class="text-xs font-mono bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/20">Fermentador #1 (Activo)</span>
+                    <button onclick="descargarFermentacionPDF()" title="Descargar Planilla de Fermentación en PDF" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-2 rounded-lg text-xs flex items-center gap-1">
+                        <i class="fa-solid fa-file-pdf"></i> Generar PDF
+                    </button>
+                </div>
+            </div>
+
+            <div id="area-impresion-fermentacion" class="space-y-6">
+                <div class="card p-4 space-y-3">
+                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Información General del Batch</h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+                        <div><label class="text-slate-400">ESTILO / CERVEZA</label><input type="text" id="ferm-estilo" value="APA Pilsen 280" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-bold text-slate-200 mt-1"></div>
+                        <div><label class="text-slate-400">N° LOTE</label><input type="text" id="ferm-lote" value="L-2026-01" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-mono text-amber-400 mt-1"></div>
+                        <div><label class="text-slate-400">FECHA INOCULACIÓN</label><input type="date" id="ferm-fecha" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                        <div><label class="text-slate-400">D.I. MEDIDA</label><input type="text" id="ferm-di" value="1.050" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-mono text-amber-400 mt-1"></div>
+                    </div>
+                </div>
+
+                <div class="card p-4 space-y-3">
+                    <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+                        <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Planilla Diaria de Monitoreo</h3>
+                        <button onclick="agregarFilaFermentacion()" class="bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs px-3 py-1 rounded border border-slate-700 flex items-center gap-1 no-print">
+                            <i class="fa-solid fa-plus"></i> Registrar Medición
+                        </button>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-slate-900 text-slate-400 border-b border-slate-700">
+                                    <th class="p-2">Fecha/Hora</th>
+                                    <th class="p-2">Día #</th>
+                                    <th class="p-2">Temp (°C)</th>
+                                    <th class="p-2">Densidad / Brix</th>
+                                    <th class="p-2">Acción / Dry Hop / Purga</th>
+                                    <th class="p-2 text-center no-print">Eliminar</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-fermentacion-body" class="divide-y divide-slate-800 text-slate-200">
+                                <tr>
+                                    <td class="p-2"><input type="datetime-local" class="bg-slate-900 border border-slate-700 rounded p-1 text-xs"></td>
+                                    <td class="p-2"><input type="number" value="1" class="w-12 bg-slate-900 border border-slate-700 rounded p-1 text-xs font-mono"></td>
+                                    <td class="p-2"><input type="text" value="18.5" class="w-16 bg-slate-900 border border-slate-700 rounded p-1 text-xs"></td>
+                                    <td class="p-2"><input type="text" value="1.050" class="w-20 bg-slate-900 border border-slate-700 rounded p-1 text-xs font-mono text-amber-400"></td>
+                                    <td class="p-2"><input type="text" value="Inoculación de levadura" class="w-full bg-slate-900 border border-slate-700 rounded p-1 text-xs"></td>
+                                    <td class="p-2 text-center no-print"><button onclick="eliminarFila(this)" class="text-rose-400 hover:text-rose-300"><i class="fa-solid fa-trash"></i></button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== MÓDULO 4: STOCK BARRILES ==================== -->
+        <section id="tab-stock" class="space-y-6 hidden">
+            <div class="card p-4 flex justify-between items-center no-print">
+                <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
+                    <i class="fa-solid fa-boxes-stacked"></i> Control de Stock de Barriles
+                </h2>
+                <button onclick="mostrarFormBarril()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 transition-colors">
+                    <i class="fa-solid fa-plus"></i> Registrar Barril
+                </button>
+            </div>
+
+            <div id="form-barril-panel" class="card p-4 space-y-4 hidden border-amber-500/50 no-print">
+                <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider border-b border-slate-700 pb-2">Nuevo Barril en Planta</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs">
+                    <div>
+                        <label class="text-slate-400 block mb-1">Código / N° Barril</label>
+                        <input type="text" id="barril-codigo" placeholder="ej. B-50-012" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-bold text-slate-200">
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1">Capacidad (Litros)</label>
+                        <select id="barril-capacidad" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-slate-200">
+                            <option value="50">50 Litros</option>
+                            <option value="30">30 Litros</option>
+                            <option value="20">20 Litros</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1">Estilo Cargado</label>
+                        <input type="text" id="barril-estilo" placeholder="ej. Honey / Lleno" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-slate-200">
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1">Estado</label>
+                        <select id="barril-estado" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-slate-200">
+                            <option value="Lleno / Disponible">Lleno / Disponible</option>
+                            <option value="Vacio / En Planta">Vacío / En Planta</option>
+                            <option value="Entregado / Cliente">Entregado / En Cliente</option>
+                            <option value="En Mantenimiento">En Mantenimiento</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button onclick="ocultarFormBarril()" class="bg-slate-700 text-slate-200 text-xs px-3 py-1.5 rounded">Cancelar</button>
+                    <button onclick="guardarBarril()" class="bg-amber-500 text-slate-950 font-bold text-xs px-3 py-1.5 rounded">Guardar Barril</button>
+                </div>
+            </div>
+
+            <div class="card p-4 overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="bg-slate-900 text-slate-400 border-b border-slate-700">
+                            <th class="p-3">Código Barril</th>
+                            <th class="p-3">Capacidad</th>
+                            <th class="p-3">Estilo Contenido</th>
+                            <th class="p-3">Estado</th>
+                            <th class="p-3 text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-barriles-body" class="divide-y divide-slate-800 text-slate-200">
+                        <tr>
+                            <td class="p-3 font-mono font-bold text-amber-400">B-50-001</td>
+                            <td class="p-3">50 LTS</td>
+                            <td class="p-3">Golden Ale</td>
+                            <td class="p-3"><span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full text-[11px]">Lleno / Disponible</span></td>
+                            <td class="p-3 text-right">
+                                <button onclick="eliminarFilaTabla(this)" class="text-rose-400 hover:text-rose-300"><i class="fa-solid fa-trash"></i></button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-mono font-bold text-amber-400">B-50-002</td>
+                            <td class="p-3">50 LTS</td>
+                            <td class="p-3">IPA Pilsen</td>
+                            <td class="p-3"><span class="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded-full text-[11px]">Entregado / Cliente</span></td>
+                            <td class="p-3 text-right">
+                                <button onclick="eliminarFilaTabla(this)" class="text-rose-400 hover:text-rose-300"><i class="fa-solid fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ==================== MÓDULO 5: CUENTAS CORRIENTES ==================== -->
+        <section id="tab-cc" class="space-y-6 hidden">
+            <div class="card p-4 flex justify-between items-center no-print">
+                <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
+                    <i class="fa-solid fa-users"></i> Cuentas Corrientes y Clientes
+                </h2>
+                <button onclick="mostrarFormCliente()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 transition-colors">
+                    <i class="fa-solid fa-plus"></i> Nuevo Cliente / Bar
+                </button>
+            </div>
+
+            <div id="form-cliente-panel" class="card p-4 space-y-4 hidden border-amber-500/50 no-print">
+                <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider border-b border-slate-700 pb-2">Registrar Cliente</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                    <div>
+                        <label class="text-slate-400 block mb-1">Nombre Comercial / Bar</label>
+                        <input type="text" id="cli-nombre" placeholder="ej. Bar El Barril" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-bold text-slate-200">
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1">Dirección / Localidad</label>
+                        <input type="text" id="cli-direccion" placeholder="ej. Av. Pellegrini 1234" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-slate-200">
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1">Contacto / Teléfono</label>
+                        <input type="text" id="cli-telefono" placeholder="ej. 341-555555" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-slate-200">
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button onclick="ocultarFormCliente()" class="bg-slate-700 text-slate-200 text-xs px-3 py-1.5 rounded">Cancelar</button>
+                    <button onclick="guardarCliente()" class="bg-amber-500 text-slate-950 font-bold text-xs px-3 py-1.5 rounded">Guardar Cliente</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="card p-4 space-y-3">
+                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Listado de Clientes</h3>
+                    <div class="space-y-2" id="lista-clientes-cc">
+                        <div class="p-3 bg-slate-900 rounded-lg border border-slate-700/80 flex justify-between items-center cursor-pointer hover:border-amber-500 transition-colors" onclick="seleccionarCliente('Bar El Barril', -15000, 2)">
+                            <div>
+                                <h4 class="font-bold text-slate-200 text-sm">Bar El Barril</h4>
+                                <span class="text-xs text-slate-400 block">Av. Pellegrini 1234</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs text-rose-400 font-mono font-bold block">-$15.000</span>
+                                <span class="text-[10px] text-slate-400">2 Barriles Prestados</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card p-4 space-y-4">
+                    <div class="border-b border-slate-700 pb-2 flex justify-between items-center">
+                        <h3 class="text-sm font-semibold text-amber-400 uppercase tracking-wider" id="cc-cliente-titulo">Detalle de Cuenta: Bar El Barril</h3>
+                        <button onclick="mostrarFormMovimiento()" class="bg-amber-500 text-slate-950 font-bold px-2.5 py-1 rounded text-xs">
+                            <i class="fa-solid fa-plus"></i> Movimiento
+                        </button>
+                    </div>
+
+                    <div id="form-movimiento-panel" class="hidden p-3 bg-slate-900 rounded-lg border border-slate-700 space-y-3 text-xs">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="text-slate-400 block mb-1">Tipo Movimiento</label>
+                                <select id="mov-tipo" class="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-slate-200">
+                                    <option value="Entrega Cerveza (Debe)">Entrega Cerveza (Debe)</option>
+                                    <option value="Pago / Entrega Efectivo (Haber)">Pago / Entrega Efectivo (Haber)</option>
+                                    <option value="Devolución Barril Vacío">Devolución Barril Vacío</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-slate-400 block mb-1">Monto ($)</label>
+                                <input type="number" id="mov-monto" placeholder="0" class="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-slate-200">
+                            </div>
+                        </div>
+                        <button onclick="guardarMovimientoCC()" class="w-full bg-amber-500 text-slate-950 font-bold py-1.5 rounded">Registrar</button>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-slate-900 text-slate-400 border-b border-slate-700">
+                                    <th class="p-2">Fecha</th>
+                                    <th class="p-2">Concepto</th>
+                                    <th class="p-2 text-right">Debe</th>
+                                    <th class="p-2 text-right">Haber</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800 text-slate-200" id="cc-historial-body">
+                                <tr>
+                                    <td class="p-2">12/09/2026</td>
+                                    <td class="p-2">Entrega 2x Barriles 50L (IPA)</td>
+                                    <td class="p-2 text-right text-rose-400 font-mono">$30.000</td>
+                                    <td class="p-2 text-right text-emerald-400 font-mono">-</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-2">14/09/2026</td>
+                                    <td class="p-2">Pago Efectivo / Transferencia</td>
+                                    <td class="p-2 text-right text-rose-400 font-mono">-</td>
+                                    <td class="p-2 text-right text-emerald-400 font-mono">$15.000</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== MÓDULO 6: REMITO DIGITAL ==================== -->
+        <section id="tab-remito" class="space-y-6 hidden">
+            <div class="card p-4 flex justify-between items-center no-print">
+                <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
+                    <i class="fa-solid fa-file-invoice"></i> Generador de Remitos
+                </h2>
+                <div class="flex gap-2">
+                    <button onclick="window.print()" class="bg-slate-700 hover:bg-slate-600 text-white font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 transition-colors">
+                        <i class="fa-solid fa-print"></i> Imprimir
+                    </button>
+                    <button onclick="descargarRemitoPDF()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 transition-colors">
+                        <i class="fa-solid fa-file-pdf"></i> Generar PDF
+                    </button>
+                </div>
+            </div>
+
+            <!-- HOJA DE REMITO FORMATO BLANCO IMPRESIÓN -->
+            <div id="area-impresion-remito" class="remito-container max-w-3xl mx-auto bg-white text-slate-900 p-8 rounded-xl shadow-2xl border border-slate-200">
+                <!-- ENCABEZADO REMITO -->
+                <div class="flex justify-between items-start border-b-2 border-slate-900 pb-4 mb-6">
+                    <div class="flex items-center gap-4">
+                        <img src="logo.png" alt="Logo Albardón" class="h-16 w-16 object-contain">
+                        <div>
+                            <h1 class="text-2xl font-black tracking-widest text-black">ALBARDÓN</h1>
+                            <p class="text-xs text-slate-600 font-medium">Cerveza Artesanal Santafesina</p>
+                            <p class="text-[10px] text-slate-500">Santa Fe, Argentina</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="inline-block border-2 border-black px-4 py-1 mb-1">
+                            <span class="text-xl font-black">R</span>
+                        </div>
+                        <p class="text-xs font-bold uppercase text-slate-700">Remito de Entrega</p>
+                    </div>
+                </div>
+
+                <!-- DATOS DEL CLIENTE Y FECHA -->
+                <div class="grid grid-cols-2 gap-4 text-xs mb-6 bg-slate-50 p-4 rounded-lg border border-slate-200">
+                    <div>
+                        <label class="font-bold text-slate-700 uppercase block mb-1">Cliente / Bar / Destino:</label>
+                        <input type="text" placeholder="Nombre del cliente o bar" class="w-full bg-white border border-slate-300 rounded p-1.5 text-sm text-slate-900 font-semibold focus:outline-amber-500">
+                    </div>
+                    <div>
+                        <label class="font-bold text-slate-700 uppercase block mb-1">Fecha de Entrega:</label>
+                        <input type="date" id="remito-fecha" class="w-full bg-white border border-slate-300 rounded p-1.5 text-sm text-slate-900 font-mono focus:outline-amber-500">
+                    </div>
+                    <div>
+                        <label class="font-bold text-slate-700 uppercase block mb-1">Dirección de Entrega:</label>
+                        <input type="text" placeholder="Calle y número" class="w-full bg-white border border-slate-300 rounded p-1.5 text-sm text-slate-900 focus:outline-amber-500">
+                    </div>
+                    <div>
+                        <label class="font-bold text-slate-700 uppercase block mb-1">N° de Remito:</label>
+                        <input type="text" value="0001-00000001" class="w-full bg-white border border-slate-300 rounded p-1.5 text-sm text-slate-900 font-mono font-bold focus:outline-amber-500">
+                    </div>
+                </div>
+
+                <!-- TABLA DE DETALLE DE DETALLES/ITEMS -->
+                <div class="mb-6">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="border-b-2 border-slate-900 text-slate-800 uppercase font-bold">
+                                <th class="py-2 w-16">Cant.</th>
+                                <th class="py-2">Descripción / Estilo de Cerveza</th>
+                                <th class="py-2 w-48">Capacidad / N° Barril</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200" id="remito-items-body">
+                            <tr>
+                                <td class="py-2"><input type="number" value="1" class="w-12 border border-slate-300 rounded p-1 text-center font-bold"></td>
+                                <td class="py-2"><input type="text" placeholder="Ej: Honey / IPA / Stout" class="w-full border border-slate-300 rounded p-1"></td>
+                                <td class="py-2"><input type="text" placeholder="Ej: Barril 50L #12" class="w-full border border-slate-300 rounded p-1"></td>
+                            </tr>
+                            <tr>
+                                <td class="py-2"><input type="number" value="1" class="w-12 border border-slate-300 rounded p-1 text-center font-bold"></td>
+                                <td class="py-2"><input type="text" placeholder="Ej: Honey / IPA / Stout" class="w-full border border-slate-300 rounded p-1"></td>
+                                <td class="py-2"><input type="text" placeholder="Ej: Barril 50L #12" class="w-full border border-slate-300 rounded p-1"></td>
+                            </tr>
+                            <tr>
+                                <td class="py-2"><input type="number" value="1" class="w-12 border border-slate-300 rounded p-1 text-center font-bold"></td>
+                                <td class="py-2"><input type="text" placeholder="Ej: Honey / IPA / Stout" class="w-full border border-slate-300 rounded p-1"></td>
+                                <td class="py-2"><input type="text" placeholder="Ej: Barril 50L #12" class="w-full border border-slate-300 rounded p-1"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <button onclick="agregarFilaRemito()" class="mt-2 text-xs text-slate-600 font-bold hover:underline flex items-center gap-1 no-print">
+                        <i class="fa-solid fa-plus"></i> Agregar Fila
+                    </button>
+                </div>
+
+                <!-- OBSERVACIONES Y FIRMAS -->
+                <div class="space-y-6">
+                    <div>
+                        <label class="font-bold text-slate-700 text-xs uppercase block mb-1">Observaciones / Estado del barril:</label>
+                        <textarea placeholder="Aclaraciones sobre la entrega, devolución de conector, etc." class="w-full border border-slate-300 rounded p-2 text-xs h-16 text-slate-900"></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-12 pt-12 text-center text-xs">
+                        <div class="border-t border-slate-400 pt-2">
+                            <p class="font-bold text-slate-800">Recibió Conforme (Firma y Aclaración)</p>
+                            <p class="text-[10px] text-slate-500">DNI / Bar</p>
+                        </div>
+                        <div class="border-t border-slate-400 pt-2">
+                            <p class="font-bold text-slate-800">Entregado por Albardón</p>
+                            <p class="text-[10px] text-slate-500">Firma Responsable</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- LOGICA JAVASCRIPT INTEGRADA -->
+    <script>
+        // ESTADO GLOBAL DE APLICACIÓN
+        let recetas = [
+            {
+                nombre: "APA Pilsen 280",
+                batch: 280,
+                di: "1.052",
+                df: "1.013",
+                abv: "5.1%",
+                ibu: 33.8,
+                srm: "6.2",
+                eficiencia: 73,
+                aguaIni: 195,
+                tempAguaIni: "73 °C",
+                tempMac: "66 °C",
+                aguaLav: 173,
+                tempLav: "75 °C",
+                salesMac: ["Sulfato de Calcio: 25 grs", "Cloruro de Calcio: 15 grs"],
+                salesLav: ["Sulfato de Calcio: 20 grs"],
+                densPre: "1.049",
+                ltsPre: 310,
+                tiempoHervor: 60,
+                evaporacion: 6,
+                trub: 10,
+                tiempoEnfriado: 30,
+                granos: [
+                    { nombre: "Malta Pilsen", cantidad: 55, unidad: "kg" },
+                    { nombre: "Malta Munich", cantidad: 5, unidad: "kg" }
+                ],
+                lupulos: [
+                    { nombre: "Cascade", cantidad: 150, tiempo: "60 min", ibu: 18 },
+                    { nombre: "Mosaic", cantidad: 200, tiempo: "0 min", ibu: 15.8 }
+                ],
+                levadura: "US-05 (200 grs)"
+            }
+        ];
+
+        // INICIALIZACIÓN
+        document.addEventListener('DOMContentLoaded', () => {
+            renderizarRecetas();
+            poblarSelectRecetas();
+            setearFechaHoy();
+        });
+
+        function setearFechaHoy() {
+            const hoy = new Date().toISOString().split('T')[0];
+            const elemCoc = document.getElementById('coc-fecha');
+            const elemFerm = document.getElementById('ferm-fecha');
+            const elemRem = document.getElementById('remito-fecha');
+            if(elemCoc) elemCoc.value = hoy;
+            if(elemFerm) elemFerm.value = hoy;
+            if(elemRem) elemRem.value = hoy;
+        }
+
+        // NAVEGACIÓN ENTRE PESTAÑAS
+        function switchTab(tabId) {
+            const tabs = ['recetas', 'coccion', 'fermentacion', 'stock', 'cc', 'remito'];
+            tabs.forEach(id => {
+                const sec = document.getElementById(`tab-${id}`);
+                const btn = document.getElementById(`btn-${id}`);
+                if (sec) sec.classList.add('hidden');
+                if (btn) {
+                    btn.classList.remove('active');
+                    btn.classList.add('text-slate-300');
+                }
+            });
+
+            const secActiva = document.getElementById(`tab-${tabId}`);
+            const btnActivo = document.getElementById(`btn-${tabId}`);
+            if (secActiva) secActiva.classList.remove('hidden');
+            if (btnActivo) {
+                btnActivo.classList.add('active');
+                btnActivo.classList.remove('text-slate-300');
+            }
+        }
+
+        // LÓGICA DE RECETAS
+        function renderizarRecetas() {
+            const container = document.getElementById('grilla-recetas');
+            container.innerHTML = '';
+
+            recetas.forEach((rec, index) => {
+                const card = document.createElement('div');
+                card.className = 'card p-5 space-y-4 border-slate-700/80';
+                card.innerHTML = `
+                    <div class="flex justify-between items-start border-b border-slate-700 pb-3">
+                        <div>
+                            <h3 class="text-lg font-bold text-amber-400">${rec.nombre}</h3>
+                            <span class="text-xs text-slate-400">Batch Esperado: <strong class="text-slate-200">${rec.batch} Lts</strong></span>
+                        </div>
+                        <span class="bg-amber-500/10 text-amber-400 text-xs px-2.5 py-1 rounded-full border border-amber-500/20 font-mono font-bold">${rec.abv} ABV</span>
+                    </div>
+
+                    <div class="grid grid-cols-4 gap-2 text-center text-xs bg-slate-900/60 p-2.5 rounded-lg font-mono">
+                        <div><span class="text-slate-500 block text-[10px]">OG</span><strong class="text-slate-200">${rec.di}</strong></div>
+                        <div><span class="text-slate-500 block text-[10px]">FG</span><strong class="text-slate-200">${rec.df}</strong></div>
+                        <div><span class="text-slate-500 block text-[10px]">IBU</span><strong class="text-slate-200">${rec.ibu}</strong></div>
+                        <div><span class="text-slate-500 block text-[10px]">SRM</span><strong class="text-slate-200">${rec.srm}</strong></div>
+                    </div>
+
+                    <div class="space-y-1 text-xs text-slate-300">
+                        <p><strong>Maltas:</strong> ${rec.granos.map(g => `${g.nombre} (${g.cantidad}${g.unidad})`).join(', ')}</p>
+                        <p><strong>Lúpulos:</strong> ${rec.lupulos.map(l => `${l.nombre} (${l.cantidad}g - ${l.tiempo})`).join(', ')}</p>
+                    </div>
+
+                    <div class="pt-2 flex justify-end">
+                        <button onclick="cargarRecetaSeleccionada(${index})" class="bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-1 font-medium transition-colors">
+                            <i class="fa-solid fa-arrow-right"></i> Usar en Cocción
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function mostrarFormularioReceta() {
+            document.getElementById('form-receta-panel').classList.remove('hidden');
+        }
+
+        function ocultarFormularioReceta() {
+            document.getElementById('form-receta-panel').classList.add('hidden');
+        }
+
+        function agregarFilaSal(tipo) {
+            const container = document.getElementById(`rec-sales-${tipo === 'macerado' ? 'mac' : 'lav'}-inputs`);
+            const div = document.createElement('div');
+            div.className = 'flex gap-2 items-center';
+            div.innerHTML = `
+                <input type="text" placeholder="Ej: Sulfato de Calcio (25 grs)" class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-slate-200">
+                <button onclick="this.parentElement.remove()" class="text-rose-400 hover:text-rose-300 text-xs px-1"><i class="fa-solid fa-times"></i></button>
+            `;
+            container.appendChild(div);
+        }
+
+        function agregarFilaGrano() {
+            const container = document.getElementById('rec-granos-inputs');
+            const div = document.createElement('div');
+            div.className = 'flex gap-2 items-center';
+            div.innerHTML = `
+                <input type="text" placeholder="Nombre Malta" class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-slate-200">
+                <input type="number" placeholder="Kg" class="w-20 bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-slate-200">
+                <button onclick="this.parentElement.remove()" class="text-rose-400 hover:text-rose-300 text-xs px-1"><i class="fa-solid fa-times"></i></button>
+            `;
+            container.appendChild(div);
+        }
+
+        function agregarFilaLupulo() {
+            const container = document.getElementById('rec-lupulos-inputs');
+            const div = document.createElement('div');
+            div.className = 'flex gap-2 items-center';
+            div.innerHTML = `
+                <input type="text" placeholder="Nombre Lúpulo" class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-slate-200">
+                <input type="number" placeholder="Grams" class="w-20 bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-slate-200">
+                <input type="text" placeholder="Tiempo (min)" class="w-24 bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-slate-200">
+                <button onclick="this.parentElement.remove()" class="text-rose-400 hover:text-rose-300 text-xs px-1"><i class="fa-solid fa-times"></i></button>
+            `;
+            container.appendChild(div);
+        }
+
+        function guardarReceta() {
+            const nombre = document.getElementById('rec-nombre').value;
+            if(!nombre) return alert('Por favor ingrese el nombre de la receta');
+
+            const nuevaReceta = {
+                nombre: nombre,
+                batch: document.getElementById('rec-batch').value || 0,
+                di: document.getElementById('rec-di').value || "1.000",
+                df: document.getElementById('rec-df').value || "1.000",
+                abv: (document.getElementById('rec-abv').value || "0") + "%",
+                ibu: document.getElementById('rec-ibu').value || 0,
+                srm: document.getElementById('rec-srm').value || "0",
+                eficiencia: document.getElementById('rec-eficiencia').value || 0,
+                granos: [],
+                lupulos: [],
+                levadura: document.getElementById('rec-levadura').value || ""
+            };
+
+            recetas.push(nuevaReceta);
+            renderizarRecetas();
+            poblarSelectRecetas();
+            ocultarFormularioReceta();
+            alert('Receta guardada exitosamente');
+        }
+
+        // LÓGICA DE COCCIÓN
+        function poblarSelectRecetas() {
+            const select = document.getElementById('select-receta');
+            if(!select) return;
+            select.innerHTML = '<option value="">-- Seleccionar Receta --</option>';
+            recetas.forEach((rec, idx) => {
+                select.innerHTML += `<option value="${idx}">${rec.nombre}</option>`;
+            });
+        }
+
+        function cargarRecetaSeleccionada(index) {
+            switchTab('coccion');
+            document.getElementById('select-receta').value = index;
+            cargarRecetaEnCoccion();
+        }
+
+        function cargarRecetaEnCoccion() {
+            const idx = document.getElementById('select-receta').value;
+            if (idx === "") return;
+
+            const rec = recetas[idx];
+            document.getElementById('coc-estilo').value = rec.nombre;
+            document.getElementById('coc-agua-lts').value = rec.aguaIni || '';
+            document.getElementById('coc-agua-temp').value = rec.tempAguaIni || '';
+            document.getElementById('coc-agua-lav-lts').value = rec.aguaLav || '';
+            document.getElementById('coc-temp-lav').value = rec.tempLav || '';
+            document.getElementById('coc-lts-pre').value = rec.ltsPre || '';
+            document.getElementById('coc-dens-pre').value = rec.densPre || '';
+            document.getElementById('coc-levadura').value = rec.levadura || '';
+
+            // Cargar Granos
+            const contGranos = document.getElementById('contenedor-granos');
+            contGranos.innerHTML = '';
+            let totalKgs = 0;
+            rec.granos.forEach(g => {
+                totalKgs += parseFloat(g.cantidad) || 0;
+                contGranos.innerHTML += `
+                    <div class="grid grid-cols-3 gap-2 text-xs bg-slate-900/60 p-2 rounded border border-slate-800">
+                        <span class="font-bold text-slate-200">${g.nombre}</span>
+                        <span class="text-amber-400 font-mono">${g.cantidad} ${g.unidad}</span>
+                        <input type="text" placeholder="Observaciones Molienda" class="bg-slate-950 border border-slate-800 rounded px-2 py-0.5 text-xs">
+                    </div>
+                `;
+            });
+            document.getElementById('total-granos').innerText = `KGS TOTALES: ${totalKgs} kg`;
+
+            // Cargar Lúpulos
+            const contLupulos = document.getElementById('contenedor-lupulos');
+            contLupulos.innerHTML = '';
+            rec.lupulos.forEach(l => {
+                contLupulos.innerHTML += `
+                    <div class="grid grid-cols-4 gap-2 text-xs bg-slate-900/60 p-2 rounded border border-slate-800 items-center">
+                        <span class="font-bold text-slate-200">${l.nombre}</span>
+                        <span class="text-amber-400 font-mono">${l.cantidad} grs</span>
+                        <span class="text-slate-400">${l.tiempo}</span>
+                        <input type="time" class="bg-slate-950 border border-slate-800 rounded px-2 py-0.5 text-xs">
+                    </div>
+                `;
+            });
+        }
+
+        function guardarCoccion() {
+            const estilo = document.getElementById('coc-estilo').value;
+            const lote = document.getElementById('coc-lote').value;
+            const diReal = document.getElementById('di-real-coccion').value;
+
+            if(!estilo || !lote) return alert('Por favor complete el Estilo y N° de Lote.');
+
+            document.getElementById('ferm-estilo').value = estilo;
+            document.getElementById('ferm-lote').value = lote;
+            if(diReal) document.getElementById('ferm-di').value = diReal;
+
+            switchTab('fermentacion');
+            alert('¡Cocción guardada exitosamente! Se han migrado los datos a Fermentación.');
+        }
+
+        // LÓGICA DE FERMENTACIÓN
+        function agregarFilaFermentacion() {
+            const tbody = document.getElementById('tabla-fermentacion-body');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="p-2"><input type="datetime-local" class="bg-slate-900 border border-slate-700 rounded p-1 text-xs text-slate-200"></td>
+                <td class="p-2"><input type="number" value="2" class="w-12 bg-slate-900 border border-slate-700 rounded p-1 text-xs font-mono text-slate-200"></td>
+                <td class="p-2"><input type="text" placeholder="18.0" class="w-16 bg-slate-900 border border-slate-700 rounded p-1 text-xs text-slate-200"></td>
+                <td class="p-2"><input type="text" placeholder="1.040" class="w-20 bg-slate-900 border border-slate-700 rounded p-1 text-xs font-mono text-amber-400"></td>
+                <td class="p-2"><input type="text" placeholder="Medición diaria / Purgado" class="w-full bg-slate-900 border border-slate-700 rounded p-1 text-xs text-slate-200"></td>
+                <td class="p-2 text-center no-print"><button onclick="eliminarFila(this)" class="text-rose-400 hover:text-rose-300"><i class="fa-solid fa-trash"></i></button></td>
+            `;
+            tbody.appendChild(tr);
+        }
+
+        function eliminarFila(btn) {
+            btn.closest('tr').remove();
+        }
+
+        function eliminarFilaTabla(btn) {
+            btn.closest('tr').remove();
+        }
+
+        // LÓGICA DE STOCK DE BARRILES
+        function mostrarFormBarril() {
+            document.getElementById('form-barril-panel').classList.remove('hidden');
+        }
+        function ocultarFormBarril() {
+            document.getElementById('form-barril-panel').classList.add('hidden');
+        }
+        function guardarBarril() {
+            const cod = document.getElementById('barril-codigo').value;
+            const cap = document.getElementById('barril-capacidad').value;
+            const est = document.getElementById('barril-estilo').value;
+            const estado = document.getElementById('barril-estado').value;
+
+            if(!cod) return alert('Ingrese el código del barril.');
+
+            const tbody = document.getElementById('tabla-barriles-body');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="p-3 font-mono font-bold text-amber-400">${cod}</td>
+                <td class="p-3">${cap} LTS</td>
+                <td class="p-3">${est || 'S/D'}</td>
+                <td class="p-3"><span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-full text-[11px]">${estado}</span></td>
+                <td class="p-3 text-right"><button onclick="eliminarFilaTabla(this)" class="text-rose-400 hover:text-rose-300"><i class="fa-solid fa-trash"></i></button></td>
+            `;
+            tbody.appendChild(tr);
+            ocultarFormBarril();
+        }
+
+        // LÓGICA CUENTAS CORRIENTES
+        function mostrarFormCliente() {
+            document.getElementById('form-cliente-panel').classList.remove('hidden');
+        }
+        function ocultarFormCliente() {
+            document.getElementById('form-cliente-panel').classList.add('hidden');
+        }
+        function guardarCliente() {
+            const nom = document.getElementById('cli-nombre').value;
+            const dir = document.getElementById('cli-direccion').value;
+            if(!nom) return alert('Ingrese nombre del bar.');
+
+            const lista = document.getElementById('lista-clientes-cc');
+            lista.innerHTML += `
+                <div class="p-3 bg-slate-900 rounded-lg border border-slate-700/80 flex justify-between items-center cursor-pointer hover:border-amber-500 transition-colors" onclick="seleccionarCliente('${nom}', 0, 0)">
+                    <div>
+                        <h4 class="font-bold text-slate-200 text-sm">${nom}</h4>
+                        <span class="text-xs text-slate-400 block">${dir}</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs text-emerald-400 font-mono font-bold block">$0</span>
+                        <span class="text-[10px] text-slate-400">0 Barriles</span>
+                    </div>
+                </div>
+            `;
+            ocultarFormCliente();
+        }
+
+        function seleccionarCliente(nombre, saldo, barriles) {
+            document.getElementById('cc-cliente-titulo').innerText = `Detalle de Cuenta: ${nombre}`;
+        }
+
+        function mostrarFormMovimiento() {
+            document.getElementById('form-movimiento-panel').classList.toggle('hidden');
+        }
+
+        function guardarMovimientoCC() {
+            const tipo = document.getElementById('mov-tipo').value;
+            const monto = document.getElementById('mov-monto').value;
+            const hoy = new Date().toLocaleDateString();
+
+            const tbody = document.getElementById('cc-historial-body');
+            const tr = document.createElement('tr');
+
+            let debe = '-';
+            let haber = '-';
+
+            if(tipo.includes('Debe')) debe = `$${monto}`;
+            else haber = `$${monto}`;
+
+            tr.innerHTML = `
+                <td class="p-2">${hoy}</td>
+                <td class="p-2">${tipo}</td>
+                <td class="p-2 text-right text-rose-400 font-mono">${debe}</td>
+                <td class="p-2 text-right text-emerald-400 font-mono">${haber}</td>
+            `;
+            tbody.appendChild(tr);
+            mostrarFormMovimiento();
+        }
+
+        // LÓGICA DE REMITO
+        function agregarFilaRemito() {
+            const tbody = document.getElementById('remito-items-body');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="py-2"><input type="number" value="1" class="w-12 border border-slate-300 rounded p-1 text-center font-bold"></td>
+                <td class="py-2"><input type="text" placeholder="Ej: Honey / IPA / Stout" class="w-full border border-slate-300 rounded p-1"></td>
+                <td class="py-2"><input type="text" placeholder="Ej: Barril 50L #12" class="w-full border border-slate-300 rounded p-1"></td>
+            `;
+            tbody.appendChild(tr);
+        }
+
+        // GENERACIÓN DE PDFS
+        function descargarCoccionPDF() {
+            const element = document.getElementById('area-impresion-coccion');
+            element.classList.add('pdf-export-mode');
+            const opt = {
+                margin:       0.3,
+                filename:     `Coccion_Albardon_${document.getElementById('coc-lote').value || 'batch'}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                element.classList.remove('pdf-export-mode');
+            });
+        }
+
+        function descargarFermentacionPDF() {
+            const element = document.getElementById('area-impresion-fermentacion');
+            element.classList.add('pdf-export-mode');
+            const opt = {
+                margin:       0.3,
+                filename:     `Fermentacion_Albardon_${document.getElementById('ferm-lote').value || 'batch'}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                element.classList.remove('pdf-export-mode');
+            });
+        }
+
+        function descargarRemitoPDF() {
+            const element = document.getElementById('area-impresion-remito');
+            const opt = {
+                margin:       0.3,
+                filename:     `Remito_Albardon.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(element).save();
+        }
+    </script>
 </body>
 </html>
