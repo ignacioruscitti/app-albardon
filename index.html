@@ -13,12 +13,23 @@
         body { background-color: #0f172a; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
         .tab-btn.active { background-color: #f59e0b; color: #020617; font-weight: bold; }
         .card { background-color: #1e293b; border: 1px solid #334155; border-radius: 0.75rem; }
+
+        /* ESTILOS EXCLUSIVOS PARA IMPRESIÓN / DESCARGA DE PLANILLAS Y RECETAS */
+        @media print {
+            body { background-color: #ffffff !important; color: #000000 !important; }
+            header, nav, button, .no-print { display: none !important; }
+            main { max-width: 100% !important; padding: 0 !important; }
+            section { display: block !important; }
+            .card { background-color: #ffffff !important; border: 1px solid #ccc !important; color: #000000 !important; box-shadow: none !important; }
+            input, select, textarea { border: 1px solid #999 !important; background-color: #fff !important; color: #000 !important; }
+            .text-amber-400, .text-emerald-400, .text-slate-300, .text-slate-400 { color: #000000 !important; }
+        }
     </style>
 </head>
 <body class="pb-12">
 
     <!-- HEADER / NAVEGACIÓN -->
-    <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50 shadow-lg">
+    <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50 shadow-lg no-print">
         <div class="max-w-7xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between">
             <div class="flex items-center space-x-3">
                 <img src="logo.png" alt="Logo Albardón" class="h-10 w-10 object-contain rounded-full bg-slate-900 border border-slate-700">
@@ -27,7 +38,7 @@
                     <span class="text-xs text-slate-400 block font-normal">Sistema Integral de Gestión</span>
                 </div>
             </div>
-            <!-- Pestañas -->
+            <!-- Pestañas ordenadas -->
             <nav class="flex space-x-2 mt-4 sm:mt-0 overflow-x-auto pb-1 sm:pb-0">
                 <button onclick="switchTab('recetas')" id="btn-recetas" class="tab-btn active px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
                     <i class="fa-solid fa-book-open"></i> Recetas
@@ -52,7 +63,7 @@
 
         <!-- ==================== MÓDULO 1: RECETAS ==================== -->
         <section id="tab-recetas" class="space-y-6">
-            <div class="card p-4 flex justify-between items-center">
+            <div class="card p-4 flex justify-between items-center no-print">
                 <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
                     <i class="fa-solid fa-book-open"></i> Biblioteca de Recetas
                 </h2>
@@ -61,7 +72,7 @@
                 </button>
             </div>
 
-            <div id="form-receta-panel" class="card p-4 space-y-4 hidden border-amber-500/50">
+            <div id="form-receta-panel" class="card p-4 space-y-4 hidden border-amber-500/50 no-print">
                 <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider border-b border-slate-700 pb-2">Crear Nueva Receta</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                     <div>
@@ -114,10 +125,13 @@
                 <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
                     <i class="fa-solid fa-clipboard-list"></i> Planilla Digital de Cocción
                 </h2>
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-3 no-print">
                     <label class="text-sm text-slate-300 font-medium">Cargar Receta Base:</label>
                     <select id="select-receta" onchange="cargarRecetaEnCoccion()" class="bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-lg p-2">
                     </select>
+                    <button onclick="imprimirSeccion('tab-coccion')" title="Imprimir Planilla" class="bg-slate-700 hover:bg-slate-600 text-amber-400 font-bold px-3 py-2 rounded-lg text-xs flex items-center gap-1">
+                        <i class="fa-solid fa-print"></i> Imprimir / PDF
+                    </button>
                 </div>
             </div>
 
@@ -250,7 +264,7 @@
                         </div>
                     </div>
 
-                    <button onclick="guardarCoccion()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg transition-colors">
+                    <button onclick="guardarCoccion()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg transition-colors no-print">
                         <i class="fa-solid fa-floppy-disk"></i> Guardar Cocción y Pasar a Fermentación
                     </button>
                 </div>
@@ -263,7 +277,12 @@
                 <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
                     <i class="fa-solid fa-temperature-half"></i> Control de Fermentación
                 </h2>
-                <span class="text-xs font-mono bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/20">Fermentador #1 (Activo)</span>
+                <div class="flex items-center gap-3">
+                    <span class="text-xs font-mono bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/20">Fermentador #1 (Activo)</span>
+                    <button onclick="imprimirSeccion('tab-fermentacion')" title="Imprimir Control" class="bg-slate-700 hover:bg-slate-600 text-amber-400 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 no-print">
+                        <i class="fa-solid fa-print"></i> Imprimir / PDF
+                    </button>
+                </div>
             </div>
 
             <div class="card p-4 space-y-3">
@@ -313,7 +332,7 @@
                         </div>
                     </div>
 
-                    <div class="bg-slate-900 p-4 rounded-lg border border-slate-700 space-y-3">
+                    <div class="bg-slate-900 p-4 rounded-lg border border-slate-700 space-y-3 no-print">
                         <h4 class="text-xs font-semibold text-slate-300 uppercase">Finalizar Lote</h4>
                         <p class="text-xs text-slate-400">Al finalizar, podés dirigirte a la pestaña de Stock para pasar tus barriles vacíos a <strong>Lleno en fábrica</strong> con este lote.</p>
                         <button onclick="switchTab('stock')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-lg text-sm flex items-center justify-center gap-2 transition-colors">
@@ -330,21 +349,26 @@
                 <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
                     <i class="fa-solid fa-boxes-stacked"></i> Inventario & Control de Barriles
                 </h2>
-                <button onclick="mostrarModalBarril()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 transition-colors">
-                    <i class="fa-solid fa-plus"></i> Nuevo Barril
-                </button>
+                <div class="flex gap-2">
+                    <button onclick="imprimirSeccion('tab-stock')" title="Imprimir Inventario" class="bg-slate-700 hover:bg-slate-600 text-amber-400 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 no-print">
+                        <i class="fa-solid fa-print"></i> Imprimir / PDF
+                    </button>
+                    <button onclick="mostrarModalBarril()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 transition-colors no-print">
+                        <i class="fa-solid fa-plus"></i> Nuevo Barril
+                    </button>
+                </div>
             </div>
 
             <div id="grilla-barriles" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
         </section>
 
-        <!-- ==================== MÓDULO 5: CUENTAS CORRIENTES & REMITOS ==================== -->
+        <!-- ==================== MÓDULO 5: CUENTAS CORRIENTES & CLIENTES ==================== -->
         <section id="tab-cc" class="space-y-6 hidden">
             <div class="card p-4 flex flex-wrap justify-between items-center gap-4">
                 <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
                     <i class="fa-solid fa-users"></i> Cuentas Corrientes & Clientes
                 </h2>
-                <div class="flex gap-2">
+                <div class="flex gap-2 no-print">
                     <button onclick="mostrarModalCliente()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 transition-colors">
                         <i class="fa-solid fa-user-plus"></i> Nuevo Cliente
                     </button>
@@ -354,7 +378,6 @@
                 </div>
             </div>
 
-            <!-- GRILLA DE CLIENTES -->
             <div id="grilla-clientes" class="space-y-4"></div>
         </section>
 
@@ -363,7 +386,7 @@
     <!-- MODALES DE INTERACCIÓN -->
 
     <!-- MODAL BARRIL -->
-    <div id="modal-barril" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+    <div id="modal-barril" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden no-print">
         <div class="card p-6 w-full max-w-md space-y-4">
             <h3 id="modal-barril-titulo" class="font-bold text-amber-400 text-base border-b border-slate-700 pb-2">Gestionar Barril</h3>
             <div class="space-y-3 text-xs">
@@ -417,7 +440,7 @@
     </div>
 
     <!-- MODAL CLIENTE -->
-    <div id="modal-cliente" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+    <div id="modal-cliente" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden no-print">
         <div class="card p-6 w-full max-w-md space-y-4">
             <h3 id="modal-cliente-titulo" class="font-bold text-amber-400 text-base border-b border-slate-700 pb-2">Nuevo Cliente</h3>
             <input type="hidden" id="cli-id-editar">
@@ -442,8 +465,8 @@
         </div>
     </div>
 
-    <!-- MODAL REGISTRAR MOVIMIENTO (ENTREGA DE BOTELLAS/BARRILES Y COBROS) -->
-    <div id="modal-movimiento" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden overflow-y-auto">
+    <!-- MODAL REGISTRAR MOVIMIENTO -->
+    <div id="modal-movimiento" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden overflow-y-auto no-print">
         <div class="card p-6 w-full max-w-2xl space-y-4 my-8">
             <h3 class="font-bold text-amber-400 text-base border-b border-slate-700 pb-2">Registrar Movimiento / Remito</h3>
             
@@ -463,7 +486,6 @@
                     </div>
                 </div>
 
-                <!-- SECCIÓN MULTI-PRESENTACIÓN (ENTREGA DE CERVEZA) -->
                 <div id="seccion-remito-items" class="space-y-3 bg-slate-900/50 p-3 rounded-lg border border-slate-700">
                     <div class="flex justify-between items-center border-b border-slate-700 pb-1">
                         <span class="font-semibold text-slate-300">DETALLE DE REMITO (PRESENTACIONES & ESTILOS)</span>
@@ -473,11 +495,9 @@
                     </div>
 
                     <div class="space-y-2" id="contenedor-filas-remito">
-                        <!-- Filas creadas por JavaScript -->
                     </div>
                 </div>
 
-                <!-- SECCIÓN COBRO (CONCEPTO LIBRE Y MONTO) -->
                 <div id="seccion-cobro-directo" class="space-y-3 hidden">
                     <div>
                         <label class="text-slate-400 block mb-1">Concepto / Detalle de Pago</label>
@@ -489,7 +509,6 @@
                     </div>
                 </div>
 
-                <!-- TOTAL AUTOMÁTICO DE REMITO -->
                 <div class="flex justify-between items-center bg-slate-900 p-3 rounded border border-slate-700">
                     <span class="text-slate-300 font-bold">TOTAL DEL MOVIMIENTO:</span>
                     <span id="mov-total-acumulado" class="text-lg font-mono font-bold text-amber-400">$ 0</span>
@@ -503,7 +522,7 @@
         </div>
     </div>
 
-    <!-- PLANTILLA OCULTA PARA IMPRESIÓN/GENERACIÓN DE REMITO PDF -->
+    <!-- PLANTILLA OCULTA PARA IMPRESIÓN DE REMITO PDF -->
     <div id="plantilla-pdf-remito" class="hidden bg-white text-slate-900 p-8 rounded font-sans text-xs max-w-xl mx-auto space-y-4">
         <div class="flex justify-between items-center border-b border-slate-300 pb-3">
             <div>
@@ -533,7 +552,6 @@
                 </tr>
             </thead>
             <tbody id="pdf-items-body">
-                <!-- Filas del remito -->
             </tbody>
         </table>
 
@@ -597,6 +615,11 @@
             if (tabId === 'cc') renderClientes();
         }
 
+        // Función general de impresión de cualquier sección/planilla
+        function imprimirSeccion(seccionId) {
+            window.print();
+        }
+
         // --- MÓDULO RECETAS ---
         function renderRecetas() {
             const container = document.getElementById('grilla-recetas');
@@ -604,7 +627,7 @@
             Object.keys(recetas).forEach(key => {
                 const r = recetas[key];
                 html += `
-                    <div class="card p-4 space-y-3 flex flex-col justify-between">
+                    <div class="card p-4 space-y-3 flex flex-col justify-between" id="receta-card-${key}">
                         <div>
                             <div class="flex justify-between items-start border-b border-slate-700 pb-2 mb-2">
                                 <h3 class="font-bold text-amber-400 text-base">${r.nombre}</h3>
@@ -625,8 +648,11 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="pt-3 border-t border-slate-700 flex justify-between items-center">
-                            <button onclick="eliminarReceta('${key}')" class="text-red-400 hover:text-red-300 text-xs"><i class="fa-solid fa-trash"></i> Eliminar</button>
+                        <div class="pt-3 border-t border-slate-700 flex justify-between items-center no-print">
+                            <div class="flex gap-2">
+                                <button onclick="eliminarReceta('${key}')" class="text-red-400 hover:text-red-300 text-xs"><i class="fa-solid fa-trash"></i></button>
+                                <button onclick="imprimirSeccion('receta-card-${key}')" title="Imprimir Receta" class="text-slate-300 hover:text-white text-xs"><i class="fa-solid fa-print"></i></button>
+                            </div>
                             <button onclick="usarRecetaEnCoccion('${key}')" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1 rounded text-xs">Cocinar esta Receta</button>
                         </div>
                     </div>`;
@@ -780,7 +806,7 @@
                                 ${b.cliente ? `<p>Ubicación: <span class="text-amber-300 font-semibold">${b.cliente}</span></p>` : ''}
                             </div>
                         </div>
-                        <div class="pt-2 border-t border-slate-700 flex justify-end">
+                        <div class="pt-2 border-t border-slate-700 flex justify-end no-print">
                             <button onclick="editarBarril(${idx})" class="text-xs bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded text-slate-200">Cambiar Estado</button>
                         </div>
                     </div>`;
@@ -852,25 +878,25 @@
                 html += `
                     <div class="card p-4 space-y-3">
                         <div class="flex flex-wrap justify-between items-center gap-2 border-b border-slate-700 pb-2">
-                            <div>
-                                <h3 class="font-bold text-lg text-slate-100">${c.nombre}</h3>
-                                <p class="text-xs text-slate-400">Tel: ${c.telefono} | Dir: ${c.direccion}</p>
-                            </div>
-                            <div class="flex items-center gap-4">
-                                <div class="text-right">
-                                    <span class="text-xs text-slate-400 block">Saldo CC</span>
-                                    <span class="text-xl font-mono font-bold ${c.saldo < 0 ? 'text-red-400' : 'text-emerald-400'}">
-                                        $ ${c.saldo.toLocaleString()}
-                                    </span>
+                            <div class="flex items-center gap-3">
+                                <div>
+                                    <h3 class="font-bold text-lg text-slate-100">${c.nombre}</h3>
+                                    <p class="text-xs text-slate-400">Tel: ${c.telefono} | Dir: ${c.direccion}</p>
                                 </div>
-                                <div class="flex gap-1">
-                                    <button onclick="editarCliente('${c.id}')" title="Editar Cliente" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs p-2 rounded-lg transition-colors">
+                                <div class="flex gap-1 ml-2 no-print">
+                                    <button onclick="editarCliente('${c.id}')" title="Editar Cliente" class="bg-slate-700 hover:bg-slate-600 text-amber-400 text-xs px-2 py-1 rounded transition-colors">
                                         <i class="fa-solid fa-pen-to-square"></i>
                                     </button>
-                                    <button onclick="eliminarCliente('${c.id}')" title="Eliminar Cliente" class="bg-red-500/20 hover:bg-red-500/40 text-red-400 text-xs p-2 rounded-lg transition-colors">
+                                    <button onclick="eliminarCliente('${c.id}')" title="Eliminar Cliente" class="bg-red-500/20 hover:bg-red-500/40 text-red-400 text-xs px-2 py-1 rounded transition-colors">
                                         <i class="fa-solid fa-trash"></i>
                                     </button>
                                 </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs text-slate-400 block">Saldo CC</span>
+                                <span class="text-xl font-mono font-bold ${c.saldo < 0 ? 'text-red-400' : 'text-emerald-400'}">
+                                    $ ${c.saldo.toLocaleString()}
+                                </span>
                             </div>
                         </div>
 
@@ -884,8 +910,8 @@
                                     <div class="flex items-center gap-2">
                                         <span class="font-mono font-bold ${m.monto < 0 ? 'text-red-400' : 'text-emerald-400'}">$ ${m.monto.toLocaleString()}</span>
                                         ${m.items && m.items.length > 0 ? `
-                                            <button onclick="descargarRemitoPDF('${c.id}', ${mIdx})" title="Descargar Remito PDF" class="bg-slate-700 hover:bg-slate-600 text-amber-400 text-[10px] px-2 py-1 rounded font-bold">
-                                                <i class="fa-solid fa-file-pdf"></i> PDF
+                                            <button onclick="descargarRemitoPDF('${c.id}', ${mIdx})" title="Descargar Remito PDF" class="bg-amber-500 hover:bg-amber-600 text-slate-950 text-[10px] px-2 py-1 rounded font-bold flex items-center gap-1 no-print">
+                                                <i class="fa-solid fa-file-pdf"></i> Generar PDF
                                             </button>
                                         ` : ''}
                                     </div>
@@ -893,7 +919,7 @@
                             `).join('') : '<p class="text-slate-500 italic">Sin movimientos registrados.</p>'}
                         </div>
 
-                        <div class="flex justify-end pt-2">
+                        <div class="flex justify-end gap-2 pt-2 no-print">
                             <button onclick="enviarWhatsapp('${c.id}')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1">
                                 <i class="fa-brands fa-whatsapp"></i> Enviar Remito WhatsApp
                             </button>
@@ -962,7 +988,7 @@
             }
         }
 
-        // --- MANEJO DE MOVIMIENTOS / REMITO DINÁMICO ---
+        // --- REGISTRO DE MOVIMIENTOS Y BOTELLAS/BARRILES ---
         const opcionesPresentaciones = [
             'Botella 355 cc', 'Botella 500 cc', 'Botella 1000 cc',
             'Barril 50L', 'Barril 30L', 'Barril 20L'
@@ -973,7 +999,7 @@
             select.innerHTML = clientes.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
             
             document.getElementById('contenedor-filas-remito').innerHTML = '';
-            agregarFilaRemito(); // Fila inicial
+            agregarFilaRemito();
             toggleFormularioRemito();
             document.getElementById('modal-movimiento').classList.remove('hidden');
         }
@@ -1061,12 +1087,12 @@
 
                 if (itemsArray.length === 0) return alert("Agregue al menos un ítem al remito.");
                 conceptoText = `Entrega de Cerveza (${itemsArray.length} descrip.)`;
-                montoTotal = -Math.abs(montoTotal); // Débito a la CC
+                montoTotal = -Math.abs(montoTotal);
             } else {
                 conceptoText = document.getElementById('mov-concepto-cobro').value.trim() || 'Cobro / Pago recibido';
                 montoTotal = parseFloat(document.getElementById('mov-monto-cobro').value) || 0;
                 if (montoTotal <= 0) return alert("Ingrese un monto de cobro válido.");
-                montoTotal = Math.abs(montoTotal); // Abono a favor de la CC
+                montoTotal = Math.abs(montoTotal);
             }
 
             cli.saldo += montoTotal;
@@ -1083,7 +1109,7 @@
             renderClientes();
         }
 
-        // --- ENVIAR POR WHATSAPP (INTEGRADO AL MÓDULO) ---
+        // --- ENVIAR POR WHATSAPP (OPCIONAL) ---
         function enviarWhatsapp(clienteId) {
             const c = clientes.find(item => item.id === clienteId);
             if (!c) return;
@@ -1112,7 +1138,7 @@
             window.open(`https://wa.me/${c.telefono}?text=${encodeURIComponent(texto)}`, '_blank');
         }
 
-        // --- GENERACIÓN DE REMITO PDF ---
+        // --- GENERACIÓN DIRECTA DE REMITO PDF ---
         function descargarRemitoPDF(clienteId, movIdx) {
             const c = clientes.find(item => item.id === clienteId);
             if (!c || !c.movimientos[movIdx]) return;
