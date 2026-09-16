@@ -11,7 +11,7 @@
     <style>
         body { background-color: #0f172a; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
         .tab-btn.active { background-color: #f59e0b; color: #020617; font-weight: bold; }
-        .card { background-color: #1e293b; border: 1px solid #334155; border-radius: 0.75rem; }
+        .card { background-color: #1e293b; border: 1px solid #334155; border-radius: 0.75rem; page-break-inside: avoid; }
 
         .pdf-export-mode {
             background-color: #ffffff !important;
@@ -34,7 +34,6 @@
             color: #0f172a !important;
         }
 
-        /* Estilos específicos para Impresión / PDF del Remito */
         @media print {
             .no-print { display: none !important; }
             body { background-color: white !important; color: black !important; }
@@ -48,7 +47,7 @@
     <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50 shadow-lg no-print">
         <div class="max-w-7xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between">
             <div class="flex items-center space-x-3">
-                <img src="logo.png" alt="Logo Albardón" class="h-10 w-10 object-contain rounded-full bg-slate-900 border border-slate-700">
+                <img src="logo.png" alt="Logo Albardón" class="h-10 w-10 object-contain rounded-full bg-slate-900 border border-slate-700" onerror="this.src='https://via.placeholder.com/40?text=A'">
                 <div>
                     <h1 class="text-xl font-bold tracking-wider text-white">ALBARDÓN</h1>
                     <span class="text-xs text-slate-400 block font-normal">Sistema Integral de Gestión</span>
@@ -370,475 +369,264 @@
                     <i class="fa-solid fa-temperature-half"></i> Control de Fermentación
                 </h2>
                 <div class="flex items-center gap-3">
-                    <span class="text-xs font-mono bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/20">Fermentador #1 (Activo)</span>
-                    <button onclick="descargarFermentacionPDF()" title="Descargar Planilla de Fermentación en PDF" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-2 rounded-lg text-xs flex items-center gap-1">
-                        <i class="fa-solid fa-file-pdf"></i> Generar PDF
-                    </button>
+                    <label class="text-sm text-slate-300 font-medium">Lote Activo:</label>
+                    <select id="select-lote-fermentacion" onchange="cargarLoteFermentacion()" class="bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-lg p-2">
+                        <option value="">Seleccione un Lote...</option>
+                    </select>
                 </div>
             </div>
 
-            <div id="area-impresion-fermentacion" class="space-y-6">
-                <div class="card p-4 space-y-3">
-                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Información General del Batch</h3>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
-                        <div><label class="text-slate-400">ESTILO / CERVEZA</label><input type="text" id="ferm-estilo" value="APA Pilsen 280" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-bold text-slate-200 mt-1"></div>
-                        <div><label class="text-slate-400">N° LOTE</label><input type="text" id="ferm-lote" value="L-2026-01" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-mono text-amber-400 mt-1"></div>
-                        <div><label class="text-slate-400">FECHA INOCULACIÓN</label><input type="date" id="ferm-fecha" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-slate-400">D.I. MEDIDA</label><input type="text" id="ferm-di" value="1.050" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-mono text-amber-400 mt-1"></div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="card p-4 space-y-4">
+                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Datos del Fermentador</h3>
+                    <div class="space-y-2 text-xs">
+                        <div><label class="text-slate-400">FERMENTADOR / TANQUE</label><input type="text" id="ferm-tanque" placeholder="F1" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
+                        <div><label class="text-slate-400">ESTILO / RECETA</label><input type="text" id="ferm-estilo" readonly class="w-full bg-slate-900/50 border border-slate-800 rounded p-2 mt-1 font-bold text-amber-400"></div>
+                        <div><label class="text-slate-400">DENSIDAD INICIAL (D.I.)</label><input type="text" id="ferm-di" readonly class="w-full bg-slate-900/50 border border-slate-800 rounded p-2 mt-1 font-mono"></div>
                     </div>
                 </div>
 
-                <div class="card p-4 space-y-3">
-                    <div class="flex justify-between items-center border-b border-slate-700 pb-2">
-                        <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Planilla Diaria de Monitoreo</h3>
-                        <button onclick="agregarFilaFermentacion()" class="bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs px-3 py-1 rounded border border-slate-700 flex items-center gap-1 no-print">
-                            <i class="fa-solid fa-plus"></i> Registrar Medición
-                        </button>
+                <div class="card p-4 space-y-4 md:col-span-2">
+                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Nuevo Registro diario</h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                        <div><label class="text-slate-400">FECHA</label><input type="date" id="ferm-reg-fecha" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
+                        <div><label class="text-slate-400">TEMP (°C)</label><input type="text" id="ferm-reg-temp" placeholder="18 °C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
+                        <div><label class="text-slate-400">DENSIDAD</label><input type="text" id="ferm-reg-densidad" placeholder="1.020" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1 font-mono"></div>
+                        <div><label class="text-slate-400">PH</label><input type="text" id="ferm-reg-ph" placeholder="4.4" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
+                        <div class="col-span-2 sm:col-span-4"><label class="text-slate-400">OBSERVACIONES / DRY HOPPING / PURGA</label><input type="text" id="ferm-reg-obs" placeholder="ej. Purga de barro / Dry Hop Cascade 500g" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
                     </div>
-                    
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse text-xs">
-                            <thead>
-                                <tr class="bg-slate-900 text-slate-400 border-b border-slate-700">
-                                    <th class="p-2">Fecha/Hora</th>
-                                    <th class="p-2">Día #</th>
-                                    <th class="p-2">Temp (°C)</th>
-                                    <th class="p-2">Densidad / Brix</th>
-                                    <th class="p-2">Acción / Dry Hop / Purga</th>
-                                    <th class="p-2 text-center no-print">Eliminar</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabla-fermentacion-body" class="divide-y divide-slate-800 text-slate-200">
-                                <tr>
-                                    <td class="p-2"><input type="datetime-local" class="bg-slate-900 border border-slate-700 rounded p-1 text-xs"></td>
-                                    <td class="p-2"><input type="number" value="1" class="w-12 bg-slate-900 border border-slate-700 rounded p-1 text-xs font-mono"></td>
-                                    <td class="p-2"><input type="text" value="18.5" class="w-16 bg-slate-900 border border-slate-700 rounded p-1 text-xs"></td>
-                                    <td class="p-2"><input type="text" value="1.050" class="w-20 bg-slate-900 border border-slate-700 rounded p-1 text-xs font-mono text-amber-400"></td>
-                                    <td class="p-2"><input type="text" value="Inoculación de levadura" class="w-full bg-slate-900 border border-slate-700 rounded p-1 text-xs"></td>
-                                    <td class="p-2 text-center no-print"><button onclick="eliminarFila(this)" class="text-rose-400 hover:text-rose-300"><i class="fa-solid fa-trash"></i></button></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <button onclick="agregarRegistroFermentacion()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-4 py-2 rounded-lg text-xs w-full">Agregar Medición</button>
+                </div>
+            </div>
+
+            <div class="card p-4 space-y-3">
+                <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Historial de Fermentación</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs text-left">
+                        <thead class="bg-slate-900 text-slate-400 uppercase">
+                            <tr>
+                                <th class="p-2">Fecha</th>
+                                <th class="p-2">T° (°C)</th>
+                                <th class="p-2">Densidad</th>
+                                <th class="p-2">pH</th>
+                                <th class="p-2">Acciones / Notas</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-historial-fermentacion" class="divide-y divide-slate-800">
+                            <tr><td colspan="5" class="p-3 text-slate-500 italic text-center">Sin registros cargados.</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </section>
 
         <!-- ==================== MÓDULO 4: STOCK BARRILES ==================== -->
         <section id="tab-stock" class="space-y-6 hidden">
-            <div class="card p-4 flex justify-between items-center no-print">
+            <div class="card p-4 flex flex-wrap justify-between items-center gap-4 no-print">
                 <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
-                    <i class="fa-solid fa-boxes-stacked"></i> Control de Stock de Barriles
+                    <i class="fa-solid fa-boxes-stacked"></i> Gestión de Inventario & Barriles
                 </h2>
-                <button onclick="mostrarFormBarril()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 transition-colors">
-                    <i class="fa-solid fa-plus"></i> Registrar Barril
+                <button onclick="registrarNuevoBarril()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1">
+                    <i class="fa-solid fa-plus"></i> Añadir Barril
                 </button>
             </div>
 
-            <div id="form-barril-panel" class="card p-4 space-y-4 hidden border-amber-500/50 no-print">
-                <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider border-b border-slate-700 pb-2">Nuevo Barril en Planta</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs">
-                    <div>
-                        <label class="text-slate-400 block mb-1">Código / N° Barril</label>
-                        <input type="text" id="barril-codigo" placeholder="ej. B-50-012" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-bold text-slate-200">
-                    </div>
-                    <div>
-                        <label class="text-slate-400 block mb-1">Capacidad (Litros)</label>
-                        <select id="barril-capacidad" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-slate-200">
-                            <option value="50">50 Litros</option>
-                            <option value="30">30 Litros</option>
-                            <option value="20">20 Litros</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="text-slate-400 block mb-1">Estilo Cargado</label>
-                        <input type="text" id="barril-estilo" placeholder="ej. Honey / Lleno" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-slate-200">
-                    </div>
-                    <div>
-                        <label class="text-slate-400 block mb-1">Estado</label>
-                        <select id="barril-estado" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-slate-200">
-                            <option value="Lleno / Disponible">Lleno / Disponible</option>
-                            <option value="Vacio / En Planta">Vacío / En Planta</option>
-                            <option value="Entregado / Cliente">Entregado / En Cliente</option>
-                            <option value="En Mantenimiento">En Mantenimiento</option>
-                        </select>
-                    </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div class="card p-4 border-l-4 border-emerald-500">
+                    <span class="text-xs text-slate-400 uppercase block">Llenos / Listos</span>
+                    <span id="stock-llenos" class="text-2xl font-bold text-emerald-400 font-mono">0</span>
                 </div>
-                <div class="flex justify-end gap-2">
-                    <button onclick="ocultarFormBarril()" class="bg-slate-700 text-slate-200 text-xs px-3 py-1.5 rounded">Cancelar</button>
-                    <button onclick="guardarBarril()" class="bg-amber-500 text-slate-950 font-bold text-xs px-3 py-1.5 rounded">Guardar Barril</button>
+                <div class="card p-4 border-l-4 border-amber-500">
+                    <span class="text-xs text-slate-400 uppercase block">En Clientes</span>
+                    <span id="stock-clientes" class="text-2xl font-bold text-amber-400 font-mono">0</span>
+                </div>
+                <div class="card p-4 border-l-4 border-blue-500">
+                    <span class="text-xs text-slate-400 uppercase block">Vacíos en Planta</span>
+                    <span id="stock-vacios" class="text-2xl font-bold text-blue-400 font-mono">0</span>
+                </div>
+                <div class="card p-4 border-l-4 border-rose-500">
+                    <span class="text-xs text-slate-400 uppercase block">Para Sanitizar</span>
+                    <span id="stock-sucio" class="text-2xl font-bold text-rose-400 font-mono">0</span>
                 </div>
             </div>
 
-            <div class="card p-4 overflow-x-auto">
-                <table class="w-full text-left border-collapse text-xs">
-                    <thead>
-                        <tr class="bg-slate-900 text-slate-400 border-b border-slate-700">
-                            <th class="p-3">Código Barril</th>
-                            <th class="p-3">Capacidad</th>
-                            <th class="p-3">Estilo Contenido</th>
-                            <th class="p-3">Estado</th>
-                            <th class="p-3 text-right">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabla-barriles-body" class="divide-y divide-slate-800 text-slate-200">
-                        <tr>
-                            <td class="p-3 font-mono font-bold text-amber-400">B-50-001</td>
-                            <td class="p-3">50 LTS</td>
-                            <td class="p-3">Golden Ale</td>
-                            <td class="p-3"><span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full text-[11px]">Lleno / Disponible</span></td>
-                            <td class="p-3 text-right">
-                                <button onclick="eliminarFilaTabla(this)" class="text-rose-400 hover:text-rose-300"><i class="fa-solid fa-trash"></i></button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="p-3 font-mono font-bold text-amber-400">B-50-002</td>
-                            <td class="p-3">50 LTS</td>
-                            <td class="p-3">IPA Pilsen</td>
-                            <td class="p-3"><span class="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded-full text-[11px]">Entregado / Cliente</span></td>
-                            <td class="p-3 text-right">
-                                <button onclick="eliminarFilaTabla(this)" class="text-rose-400 hover:text-rose-300"><i class="fa-solid fa-trash"></i></button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="card p-4 space-y-3">
+                <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Listado General de Barriles</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs text-left">
+                        <thead class="bg-slate-900 text-slate-400 uppercase">
+                            <tr>
+                                <th class="p-2">Código</th>
+                                <th class="p-2">Capacidad</th>
+                                <th class="p-2">Estilo Contenido</th>
+                                <th class="p-2">Estado</th>
+                                <th class="p-2">Ubicación / Cliente</th>
+                                <th class="p-2 text-right">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-barriles" class="divide-y divide-slate-800">
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </section>
 
         <!-- ==================== MÓDULO 5: CUENTAS CORRIENTES ==================== -->
         <section id="tab-cc" class="space-y-6 hidden">
-            <div class="card p-4 flex justify-between items-center no-print">
+            <div class="card p-4 flex flex-wrap justify-between items-center gap-4 no-print">
                 <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
-                    <i class="fa-solid fa-users"></i> Cuentas Corrientes y Clientes
+                    <i class="fa-solid fa-users"></i> Cuentas Corrientes de Clientes
                 </h2>
-                <button onclick="mostrarFormCliente()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 transition-colors">
-                    <i class="fa-solid fa-plus"></i> Nuevo Cliente / Bar
+                <button onclick="nuevoMovimientoCC()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1">
+                    <i class="fa-solid fa-plus"></i> Registrar Cobro / Entrega
                 </button>
             </div>
 
-            <div id="form-cliente-panel" class="card p-4 space-y-4 hidden border-amber-500/50 no-print">
-                <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider border-b border-slate-700 pb-2">Registrar Cliente</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-                    <div>
-                        <label class="text-slate-400 block mb-1">Nombre Comercial / Bar</label>
-                        <input type="text" id="cli-nombre" placeholder="ej. Bar El Barril" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-bold text-slate-200">
-                    </div>
-                    <div>
-                        <label class="text-slate-400 block mb-1">Dirección / Localidad</label>
-                        <input type="text" id="cli-direccion" placeholder="ej. Av. Pellegrini 1234" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-slate-200">
-                    </div>
-                    <div>
-                        <label class="text-slate-400 block mb-1">Contacto / Teléfono</label>
-                        <input type="text" id="cli-telefono" placeholder="ej. 341-555555" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-slate-200">
-                    </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="card p-4 space-y-3">
+                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Seleccionar Cliente</h3>
+                    <select id="select-cliente-cc" onchange="cargarDetalleCC()" class="w-full bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-lg p-2">
+                        <option value="Cliente Generico">Cliente Genérico</option>
+                    </select>
                 </div>
-                <div class="flex justify-end gap-2">
-                    <button onclick="ocultarFormCliente()" class="bg-slate-700 text-slate-200 text-xs px-3 py-1.5 rounded">Cancelar</button>
-                    <button onclick="guardarCliente()" class="bg-amber-500 text-slate-950 font-bold text-xs px-3 py-1.5 rounded">Guardar Cliente</button>
+
+                <div class="card p-4 space-y-1 border-l-4 border-amber-500 md:col-span-2 flex flex-col justify-center">
+                    <span class="text-xs text-slate-400 uppercase">Saldo Pendiente del Cliente</span>
+                    <span id="saldo-cliente-monto" class="text-3xl font-bold font-mono text-amber-400">$ 0.00</span>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="card p-4 space-y-3">
-                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Listado de Clientes</h3>
-                    <div class="space-y-2" id="lista-clientes-cc">
-                        <div class="p-3 bg-slate-900 rounded-lg border border-slate-700/80 flex justify-between items-center cursor-pointer hover:border-amber-500 transition-colors" onclick="seleccionarCliente('Bar El Barril', -15000, 2)">
-                            <div>
-                                <h4 class="font-bold text-slate-200 text-sm">Bar El Barril</h4>
-                                <span class="text-xs text-slate-400 block">Av. Pellegrini 1234</span>
-                            </div>
-                            <div class="text-right">
-                                <span class="text-xs text-rose-400 font-mono font-bold block">-$15.000</span>
-                                <span class="text-[10px] text-slate-400">2 Barriles Prestados</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card p-4 space-y-4">
-                    <div class="border-b border-slate-700 pb-2 flex justify-between items-center">
-                        <h3 class="text-sm font-semibold text-amber-400 uppercase tracking-wider" id="cc-cliente-titulo">Detalle de Cuenta: Bar El Barril</h3>
-                        <button onclick="mostrarFormMovimiento()" class="bg-amber-500 text-slate-950 font-bold px-2.5 py-1 rounded text-xs">
-                            <i class="fa-solid fa-plus"></i> Movimiento
-                        </button>
-                    </div>
-
-                    <div id="form-movimiento-panel" class="hidden p-3 bg-slate-900 rounded-lg border border-slate-700 space-y-3 text-xs">
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <label class="text-slate-400 block mb-1">Tipo Movimiento</label>
-                                <select id="mov-tipo" class="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-slate-200">
-                                    <option value="Entrega Cerveza (Debe)">Entrega Cerveza (Debe)</option>
-                                    <option value="Pago / Entrega Efectivo (Haber)">Pago / Entrega Efectivo (Haber)</option>
-                                    <option value="Devolución Barril Vacío">Devolución Barril Vacío</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="text-slate-400 block mb-1">Monto ($)</label>
-                                <input type="number" id="mov-monto" placeholder="0" class="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-slate-200">
-                            </div>
-                        </div>
-                        <button onclick="guardarMovimientoCC()" class="w-full bg-amber-500 text-slate-950 font-bold py-1.5 rounded">Registrar</button>
-                    </div>
-
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse text-xs">
-                            <thead>
-                                <tr class="bg-slate-900 text-slate-400 border-b border-slate-700">
-                                    <th class="p-2">Fecha</th>
-                                    <th class="p-2">Concepto</th>
-                                    <th class="p-2 text-right">Debe</th>
-                                    <th class="p-2 text-right">Haber</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-800 text-slate-200" id="cc-historial-body">
-                                <tr>
-                                    <td class="p-2">12/09/2026</td>
-                                    <td class="p-2">Entrega 2x Barriles 50L (IPA)</td>
-                                    <td class="p-2 text-right text-rose-400 font-mono">$30.000</td>
-                                    <td class="p-2 text-right text-emerald-400 font-mono">-</td>
-                                </tr>
-                                <tr>
-                                    <td class="p-2">14/09/2026</td>
-                                    <td class="p-2">Pago Efectivo / Transferencia</td>
-                                    <td class="p-2 text-right text-rose-400 font-mono">-</td>
-                                    <td class="p-2 text-right text-emerald-400 font-mono">$15.000</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+            <div class="card p-4 space-y-3">
+                <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Historial de Movimientos</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs text-left">
+                        <thead class="bg-slate-900 text-slate-400 uppercase">
+                            <tr>
+                                <th class="p-2">Fecha</th>
+                                <th class="p-2">Concepto / Detalle</th>
+                                <th class="p-2 text-right">Debe ($)</th>
+                                <th class="p-2 text-right">Haber ($)</th>
+                                <th class="p-2 text-right">Saldo ($)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-movimientos-cc" class="divide-y divide-slate-800">
+                            <tr><td colspan="5" class="p-3 text-slate-500 italic text-center">Seleccione un cliente para ver sus movimientos.</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </section>
 
-        <!-- ==================== MÓDULO 6: REMITO DIGITAL ==================== -->
+        <!-- ==================== MÓDULO 6: REMITO ==================== -->
         <section id="tab-remito" class="space-y-6 hidden">
-            <div class="card p-4 flex justify-between items-center no-print">
+            <div class="card p-4 flex flex-wrap justify-between items-center gap-4 no-print">
                 <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
-                    <i class="fa-solid fa-file-invoice"></i> Generador de Remitos
+                    <i class="fa-solid fa-file-invoice"></i> Generador de Remito
                 </h2>
-                <div class="flex gap-2">
-                    <button onclick="window.print()" class="bg-slate-700 hover:bg-slate-600 text-white font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 transition-colors">
-                        <i class="fa-solid fa-print"></i> Imprimir
-                    </button>
-                    <button onclick="descargarRemitoPDF()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 transition-colors">
-                        <i class="fa-solid fa-file-pdf"></i> Generar PDF
-                    </button>
-                </div>
+                <button onclick="window.print()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-2 rounded-lg text-xs flex items-center gap-1">
+                    <i class="fa-solid fa-print"></i> Imprimir Remito
+                </button>
             </div>
 
-            <!-- HOJA DE REMITO FORMATO BLANCO IMPRESIÓN -->
-            <div id="area-impresion-remito" class="remito-container max-w-3xl mx-auto bg-white text-slate-900 p-8 rounded-xl shadow-2xl border border-slate-200">
-                <!-- ENCABEZADO REMITO -->
-                <div class="flex justify-between items-start border-b-2 border-slate-900 pb-4 mb-6">
-                    <div class="flex items-center gap-4">
-                        <img src="logo.png" alt="Logo Albardón" class="h-16 w-16 object-contain">
-                        <div>
-                            <h1 class="text-2xl font-black tracking-widest text-black">ALBARDÓN</h1>
-                            <p class="text-xs text-slate-600 font-medium">Cerveza Artesanal Santafesina</p>
-                            <p class="text-[10px] text-slate-500">Santa Fe, Argentina</p>
-                        </div>
+            <div id="area-remito" class="remito-container card p-6 bg-white text-slate-900 space-y-6 max-w-3xl mx-auto border border-slate-300">
+                <div class="flex justify-between items-start border-b border-slate-300 pb-4">
+                    <div>
+                        <h1 class="text-2xl font-black tracking-wider text-slate-900">CERVECERÍA ALBARDÓN</h1>
+                        <p class="text-xs text-slate-600">Santa Fe, Argentina | Producción Artesanal</p>
                     </div>
                     <div class="text-right">
-                        <div class="inline-block border-2 border-black px-4 py-1 mb-1">
-                            <span class="text-xl font-black">R</span>
-                        </div>
-                        <p class="text-xs font-bold uppercase text-slate-700">Remito de Entrega</p>
+                        <span class="text-lg font-bold text-slate-800 block">REMITO</span>
+                        <span class="text-xs text-slate-500 font-mono">N° 0001-00000124</span>
                     </div>
                 </div>
 
-                <!-- DATOS DEL CLIENTE Y FECHA -->
-                <div class="grid grid-cols-2 gap-4 text-xs mb-6 bg-slate-50 p-4 rounded-lg border border-slate-200">
+                <div class="grid grid-cols-2 gap-4 text-xs">
                     <div>
-                        <label class="font-bold text-slate-700 uppercase block mb-1">Cliente / Bar / Destino:</label>
-                        <input type="text" placeholder="Nombre del cliente o bar" class="w-full bg-white border border-slate-300 rounded p-1.5 text-sm text-slate-900 font-semibold focus:outline-amber-500">
+                        <label class="text-slate-500 font-bold block">CLIENTE / RAZÓN SOCIAL</label>
+                        <input type="text" value="Bar Central Santa Fe" class="w-full bg-slate-50 border border-slate-300 rounded p-1 font-semibold text-slate-800">
                     </div>
                     <div>
-                        <label class="font-bold text-slate-700 uppercase block mb-1">Fecha de Entrega:</label>
-                        <input type="date" id="remito-fecha" class="w-full bg-white border border-slate-300 rounded p-1.5 text-sm text-slate-900 font-mono focus:outline-amber-500">
-                    </div>
-                    <div>
-                        <label class="font-bold text-slate-700 uppercase block mb-1">Dirección de Entrega:</label>
-                        <input type="text" placeholder="Calle y número" class="w-full bg-white border border-slate-300 rounded p-1.5 text-sm text-slate-900 focus:outline-amber-500">
-                    </div>
-                    <div>
-                        <label class="font-bold text-slate-700 uppercase block mb-1">N° de Remito:</label>
-                        <input type="text" value="0001-00000001" class="w-full bg-white border border-slate-300 rounded p-1.5 text-sm text-slate-900 font-mono font-bold focus:outline-amber-500">
+                        <label class="text-slate-500 font-bold block">FECHA DE ENTREGA</label>
+                        <input type="date" class="w-full bg-slate-50 border border-slate-300 rounded p-1 text-slate-800">
                     </div>
                 </div>
 
-                <!-- TABLA DE DETALLE DE DETALLES/ITEMS -->
-                <div class="mb-6">
-                    <table class="w-full text-left text-xs border-collapse">
-                        <thead>
-                            <tr class="border-b-2 border-slate-900 text-slate-800 uppercase font-bold">
-                                <th class="py-2 w-16">Cant.</th>
-                                <th class="py-2">Descripción / Estilo de Cerveza</th>
-                                <th class="py-2 w-48">Capacidad / N° Barril</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-200" id="remito-items-body">
-                            <tr>
-                                <td class="py-2"><input type="number" value="1" class="w-12 border border-slate-300 rounded p-1 text-center font-bold"></td>
-                                <td class="py-2"><input type="text" placeholder="Ej: Honey / IPA / Stout" class="w-full border border-slate-300 rounded p-1"></td>
-                                <td class="py-2"><input type="text" placeholder="Ej: Barril 50L #12" class="w-full border border-slate-300 rounded p-1"></td>
-                            </tr>
-                            <tr>
-                                <td class="py-2"><input type="number" value="1" class="w-12 border border-slate-300 rounded p-1 text-center font-bold"></td>
-                                <td class="py-2"><input type="text" placeholder="Ej: Honey / IPA / Stout" class="w-full border border-slate-300 rounded p-1"></td>
-                                <td class="py-2"><input type="text" placeholder="Ej: Barril 50L #12" class="w-full border border-slate-300 rounded p-1"></td>
-                            </tr>
-                            <tr>
-                                <td class="py-2"><input type="number" value="1" class="w-12 border border-slate-300 rounded p-1 text-center font-bold"></td>
-                                <td class="py-2"><input type="text" placeholder="Ej: Honey / IPA / Stout" class="w-full border border-slate-300 rounded p-1"></td>
-                                <td class="py-2"><input type="text" placeholder="Ej: Barril 50L #12" class="w-full border border-slate-300 rounded p-1"></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <button onclick="agregarFilaRemito()" class="mt-2 text-xs text-slate-600 font-bold hover:underline flex items-center gap-1 no-print">
-                        <i class="fa-solid fa-plus"></i> Agregar Fila
-                    </button>
-                </div>
+                <table class="w-full text-xs text-left border-collapse">
+                    <thead>
+                        <tr class="border-b-2 border-slate-800 text-slate-800">
+                            <th class="py-2">CANT.</th>
+                            <th class="py-2">DESCRIPCIÓN / ESTILO</th>
+                            <th class="py-2">BARRIL N°</th>
+                            <th class="py-2 text-right">PRECIO UNT.</th>
+                            <th class="py-2 text-right">TOTAL</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200">
+                        <tr>
+                            <td class="py-2"><input type="number" value="2" class="w-12 border p-1 rounded"></td>
+                            <td class="py-2"><input type="text" value="Barril 50L - APA Pilsen" class="w-full border p-1 rounded"></td>
+                            <td class="py-2"><input type="text" value="B-08, B-12" class="w-full border p-1 rounded"></td>
+                            <td class="py-2 text-right"><input type="text" value="85000" class="w-20 border p-1 rounded text-right"></td>
+                            <td class="py-2 text-right font-bold">$ 170.000</td>
+                        </tr>
+                    </tbody>
+                </table>
 
-                <!-- OBSERVACIONES Y FIRMAS -->
-                <div class="space-y-6">
-                    <div>
-                        <label class="font-bold text-slate-700 text-xs uppercase block mb-1">Observaciones / Estado del barril:</label>
-                        <textarea placeholder="Aclaraciones sobre la entrega, devolución de conector, etc." class="w-full border border-slate-300 rounded p-2 text-xs h-16 text-slate-900"></textarea>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-12 pt-12 text-center text-xs">
-                        <div class="border-t border-slate-400 pt-2">
-                            <p class="font-bold text-slate-800">Recibió Conforme (Firma y Aclaración)</p>
-                            <p class="text-[10px] text-slate-500">DNI / Bar</p>
-                        </div>
-                        <div class="border-t border-slate-400 pt-2">
-                            <p class="font-bold text-slate-800">Entregado por Albardón</p>
-                            <p class="text-[10px] text-slate-500">Firma Responsable</p>
-                        </div>
-                    </div>
+                <div class="pt-12 grid grid-cols-2 gap-8 text-center text-xs">
+                    <div class="border-t border-slate-400 pt-1 text-slate-600">Firma Entregado / Conductor</div>
+                    <div class="border-t border-slate-400 pt-1 text-slate-600">Firma Recibido / Cliente</div>
                 </div>
             </div>
         </section>
 
     </main>
 
-    <!-- LOGICA JAVASCRIPT INTEGRADA -->
+    <!-- LOGICA JAVASCRIPT PRINCIPAL -->
     <script>
-        // ESTADO GLOBAL DE APLICACIÓN
-        let recetas = [
+        // Datos Iniciales / Persistencia
+        let recetas = JSON.parse(localStorage.getItem('albardon_recetas')) || [
             {
                 nombre: "APA Pilsen 280",
                 batch: 280,
                 di: "1.052",
                 df: "1.013",
-                abv: "5.1%",
+                abv: "5.1",
                 ibu: 33.8,
                 srm: "6.2",
                 eficiencia: 73,
-                aguaIni: 195,
-                tempAguaIni: "73 °C",
-                tempMac: "66 °C",
-                aguaLav: 173,
-                tempLav: "75 °C",
-                salesMac: ["Sulfato de Calcio: 25 grs", "Cloruro de Calcio: 15 grs"],
-                salesLav: ["Sulfato de Calcio: 20 grs"],
-                densPre: "1.049",
-                ltsPre: 310,
-                tiempoHervor: 60,
-                evaporacion: 6,
-                trub: 10,
-                tiempoEnfriado: 30,
-                granos: [
-                    { nombre: "Malta Pilsen", cantidad: 55, unidad: "kg" },
-                    { nombre: "Malta Munich", cantidad: 5, unidad: "kg" }
-                ],
-                lupulos: [
-                    { nombre: "Cascade", cantidad: 150, tiempo: "60 min", ibu: 18 },
-                    { nombre: "Mosaic", cantidad: 200, tiempo: "0 min", ibu: 15.8 }
-                ],
-                levadura: "US-05 (200 grs)"
+                levadura: "US-05 (200 grs)",
+                granos: [{ nombre: "Malta Pilsen", cant: 60 }],
+                lupulos: [{ nombre: "Cascade", cant: 250, tiempo: "60 min" }]
             }
         ];
 
-        // INICIALIZACIÓN
-        document.addEventListener('DOMContentLoaded', () => {
-            renderizarRecetas();
-            poblarSelectRecetas();
-            setearFechaHoy();
-        });
+        let cocciones = JSON.parse(localStorage.getItem('albardon_cocciones')) || [];
+        let barriles = JSON.parse(localStorage.getItem('albardon_barriles')) || [
+            { id: "B-01", cap: "50L", estilo: "APA Pilsen", estado: "Lleno", cliente: "Planta" },
+            { id: "B-02", cap: "50L", estilo: "-", estado: "Vacío", cliente: "Planta" }
+        ];
 
-        function setearFechaHoy() {
-            const hoy = new Date().toISOString().split('T')[0];
-            const elemCoc = document.getElementById('coc-fecha');
-            const elemFerm = document.getElementById('ferm-fecha');
-            const elemRem = document.getElementById('remito-fecha');
-            if(elemCoc) elemCoc.value = hoy;
-            if(elemFerm) elemFerm.value = hoy;
-            if(elemRem) elemRem.value = hoy;
-        }
-
-        // NAVEGACIÓN ENTRE PESTAÑAS
+        // Cambio de Solapas
         function switchTab(tabId) {
-            const tabs = ['recetas', 'coccion', 'fermentacion', 'stock', 'cc', 'remito'];
-            tabs.forEach(id => {
-                const sec = document.getElementById(`tab-${id}`);
-                const btn = document.getElementById(`btn-${id}`);
-                if (sec) sec.classList.add('hidden');
-                if (btn) {
-                    btn.classList.remove('active');
-                    btn.classList.add('text-slate-300');
-                }
+            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.classList.add('text-slate-300');
             });
 
-            const secActiva = document.getElementById(`tab-${tabId}`);
-            const btnActivo = document.getElementById(`btn-${tabId}`);
-            if (secActiva) secActiva.classList.remove('hidden');
-            if (btnActivo) {
-                btnActivo.classList.add('active');
-                btnActivo.classList.remove('text-slate-300');
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`btn-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+                activeBtn.classList.remove('text-slate-300');
             }
+
+            if(tabId === 'coccion') popularSelectRecetas();
+            if(tabId === 'fermentacion') popularSelectLotes();
+            if(tabId === 'stock') renderizarBarriles();
         }
 
-        // LÓGICA DE RECETAS
-        function renderizarRecetas() {
-            const container = document.getElementById('grilla-recetas');
-            container.innerHTML = '';
-
-            recetas.forEach((rec, index) => {
-                const card = document.createElement('div');
-                card.className = 'card p-5 space-y-4 border-slate-700/80';
-                card.innerHTML = `
-                    <div class="flex justify-between items-start border-b border-slate-700 pb-3">
-                        <div>
-                            <h3 class="text-lg font-bold text-amber-400">${rec.nombre}</h3>
-                            <span class="text-xs text-slate-400">Batch Esperado: <strong class="text-slate-200">${rec.batch} Lts</strong></span>
-                        </div>
-                        <span class="bg-amber-500/10 text-amber-400 text-xs px-2.5 py-1 rounded-full border border-amber-500/20 font-mono font-bold">${rec.abv} ABV</span>
-                    </div>
-
-                    <div class="grid grid-cols-4 gap-2 text-center text-xs bg-slate-900/60 p-2.5 rounded-lg font-mono">
-                        <div><span class="text-slate-500 block text-[10px]">OG</span><strong class="text-slate-200">${rec.di}</strong></div>
-                        <div><span class="text-slate-500 block text-[10px]">FG</span><strong class="text-slate-200">${rec.df}</strong></div>
-                        <div><span class="text-slate-500 block text-[10px]">IBU</span><strong class="text-slate-200">${rec.ibu}</strong></div>
-                        <div><span class="text-slate-500 block text-[10px]">SRM</span><strong class="text-slate-200">${rec.srm}</strong></div>
-                    </div>
-
-                    <div class="space-y-1 text-xs text-slate-300">
-                        <p><strong>Maltas:</strong> ${rec.granos.map(g => `${g.nombre} (${g.cantidad}${g.unidad})`).join(', ')}</p>
-                        <p><strong>Lúpulos:</strong> ${rec.lupulos.map(l => `${l.nombre} (${l.cantidad}g - ${l.tiempo})`).join(', ')}</p>
-                    </div>
-
-                    <div class="pt-2 flex justify-end">
-                        <button onclick="cargarRecetaSeleccionada(${index})" class="bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-1 font-medium transition-colors">
-                            <i class="fa-solid fa-arrow-right"></i> Usar en Cocción
-                        </button>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
+        // --- GESTIÓN DE RECETAS ---
         function mostrarFormularioReceta() {
             document.getElementById('form-receta-panel').classList.remove('hidden');
         }
@@ -847,311 +635,244 @@
             document.getElementById('form-receta-panel').classList.add('hidden');
         }
 
-        function agregarFilaSal(tipo) {
-            const container = document.getElementById(`rec-sales-${tipo === 'macerado' ? 'mac' : 'lav'}-inputs`);
-            const div = document.createElement('div');
-            div.className = 'flex gap-2 items-center';
-            div.innerHTML = `
-                <input type="text" placeholder="Ej: Sulfato de Calcio (25 grs)" class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-slate-200">
-                <button onclick="this.parentElement.remove()" class="text-rose-400 hover:text-rose-300 text-xs px-1"><i class="fa-solid fa-times"></i></button>
-            `;
-            container.appendChild(div);
-        }
-
         function agregarFilaGrano() {
-            const container = document.getElementById('rec-granos-inputs');
+            const cont = document.getElementById('rec-granos-inputs');
             const div = document.createElement('div');
-            div.className = 'flex gap-2 items-center';
+            div.className = "flex gap-2 items-center";
             div.innerHTML = `
-                <input type="text" placeholder="Nombre Malta" class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-slate-200">
-                <input type="number" placeholder="Kg" class="w-20 bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-slate-200">
-                <button onclick="this.parentElement.remove()" class="text-rose-400 hover:text-rose-300 text-xs px-1"><i class="fa-solid fa-times"></i></button>
+                <input type="text" placeholder="Nombre Malta" class="w-2/3 bg-slate-900 border border-slate-700 rounded p-1 text-xs">
+                <input type="number" placeholder="Kg" class="w-1/3 bg-slate-900 border border-slate-700 rounded p-1 text-xs">
             `;
-            container.appendChild(div);
+            cont.appendChild(div);
         }
 
         function agregarFilaLupulo() {
-            const container = document.getElementById('rec-lupulos-inputs');
+            const cont = document.getElementById('rec-lupulos-inputs');
             const div = document.createElement('div');
-            div.className = 'flex gap-2 items-center';
+            div.className = "flex gap-2 items-center";
             div.innerHTML = `
-                <input type="text" placeholder="Nombre Lúpulo" class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-slate-200">
-                <input type="number" placeholder="Grams" class="w-20 bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-slate-200">
-                <input type="text" placeholder="Tiempo (min)" class="w-24 bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-slate-200">
-                <button onclick="this.parentElement.remove()" class="text-rose-400 hover:text-rose-300 text-xs px-1"><i class="fa-solid fa-times"></i></button>
+                <input type="text" placeholder="Variedad Lúpulo" class="w-1/2 bg-slate-900 border border-slate-700 rounded p-1 text-xs">
+                <input type="number" placeholder="Gramos" class="w-1/4 bg-slate-900 border border-slate-700 rounded p-1 text-xs">
+                <input type="text" placeholder="Minutos" class="w-1/4 bg-slate-900 border border-slate-700 rounded p-1 text-xs">
             `;
-            container.appendChild(div);
+            cont.appendChild(div);
+        }
+
+        function agregarFilaSal(seccion) {
+            const cont = document.getElementById(seccion === 'macerado' ? 'rec-sales-mac-inputs' : 'rec-sales-lav-inputs');
+            const div = document.createElement('div');
+            div.className = "flex gap-2 items-center";
+            div.innerHTML = `
+                <input type="text" placeholder="Sal (ej. CaCl2)" class="w-2/3 bg-slate-900 border border-slate-700 rounded p-1 text-xs">
+                <input type="number" placeholder="Gramos" class="w-1/3 bg-slate-900 border border-slate-700 rounded p-1 text-xs">
+            `;
+            cont.appendChild(div);
         }
 
         function guardarReceta() {
-            const nombre = document.getElementById('rec-nombre').value;
-            if(!nombre) return alert('Por favor ingrese el nombre de la receta');
-
             const nuevaReceta = {
-                nombre: nombre,
+                nombre: document.getElementById('rec-nombre').value || "Nueva Receta",
                 batch: document.getElementById('rec-batch').value || 0,
                 di: document.getElementById('rec-di').value || "1.000",
                 df: document.getElementById('rec-df').value || "1.000",
-                abv: (document.getElementById('rec-abv').value || "0") + "%",
+                abv: document.getElementById('rec-abv').value || "0",
                 ibu: document.getElementById('rec-ibu').value || 0,
                 srm: document.getElementById('rec-srm').value || "0",
-                eficiencia: document.getElementById('rec-eficiencia').value || 0,
+                levadura: document.getElementById('rec-levadura').value || "-",
                 granos: [],
-                lupulos: [],
-                levadura: document.getElementById('rec-levadura').value || ""
+                lupulos: []
             };
 
             recetas.push(nuevaReceta);
-            renderizarRecetas();
-            poblarSelectRecetas();
+            localStorage.setItem('albardon_recetas', JSON.stringify(recetas));
             ocultarFormularioReceta();
-            alert('Receta guardada exitosamente');
+            renderizarRecetas();
         }
 
-        // LÓGICA DE COCCIÓN
-        function poblarSelectRecetas() {
-            const select = document.getElementById('select-receta');
-            if(!select) return;
-            select.innerHTML = '<option value="">-- Seleccionar Receta --</option>';
-            recetas.forEach((rec, idx) => {
-                select.innerHTML += `<option value="${idx}">${rec.nombre}</option>`;
+        function renderizarRecetas() {
+            const grilla = document.getElementById('grilla-recetas');
+            grilla.innerHTML = "";
+            recetas.forEach((r, idx) => {
+                grilla.innerHTML += `
+                    <div class="card p-5 space-y-3 relative border-l-4 border-amber-500">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-bold text-amber-400 text-base">${r.nombre}</h3>
+                                <span class="text-xs text-slate-400">Batch: ${r.batch} Lts</span>
+                            </div>
+                            <span class="text-xs font-mono bg-slate-900 px-2 py-1 rounded text-emerald-400 font-bold">${r.abv}% ABV</span>
+                        </div>
+                        <div class="grid grid-cols-4 gap-2 text-center text-xs bg-slate-900/60 p-2 rounded">
+                            <div><span class="text-slate-500 block">D.I.</span><b>${r.di}</b></div>
+                            <div><span class="text-slate-500 block">D.F.</span><b>${r.df}</b></div>
+                            <div><span class="text-slate-500 block">IBU</span><b>${r.ibu}</b></div>
+                            <div><span class="text-slate-500 block">SRM</span><b>${r.srm}</b></div>
+                        </div>
+                    </div>
+                `;
             });
         }
 
-        function cargarRecetaSeleccionada(index) {
-            switchTab('coccion');
-            document.getElementById('select-receta').value = index;
-            cargarRecetaEnCoccion();
+        // --- GESTIÓN DE COCCIÓN ---
+        function popularSelectRecetas() {
+            const select = document.getElementById('select-receta');
+            select.innerHTML = `<option value="">-- Seleccionar --</option>`;
+            recetas.forEach((r, index) => {
+                select.innerHTML += `<option value="${index}">${r.nombre}</option>`;
+            });
         }
 
         function cargarRecetaEnCoccion() {
-            const idx = document.getElementById('select-receta').value;
-            if (idx === "") return;
-
-            const rec = recetas[idx];
-            document.getElementById('coc-estilo').value = rec.nombre;
-            document.getElementById('coc-agua-lts').value = rec.aguaIni || '';
-            document.getElementById('coc-agua-temp').value = rec.tempAguaIni || '';
-            document.getElementById('coc-agua-lav-lts').value = rec.aguaLav || '';
-            document.getElementById('coc-temp-lav').value = rec.tempLav || '';
-            document.getElementById('coc-lts-pre').value = rec.ltsPre || '';
-            document.getElementById('coc-dens-pre').value = rec.densPre || '';
-            document.getElementById('coc-levadura').value = rec.levadura || '';
-
-            // Cargar Granos
-            const contGranos = document.getElementById('contenedor-granos');
-            contGranos.innerHTML = '';
-            let totalKgs = 0;
-            rec.granos.forEach(g => {
-                totalKgs += parseFloat(g.cantidad) || 0;
-                contGranos.innerHTML += `
-                    <div class="grid grid-cols-3 gap-2 text-xs bg-slate-900/60 p-2 rounded border border-slate-800">
-                        <span class="font-bold text-slate-200">${g.nombre}</span>
-                        <span class="text-amber-400 font-mono">${g.cantidad} ${g.unidad}</span>
-                        <input type="text" placeholder="Observaciones Molienda" class="bg-slate-950 border border-slate-800 rounded px-2 py-0.5 text-xs">
-                    </div>
-                `;
-            });
-            document.getElementById('total-granos').innerText = `KGS TOTALES: ${totalKgs} kg`;
-
-            // Cargar Lúpulos
-            const contLupulos = document.getElementById('contenedor-lupulos');
-            contLupulos.innerHTML = '';
-            rec.lupulos.forEach(l => {
-                contLupulos.innerHTML += `
-                    <div class="grid grid-cols-4 gap-2 text-xs bg-slate-900/60 p-2 rounded border border-slate-800 items-center">
-                        <span class="font-bold text-slate-200">${l.nombre}</span>
-                        <span class="text-amber-400 font-mono">${l.cantidad} grs</span>
-                        <span class="text-slate-400">${l.tiempo}</span>
-                        <input type="time" class="bg-slate-950 border border-slate-800 rounded px-2 py-0.5 text-xs">
-                    </div>
-                `;
-            });
+            const index = document.getElementById('select-receta').value;
+            if (index === "") return;
+            const r = recetas[index];
+            document.getElementById('coc-estilo').value = r.nombre;
+            document.getElementById('coc-agua-lts').value = r.batch * 0.7; 
+            document.getElementById('coc-levadura').value = r.levadura;
         }
 
         function guardarCoccion() {
-            const estilo = document.getElementById('coc-estilo').value;
             const lote = document.getElementById('coc-lote').value;
-            const diReal = document.getElementById('di-real-coccion').value;
+            const estilo = document.getElementById('coc-estilo').value;
+            const diReal = document.getElementById('di-real-coccion').value || "1.050";
 
-            if(!estilo || !lote) return alert('Por favor complete el Estilo y N° de Lote.');
+            if (!lote || !estilo) {
+                alert("Por favor ingrese estilo y N° de lote.");
+                return;
+            }
 
-            document.getElementById('ferm-estilo').value = estilo;
-            document.getElementById('ferm-lote').value = lote;
-            if(diReal) document.getElementById('ferm-di').value = diReal;
-
+            const nuevaCoccion = { lote, estilo, diReal, historialFermentacion: [] };
+            cocciones.push(nuevaCoccion);
+            localStorage.setItem('albardon_cocciones', JSON.stringify(cocciones));
+            alert("Cocción guardada exitosamente y transferida a Fermentación.");
             switchTab('fermentacion');
-            alert('¡Cocción guardada exitosamente! Se han migrado los datos a Fermentación.');
         }
 
-        // LÓGICA DE FERMENTACIÓN
-        function agregarFilaFermentacion() {
-            const tbody = document.getElementById('tabla-fermentacion-body');
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td class="p-2"><input type="datetime-local" class="bg-slate-900 border border-slate-700 rounded p-1 text-xs text-slate-200"></td>
-                <td class="p-2"><input type="number" value="2" class="w-12 bg-slate-900 border border-slate-700 rounded p-1 text-xs font-mono text-slate-200"></td>
-                <td class="p-2"><input type="text" placeholder="18.0" class="w-16 bg-slate-900 border border-slate-700 rounded p-1 text-xs text-slate-200"></td>
-                <td class="p-2"><input type="text" placeholder="1.040" class="w-20 bg-slate-900 border border-slate-700 rounded p-1 text-xs font-mono text-amber-400"></td>
-                <td class="p-2"><input type="text" placeholder="Medición diaria / Purgado" class="w-full bg-slate-900 border border-slate-700 rounded p-1 text-xs text-slate-200"></td>
-                <td class="p-2 text-center no-print"><button onclick="eliminarFila(this)" class="text-rose-400 hover:text-rose-300"><i class="fa-solid fa-trash"></i></button></td>
-            `;
-            tbody.appendChild(tr);
-        }
-
-        function eliminarFila(btn) {
-            btn.closest('tr').remove();
-        }
-
-        function eliminarFilaTabla(btn) {
-            btn.closest('tr').remove();
-        }
-
-        // LÓGICA DE STOCK DE BARRILES
-        function mostrarFormBarril() {
-            document.getElementById('form-barril-panel').classList.remove('hidden');
-        }
-        function ocultarFormBarril() {
-            document.getElementById('form-barril-panel').classList.add('hidden');
-        }
-        function guardarBarril() {
-            const cod = document.getElementById('barril-codigo').value;
-            const cap = document.getElementById('barril-capacidad').value;
-            const est = document.getElementById('barril-estilo').value;
-            const estado = document.getElementById('barril-estado').value;
-
-            if(!cod) return alert('Ingrese el código del barril.');
-
-            const tbody = document.getElementById('tabla-barriles-body');
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td class="p-3 font-mono font-bold text-amber-400">${cod}</td>
-                <td class="p-3">${cap} LTS</td>
-                <td class="p-3">${est || 'S/D'}</td>
-                <td class="p-3"><span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-full text-[11px]">${estado}</span></td>
-                <td class="p-3 text-right"><button onclick="eliminarFilaTabla(this)" class="text-rose-400 hover:text-rose-300"><i class="fa-solid fa-trash"></i></button></td>
-            `;
-            tbody.appendChild(tr);
-            ocultarFormBarril();
-        }
-
-        // LÓGICA CUENTAS CORRIENTES
-        function mostrarFormCliente() {
-            document.getElementById('form-cliente-panel').classList.remove('hidden');
-        }
-        function ocultarFormCliente() {
-            document.getElementById('form-cliente-panel').classList.add('hidden');
-        }
-        function guardarCliente() {
-            const nom = document.getElementById('cli-nombre').value;
-            const dir = document.getElementById('cli-direccion').value;
-            if(!nom) return alert('Ingrese nombre del bar.');
-
-            const lista = document.getElementById('lista-clientes-cc');
-            lista.innerHTML += `
-                <div class="p-3 bg-slate-900 rounded-lg border border-slate-700/80 flex justify-between items-center cursor-pointer hover:border-amber-500 transition-colors" onclick="seleccionarCliente('${nom}', 0, 0)">
-                    <div>
-                        <h4 class="font-bold text-slate-200 text-sm">${nom}</h4>
-                        <span class="text-xs text-slate-400 block">${dir}</span>
-                    </div>
-                    <div class="text-right">
-                        <span class="text-xs text-emerald-400 font-mono font-bold block">$0</span>
-                        <span class="text-[10px] text-slate-400">0 Barriles</span>
-                    </div>
-                </div>
-            `;
-            ocultarFormCliente();
-        }
-
-        function seleccionarCliente(nombre, saldo, barriles) {
-            document.getElementById('cc-cliente-titulo').innerText = `Detalle de Cuenta: ${nombre}`;
-        }
-
-        function mostrarFormMovimiento() {
-            document.getElementById('form-movimiento-panel').classList.toggle('hidden');
-        }
-
-        function guardarMovimientoCC() {
-            const tipo = document.getElementById('mov-tipo').value;
-            const monto = document.getElementById('mov-monto').value;
-            const hoy = new Date().toLocaleDateString();
-
-            const tbody = document.getElementById('cc-historial-body');
-            const tr = document.createElement('tr');
-
-            let debe = '-';
-            let haber = '-';
-
-            if(tipo.includes('Debe')) debe = `$${monto}`;
-            else haber = `$${monto}`;
-
-            tr.innerHTML = `
-                <td class="p-2">${hoy}</td>
-                <td class="p-2">${tipo}</td>
-                <td class="p-2 text-right text-rose-400 font-mono">${debe}</td>
-                <td class="p-2 text-right text-emerald-400 font-mono">${haber}</td>
-            `;
-            tbody.appendChild(tr);
-            mostrarFormMovimiento();
-        }
-
-        // LÓGICA DE REMITO
-        function agregarFilaRemito() {
-            const tbody = document.getElementById('remito-items-body');
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td class="py-2"><input type="number" value="1" class="w-12 border border-slate-300 rounded p-1 text-center font-bold"></td>
-                <td class="py-2"><input type="text" placeholder="Ej: Honey / IPA / Stout" class="w-full border border-slate-300 rounded p-1"></td>
-                <td class="py-2"><input type="text" placeholder="Ej: Barril 50L #12" class="w-full border border-slate-300 rounded p-1"></td>
-            `;
-            tbody.appendChild(tr);
-        }
-
-        // GENERACIÓN DE PDFS
         function descargarCoccionPDF() {
-            const element = document.getElementById('area-impresion-coccion');
-            element.classList.add('pdf-export-mode');
+            const elemento = document.getElementById('area-impresion-coccion');
+            elemento.classList.add('pdf-export-mode');
             const opt = {
-                margin:       0.3,
-                filename:     `Coccion_Albardon_${document.getElementById('coc-lote').value || 'batch'}.pdf`,
+                margin:       0.5,
+                filename:     `Coccion_${document.getElementById('coc-lote').value}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2 },
                 jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
             };
-
-            html2pdf().set(opt).from(element).save().then(() => {
-                element.classList.remove('pdf-export-mode');
+            html2pdf().set(opt).from(elemento).save().then(() => {
+                elemento.classList.remove('pdf-export-mode');
             });
         }
 
-        function descargarFermentacionPDF() {
-            const element = document.getElementById('area-impresion-fermentacion');
-            element.classList.add('pdf-export-mode');
-            const opt = {
-                margin:       0.3,
-                filename:     `Fermentacion_Albardon_${document.getElementById('ferm-lote').value || 'batch'}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 },
-                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-            };
-
-            html2pdf().set(opt).from(element).save().then(() => {
-                element.classList.remove('pdf-export-mode');
+        // --- GESTIÓN DE FERMENTACIÓN ---
+        function popularSelectLotes() {
+            const select = document.getElementById('select-lote-fermentacion');
+            select.innerHTML = `<option value="">-- Seleccione un Lote --</option>`;
+            cocciones.forEach((c, index) => {
+                select.innerHTML += `<option value="${index}">${c.lote} - ${c.estilo}</option>`;
             });
         }
 
-        function descargarRemitoPDF() {
-            const element = document.getElementById('area-impresion-remito');
-            const opt = {
-                margin:       0.3,
-                filename:     `Remito_Albardon.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 },
-                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-            };
-
-            html2pdf().set(opt).from(element).save();
+        function cargarLoteFermentacion() {
+            const index = document.getElementById('select-lote-fermentacion').value;
+            if(index === "") return;
+            const c = cocciones[index];
+            document.getElementById('ferm-estilo').value = c.estilo;
+            document.getElementById('ferm-di').value = c.diReal;
+            renderizarHistorialFermentacion(c.historialFermentacion || []);
         }
+
+        function agregarRegistroFermentacion() {
+            const index = document.getElementById('select-lote-fermentacion').value;
+            if(index === "") { alert("Seleccione un lote."); return; }
+
+            const fecha = document.getElementById('ferm-reg-fecha').value;
+            const temp = document.getElementById('ferm-reg-temp').value;
+            const densidad = document.getElementById('ferm-reg-densidad').value;
+            const ph = document.getElementById('ferm-reg-ph').value;
+            const obs = document.getElementById('ferm-reg-obs').value;
+
+            cocciones[index].historialFermentacion.push({ fecha, temp, densidad, ph, obs });
+            localStorage.setItem('albardon_cocciones', JSON.stringify(cocciones));
+            cargarLoteFermentacion();
+        }
+
+        function renderizarHistorialFermentacion(historial) {
+            const tbody = document.getElementById('tabla-historial-fermentacion');
+            tbody.innerHTML = "";
+            if (historial.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-slate-500 italic text-center">Sin registros cargados.</td></tr>`;
+                return;
+            }
+            historial.forEach(h => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-800/50">
+                        <td class="p-2">${h.fecha}</td>
+                        <td class="p-2">${h.temp}</td>
+                        <td class="p-2 font-mono text-amber-400">${h.densidad}</td>
+                        <td class="p-2">${h.ph}</td>
+                        <td class="p-2 text-slate-400">${h.obs}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        // --- GESTIÓN DE BARRILES ---
+        function renderizarBarriles() {
+            const tbody = document.getElementById('tabla-barriles');
+            tbody.innerHTML = "";
+            let llenos = 0, vacios = 0, clientes = 0, sucios = 0;
+
+            barriles.forEach((b) => {
+                if(b.estado === 'Lleno') llenos++;
+                if(b.estado === 'Vacío') vacios++;
+                if(b.estado === 'En Cliente') clientes++;
+                if(b.estado === 'Para Sanitizar') sucios++;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="p-2 font-bold text-amber-400">${b.id}</td>
+                        <td class="p-2">${b.cap}</td>
+                        <td class="p-2">${b.estilo}</td>
+                        <td class="p-2"><span class="px-2 py-0.5 rounded text-[10px] uppercase font-bold bg-slate-800 border">${b.estado}</span></td>
+                        <td class="p-2">${b.cliente}</td>
+                        <td class="p-2 text-right">
+                            <button onclick="cambiarEstadoBarril('${b.id}')" class="text-amber-400 hover:underline">Cambiar Estado</button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('stock-llenos').innerText = llenos;
+            document.getElementById('stock-vacios').innerText = vacios;
+            document.getElementById('stock-clientes').innerText = clientes;
+            document.getElementById('stock-sucio').innerText = sucios;
+        }
+
+        function registrarNuevoBarril() {
+            const id = prompt("Identificador del barril (ej. B-05):");
+            if (!id) return;
+            barriles.push({ id, cap: "50L", estilo: "-", estado: "Vacío", cliente: "Planta" });
+            localStorage.setItem('albardon_barriles', JSON.stringify(barriles));
+            renderizarBarriles();
+        }
+
+        function cambiarEstadoBarril(id) {
+            const b = barriles.find(item => item.id === id);
+            if(b) {
+                const nuevoEstado = prompt("Nuevo estado: Lleno, Vacío, En Cliente, Para Sanitizar", b.estado);
+                if(nuevoEstado) {
+                    b.estado = nuevoEstado;
+                    localStorage.setItem('albardon_barriles', JSON.stringify(barriles));
+                    renderizarBarriles();
+                }
+            }
+        }
+
+        // Inicialización al cargar la ventana
+        window.onload = function() {
+            renderizarRecetas();
+            document.getElementById('coc-fecha').valueToDate = new Date();
+        };
     </script>
 </body>
 </html>
