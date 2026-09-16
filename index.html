@@ -31,23 +31,28 @@
     </div>
   </header>
 
-  <!-- NAVEGACIÓN PRINCIPAL -->
-  <nav class="bg-slate-900 border-b border-slate-800 px-4 overflow-x-auto">
-    <div class="max-w-7xl mx-auto flex space-x-6 whitespace-nowrap text-sm">
-      <button onclick="switchTab('recetas')" id="tab-recetas" class="py-3 px-1 tab-active flex items-center gap-2">
-        <i class="fa-solid fa-book-open text-amber-500"></i> Recetas
+  <!-- NAVEGACIÓN PRINCIPAL ADAPTADA A MÓVIL Y DESKTOP -->
+  <nav class="bg-slate-900 border-b border-slate-800 px-2 sm:px-4">
+    <div class="max-w-7xl mx-auto flex justify-between sm:justify-start sm:space-x-6 text-xs sm:text-sm">
+      <button onclick="switchTab('recetas')" id="tab-recetas" class="py-3 px-1 tab-active flex flex-col sm:flex-row items-center gap-1 sm:gap-2">
+        <i class="fa-solid fa-book-open text-amber-500 text-base sm:text-sm"></i>
+        <span>Recetas</span>
       </button>
-      <button onclick="switchTab('produccion')" id="tab-produccion" class="py-3 px-1 text-slate-400 flex items-center gap-2">
-        <i class="fa-solid fa-beer-mug-empty text-amber-500"></i> Cocción
+      <button onclick="switchTab('produccion')" id="tab-produccion" class="py-3 px-1 text-slate-400 flex flex-col sm:flex-row items-center gap-1 sm:gap-2">
+        <i class="fa-solid fa-beer-mug-empty text-amber-500 text-base sm:text-sm"></i>
+        <span>Cocción</span>
       </button>
-      <button onclick="switchTab('fermentacion')" id="tab-fermentacion" class="py-3 px-1 text-slate-400 flex items-center gap-2">
-        <i class="fa-solid fa-flask text-amber-500"></i> Fermentación
+      <button onclick="switchTab('fermentacion')" id="tab-fermentacion" class="py-3 px-1 text-slate-400 flex flex-col sm:flex-row items-center gap-1 sm:gap-2">
+        <i class="fa-solid fa-flask text-amber-500 text-base sm:text-sm"></i>
+        <span>Fermentación</span>
       </button>
-      <button onclick="switchTab('stock')" id="tab-stock" class="py-3 px-1 text-slate-400 flex items-center gap-2">
-        <i class="fa-solid fa-boxes-stacked text-amber-500"></i> Stock / Barriles
+      <button onclick="switchTab('stock')" id="tab-stock" class="py-3 px-1 text-slate-400 flex flex-col sm:flex-row items-center gap-1 sm:gap-2">
+        <i class="fa-solid fa-boxes-stacked text-amber-500 text-base sm:text-sm"></i>
+        <span>Stock</span>
       </button>
-      <button onclick="switchTab('cuentas')" id="tab-cuentas" class="py-3 px-1 text-slate-400 flex items-center gap-2">
-        <i class="fa-solid fa-users text-amber-500"></i> Cuentas Corrientes
+      <button onclick="switchTab('cuentas')" id="tab-cuentas" class="py-3 px-1 text-slate-400 flex flex-col sm:flex-row items-center gap-1 sm:gap-2">
+        <i class="fa-solid fa-users text-amber-500 text-base sm:text-sm"></i>
+        <span>Clientes / CC</span>
       </button>
     </div>
   </nav>
@@ -195,7 +200,7 @@
               </tr>
             </thead>
             <tbody id="tabla-fermentacion-body">
-              <!-- Filas de días 1 a 18 -->
+              <!-- Filas de días 1 a 14 -->
             </tbody>
           </table>
         </div>
@@ -291,7 +296,6 @@
 
   <!-- LÓGICA DE LA APLICACIÓN -->
   <script>
-    // ESTADO DE LA APLICACIÓN EN LOCALSTORAGE
     let db = JSON.parse(localStorage.getItem('albardon_db')) || {
       recetas: [
         { id: 1, nombre: 'Porter', batch: 190, caso4: 2.1, mgso4: 3.2, di: 1050, df: 1012 },
@@ -310,7 +314,6 @@
       localStorage.setItem('albardon_db', JSON.stringify(db));
     }
 
-    // NAVEGACIÓN
     function switchTab(tab) {
       ['recetas', 'produccion', 'fermentacion', 'stock', 'cuentas'].forEach(t => {
         document.getElementById(`sec-${t}`).classList.add('hidden');
@@ -407,7 +410,6 @@
       document.getElementById('ferm-di-val').innerText = coccion.diReal;
       document.getElementById('ferm-df-val').innerText = coccion.dfReal || '----';
       
-      // Calcular ABV
       if (coccion.diReal && coccion.dfReal) {
         const abv = ((coccion.diReal - coccion.dfReal) * 0.13125).toFixed(1);
         document.getElementById('ferm-abv-val').innerText = `${abv} %`;
