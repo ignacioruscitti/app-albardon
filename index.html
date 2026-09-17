@@ -14,24 +14,24 @@
         .card { background-color: #1e293b; border: 1px solid #334155; border-radius: 0.75rem; }
 
         .pdf-export-mode {
-            color de fondo: #ffffff !importante;
-            color: #000000 !importante;
-            relleno: 20px !importante;
+            background-color: #ffffff !important;
+            color: #000000 !important;
+            padding: 20px !important;
         }
         .pdf-export-mode .card {
-            color de fondo: #ffffff !importante;
-            borde: 1px sólido #cccccc !importante;
-            color: #000000 !importante;
+            background-color: #ffffff !important;
+            border: 1px solid #cccccc !important;
+            color: #000000 !important;
             box-shadow: none !important;
-            margen inferior: 15px !importante;
+            margin-bottom: 15px !important;
         }
         .pdf-export-mode input, .pdf-export-mode select {
-            color de fondo: #f8fafc !importante;
-            borde: 1px sólido #cbd5e1 !importante;
-            color: #0f172a !importante;
+            background-color: #f8fafc !important;
+            border: 1px solid #cbd5e1 !important;
+            color: #0f172a !important;
         }
         .pdf-export-mode h2, .pdf-export-mode h3, .pdf-export-mode label, .pdf-export-mode span, .pdf-export-mode th, .pdf-export-mode td {
-            color: #0f172a !importante;
+            color: #0f172a !important;
         }
     </style>
 </head>
@@ -58,7 +58,7 @@
                     <i class="fa-solid fa-temperature-half"></i> Fermentación
                 </button>
                 <button onclick="switchTab('stock')" id="btn-stock" class="tab-btn px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700 transition-colors flex items-center gap-2">
-                    <i class="fa-solid fa-boxes-stacked"></i> Barriles de stock
+                    <i class="fa-solid fa-boxes-stacked"></i> Stock Barriles
                 </button>
                 <button onclick="switchTab('cc')" id="btn-cc" class="tab-btn px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700 transition-colors flex items-center gap-2">
                     <i class="fa-solid fa-users"></i> Cuentas Corrientes
@@ -69,7 +69,7 @@
 
     <main class="max-w-7xl mx-auto px-4 py-6">
 
-        <!-- ==================== MÓDULO 1: RECETAS ===================== -->
+        <!-- ==================== MÓDULO 1: RECETAS ==================== -->
         <section id="tab-recetas" class="space-y-6">
             <div class="card p-4 flex justify-between items-center no-print">
                 <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
@@ -93,15 +93,15 @@
                         <input type="text" id="rec-nombre" placeholder="ej. APA Pilsen 280" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-bold text-slate-200">
                     </div>
                     <div>
-                        <label class="text-slate-400 block mb-1">Lote (Lts)</label>
+                        <label class="text-slate-400 block mb-1">Batch (Lts)</label>
                         <input type="number" id="rec-batch" placeholder="280" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-mono text-amber-400 font-bold">
                     </div>
                     <div>
-                        <label class="text-slate-400 block mb-1">DI (OG)</label>
+                        <label class="text-slate-400 block mb-1">D.I. (OG)</label>
                         <input type="text" id="rec-di" placeholder="1.052" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-mono">
                     </div>
                     <div>
-                        <label class="text-slate-400 block mb-1">DF (FG)</label>
+                        <label class="text-slate-400 block mb-1">D.F. (FG)</label>
                         <input type="text" id="rec-df" placeholder="1.013" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-mono">
                     </div>
                     <div>
@@ -142,7 +142,7 @@
                         <div><label class="text-slate-400">T° AGUA LAVADO</label><input type="text" id="rec-temp-lav" placeholder="75 °C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
                     </div>
 
-                    <!-- VENTAS MÚLTIPLES: MACERADO Y LAVADO -->
+                    <!-- MÚLTIPLES SALES: MACERADO Y LAVADO -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                         <div class="space-y-2 bg-slate-950/40 p-3 rounded-lg border border-slate-800">
                             <div class="flex justify-between items-center border-b border-slate-800 pb-1">
@@ -201,7 +201,7 @@
             <div id="grilla-recetas" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
         </section>
 
-        <!-- ==================== MÓDULO 2: COCCIÓN ===================== -->
+        <!-- ==================== MÓDULO 2: COCCIÓN ==================== -->
         <section id="tab-coccion" class="space-y-6 hidden">
             <div class="card p-4 flex flex-wrap justify-between items-center gap-4 no-print">
                 <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
@@ -210,14 +210,14 @@
                 <div class="flex items-center gap-3">
                     <label class="text-sm text-slate-300 font-medium">Cargar Receta Base:</label>
                     <select id="select-receta" onchange="cargarRecetaEnCoccion()" class="bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-lg p-2">
-                    </seleccionar>
+                    </select>
                     <button onclick="descargarCoccionPDF()" title="Descargar Planilla en PDF" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-2 rounded-lg text-xs flex items-center gap-1">
                         <i class="fa-solid fa-file-pdf"></i> Generar PDF
                     </button>
                 </div>
             </div>
 
-            <div id="area-impresion-coccion" class="espacio-y-6">
+            <div id="area-impresion-coccion" class="space-y-6">
                 <div class="card p-4 space-y-3">
                     <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Encabezado</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -236,16 +236,16 @@
                         <div><label class="text-slate-400">T° AGUA</label><input type="text" id="coc-agua-temp" placeholder="°C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
                         <div><label class="text-slate-400">T° OBJETIVO</label><input type="text" placeholder="°C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
                         <div><label class="text-slate-400">PH AGUA</label><input type="text" placeholder="pH" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div class="col-span-2"><label class="text-slate-400">VENTAS AGREGADAS (grs)</label><input type="text" id="coc-sales" placeholder="Ventas añadidas" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                        <div class="col-span-2"><label class="text-slate-400">AGREGADO SALES (grs)</label><input type="text" id="coc-sales" placeholder="Sales adicionadas" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
                     </div>
                 </div>
 
                 <div class="card p-4 space-y-3">
                     <div class="flex justify-between items-center border-b border-slate-700 pb-1">
                         <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Granos / Molienda</h3>
-                        <span id="total-granos" class="text-sm font-mono text-amber-400 bg-slate-900 px-3 py-1 rounded border border-slate-700">TOTALES DE KG: 0 kg</span>
+                        <span id="total-granos" class="text-sm font-mono text-amber-400 bg-slate-900 px-3 py-1 rounded border border-slate-700">KGS TOTALES: 0 kg</span>
                     </div>
-                    <div id="contenedor-granos" class="espacio-y-2">
+                    <div id="contenedor-granos" class="space-y-2">
                         <p class="text-xs text-slate-500 italic">Seleccione una receta para cargar los granos automáticamente.</p>
                     </div>
                 </div>
@@ -258,8 +258,8 @@
                             <div><label class="text-slate-400">FIN LLENADO + MALTAS</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
                             <div><label class="text-slate-400">COMIENZO MACERADO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
                             <div><label class="text-slate-400">FIN MACERADO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                            <div><label class="text-slate-400">PH MÍN. 15</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                            <div><label class="text-slate-400">PH MÍN. 60</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            <div><label class="text-slate-400">PH MIN. 15</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            <div><label class="text-slate-400">PH MIN. 60</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
                             <div class="col-span-2"><label class="text-slate-400">1° MOSTO (DENSIDAD)</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 font-mono text-amber-400"></div>
                             <div><label class="text-slate-400">RECIRCULADO COMIENZO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
                             <div><label class="text-slate-400">RECIRCULADO FIN</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
@@ -277,7 +277,7 @@
                             <div><label class="text-slate-400">PH</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
                             <div><label class="text-slate-400">COMIENZO LAVADO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
                             <div><label class="text-slate-400">FIN LAVADO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                            <div><label class="text-slate-400">VENTAS (grs)</label><input type="text" id="coc-sales-lav" placeholder="grs" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                            <div><label class="text-slate-400">SALES (grs)</label><input type="text" id="coc-sales-lav" placeholder="grs" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
                         </div>
                     </div>
                 </div>
@@ -290,10 +290,10 @@
                         <div><label class="text-slate-400">PH ANTES HERVOR</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
                         <div><label class="text-slate-400">DENS. ANTES HERVOR</label><input type="text" id="coc-dens-pre" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 font-mono"></div>
                         <div><label class="text-slate-400">COMIENZO HERVOR</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-slate-400">LTS DESPUÉS DE HERVOR</label><input type="number" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-slate-400">PH DESPUÉS DE HERVOR</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                        <div><label class="text-slate-400">LTS DESPUES HERVOR</label><input type="number" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                        <div><label class="text-slate-400">PH DESPUES HERVOR</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
                         <div>
-                            <label class="text-amber-400 font-bold">DI REAL (DESPUES HERVOR)</label>
+                            <label class="text-amber-400 font-bold">D.I. REAL (DESPUES HERVOR)</label>
                             <input type="text" id="di-real-coccion" placeholder="ej. 1.048" class="w-full bg-slate-900 border border-amber-500/50 rounded p-2 text-sm mt-1 font-mono text-amber-400 font-bold">
                         </div>
                     </div>
@@ -311,8 +311,8 @@
                         <div class="card p-4 space-y-3">
                             <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Varios</h3>
                             <div class="grid grid-cols-2 gap-3 text-xs">
-                                <div><label class="text-slate-400">MUSGO IRLANDÉS (CANT)</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                                <div><label class="text-slate-400">MUSGO IRLANDÉS (HORA)</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                                <div><label class="text-slate-400">IRISH MOSS (CANT)</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                                <div><label class="text-slate-400">IRISH MOSS (HORA)</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
                                 <div><label class="text-slate-400">NUTRIENTE LEVA (CANT)</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
                                 <div><label class="text-slate-400">NUTRIENTE LEVA (HORA)</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
                             </div>
@@ -341,9 +341,9 @@
                         <div class="card p-4 space-y-3">
                             <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Inoculación</h3>
                             <div class="grid grid-cols-2 gap-3 text-xs">
-                                <div><label class="text-slate-400">HORA DE INOCULACIÓN</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                                <div><label class="text-slate-400">HORA INOCULACIÓN</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
                                 <div><label class="text-slate-400">T° MOSTO</label><input type="text" placeholder="°C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                                <div class="col-span-2"><label class="text-slate-400">CANTIDAD / LEVADURA</label><input type="text" id="coc-levadura" placeholder="Cepa y Gramos añadidos" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
+                                <div class="col-span-2"><label class="text-slate-400">CANTIDAD / LEVADURA</label><input type="text" id="coc-levadura" placeholder="Cepa y Gramos adicionados" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
                             </div>
                         </div>
                     </div>
@@ -355,7 +355,7 @@
             </button>
         </section>
 
-        <!-- ==================== MÓDULO 3: FERMENTACIÓN ===================== -->
+        <!-- ==================== MÓDULO 3: FERMENTACIÓN ==================== -->
         <section id="tab-fermentacion" class="space-y-6 hidden">
             <div class="card p-4 flex flex-wrap justify-between items-center gap-4 no-print">
                 <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
@@ -369,16 +369,16 @@
                 </div>
             </div>
 
-            <div id="area-impresion-fermentacion" class="espacio-y-6">
+            <div id="area-impresion-fermentacion" class="space-y-6">
                 <div class="card p-4 space-y-3">
                     <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Encabezado</h3>
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                         <div><span class="text-xs text-slate-400 block">ESTILO</span><input type="text" id="ferm-estilo" value="APA Pilsen 280" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
                         <div><span class="text-xs text-slate-400 block">FECHA ELABORACIÓN</span><input type="date" id="ferm-fecha" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
                         <div><span class="text-xs text-slate-400 block">LOTE</span><input type="text" id="ferm-lote" value="L-2026-01" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1 font-mono text-amber-400"></div>
-                        <div><span class="text-xs text-slate-400 block">LOTE</span><input type="text" id="ferm-batch" value="280L" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
-                        <div><span class="text-xs text-slate-400 block">DI RECETA</span><input type="text" id="ferm-di-receta" value="1.052" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1 font-mono"></div>
-                        <div><span class="text-xs text-amber-400 block font-bold">DI REAL</span><input type="text" id="ferm-di-real" value="1.052" oninput="calcularABV()" class="w-full bg-slate-900 border border-amber-500/50 rounded p-2 mt-1 font-mono text-amber-400 font-bold"></div>
+                        <div><span class="text-xs text-slate-400 block">BATCH</span><input type="text" id="ferm-batch" value="280L" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
+                        <div><span class="text-xs text-slate-400 block">D.I. RECETA</span><input type="text" id="ferm-di-receta" value="1.052" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1 font-mono"></div>
+                        <div><span class="text-xs text-amber-400 block font-bold">D.I. REAL</span><input type="text" id="ferm-di-real" value="1.052" oninput="calcularABV()" class="w-full bg-slate-900 border border-amber-500/50 rounded p-2 mt-1 font-mono text-amber-400 font-bold"></div>
                     </div>
                 </div>
 
@@ -391,14 +391,14 @@
                                 <th class="p-2 border border-slate-700">Fecha</th>
                                 <th class="p-2 border border-slate-700">Densidad</th>
                                 <th class="p-2 border border-slate-700">Temperatura</th>
-                                <th class="p-2 border border-slate-700">Punto de ajuste</th>
+                                <th class="p-2 border border-slate-700">Set Point</th>
                                 <th class="p-2 border border-slate-700">pH</th>
                                 <th class="p-2 border border-slate-700">Purga / Cosecha / Notas</th>
                             </tr>
                         </thead>
                         <tbody id="tabla-dias-fermentacion">
                         </tbody>
-                    </tabla>
+                    </table>
                 </div>
 
                 <div class="card p-4 space-y-4">
@@ -406,7 +406,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
                         <div class="space-y-4">
                             <div>
-                                <label class="text-xs text-slate-400 font-bold block">DF (DENSIDAD FINAL)</label>
+                                <label class="text-xs text-slate-400 font-bold block">D. F. (DENSIDAD FINAL)</label>
                                 <input type="text" id="ferm-df" placeholder="ej. 1.013" oninput="calcularABV()" class="w-full bg-slate-900 border border-slate-700 rounded p-3 text-lg font-mono text-amber-400 mt-1">
                             </div>
                             <div>
@@ -419,7 +419,7 @@
 
                         <div class="bg-slate-900 p-4 rounded-lg border border-slate-700 space-y-3 no-print">
                             <h4 class="text-xs font-semibold text-slate-300 uppercase">Finalizar Lote</h4>
-                            <p class="text-xs text-slate-400">Al finalizar, podrás dirigirte a la pestaña de Stock para pasar tus barriles vacíos a <strong>Lleno en fábrica</strong> con este lote.</p>
+                            <p class="text-xs text-slate-400">Al finalizar, podés dirigirte a la pestaña de Stock para pasar tus barriles vacíos a <strong>Lleno en fábrica</strong> con este lote.</p>
                             <button onclick="switchTab('stock')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-lg text-sm flex items-center justify-center gap-2 transition-colors">
                                 <i class="fa-solid fa-boxes-stacked"></i> Ir a Stock de Barriles
                             </button>
@@ -429,7 +429,7 @@
             </div>
         </section>
 
-        <!-- ==================== MÓDULO 4: STOCK DE BARRILES ===================== -->
+        <!-- ==================== MÓDULO 4: STOCK DE BARRILES ==================== -->
         <section id="tab-stock" class="space-y-6 hidden">
             <div class="card p-4 flex flex-wrap justify-between items-center gap-4 no-print">
                 <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
@@ -443,18 +443,18 @@
             <div id="grilla-barriles" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
         </section>
 
-        <!-- ==================== MÓDULO 5: CUENTAS CORRIENTES & CLIENTES ===================== -->
+        <!-- ==================== MÓDULO 5: CUENTAS CORRIENTES & CLIENTES ==================== -->
         <section id="tab-cc" class="space-y-6 hidden">
             <div class="card p-4 flex flex-wrap justify-between items-center gap-4 no-print">
                 <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
-                    <i class="fa-solid fa-users"></i> Cuentas Corrientes y Clientes
+                    <i class="fa-solid fa-users"></i> Cuentas Corrientes & Clientes
                 </h2>
                 <div class="flex gap-2">
                     <button onclick="mostrarModalCliente()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 transition-colors">
                         <i class="fa-solid fa-user-plus"></i> Nuevo Cliente
                     </button>
                     <button onclick="mostrarModalMovimiento()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 transition-colors">
-                        <i class="fa-solid fa-receipt"></i> Registrador Movimiento / Remito
+                        <i class="fa-solid fa-receipt"></i> Registrar Movimiento / Remito
                     </button>
                 </div>
             </div>
@@ -466,7 +466,7 @@
 
     <!-- MODALES DE INTERACCIÓN -->
 
-    <!-- BARRIL MODAL -->
+    <!-- MODAL BARRIL -->
     <div id="modal-barril" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden no-print">
         <div class="card p-6 w-full max-w-md space-y-4">
             <h3 id="modal-barril-titulo" class="font-bold text-amber-400 text-base border-b border-slate-700 pb-2">Gestionar Barril</h3>
@@ -482,14 +482,14 @@
                             <option value="50L">50 Litros</option>
                             <option value="30L">30 Litros</option>
                             <option value="20L">20 Litros</option>
-                        </seleccionar>
+                        </select>
                     </div>
                     <div>
                         <label class="text-slate-400 block mb-1">Tipo de Conector</label>
                         <select id="barril-conector" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
                             <option value="G">Conector G</option>
                             <option value="S">Conector S</option>
-                        </seleccionar>
+                        </select>
                     </div>
                 </div>
                 <div>
@@ -501,16 +501,16 @@
                         <option value="lleno_fabrica">Lleno en fábrica</option>
                         <option value="entregado_cliente">Entregado en Cliente</option>
                         <option value="mantenimiento">Mantenimiento / Fuera de servicio</option>
-                    </seleccionar>
+                    </select>
                 </div>
-                <div id="campo-barril-cerveza" class="oculto">
+                <div id="campo-barril-cerveza" class="hidden">
                     <label class="text-slate-400 block mb-1">Cerveza / Lote</label>
                     <input type="text" id="barril-cerveza" placeholder="ej. APA Pilsen 280 (L-2026-01)" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
                 </div>
-                <div id="campo-barril-cliente" class="oculto">
+                <div id="campo-barril-cliente" class="hidden">
                     <label class="text-slate-400 block mb-1">Cliente Asignado</label>
                     <select id="barril-cliente-select" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
-                    </seleccionar>
+                    </select>
                 </div>
             </div>
             <div class="flex justify-end gap-3 pt-3 border-t border-slate-700">
@@ -524,7 +524,7 @@
     <div id="modal-cliente" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden no-print">
         <div class="card p-6 w-full max-w-md space-y-4">
             <h3 id="modal-cliente-titulo" class="font-bold text-amber-400 text-base border-b border-slate-700 pb-2">Nuevo Cliente</h3>
-            <input type="hidden" id="cli-id-editor">
+            <input type="hidden" id="cli-id-editar">
             <div class="space-y-3 text-xs">
                 <div>
                     <label class="text-slate-400 block mb-1">Nombre / Razón Social</label>
@@ -546,7 +546,7 @@
         </div>
     </div>
 
-    <!-- MODAL REGISTRO MOVIMIENTO -->
+    <!-- MODAL REGISTRAR MOVIMIENTO -->
     <div id="modal-movimiento" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden overflow-y-auto no-print">
         <div class="card p-6 w-full max-w-2xl space-y-4 my-8">
             <h3 class="font-bold text-amber-400 text-base border-b border-slate-700 pb-2">Registrar Movimiento / Remito</h3>
@@ -556,14 +556,14 @@
                     <div>
                         <label class="text-slate-400 block mb-1">Cliente</label>
                         <select id="mov-cliente-select" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
-                        </seleccionar>
+                        </select>
                     </div>
                     <div>
                         <label class="text-slate-400 block mb-1">Tipo de Movimiento</label>
                         <select id="mov-tipo" onchange="toggleFormularioRemito()" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
                             <option value="entrega">Entrega de Cerveza (Generar Remito / Débito)</option>
                             <option value="cobro">Cobro / Pago Recibido (Abono a CC)</option>
-                        </seleccionar>
+                        </select>
                     </div>
                 </div>
 
@@ -579,7 +579,7 @@
                     </div>
                 </div>
 
-                <div id="seccion-cobro-directo" class="espacio-y-3 oculto">
+                <div id="seccion-cobro-directo" class="space-y-3 hidden">
                     <div>
                         <label class="text-slate-400 block mb-1">Concepto / Detalle de Pago</label>
                         <input type="text" id="mov-concepto-cobro" placeholder="ej. Pago en efectivo / Transferencia recibida" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
@@ -612,13 +612,13 @@
             </div>
             <div class="text-right">
                 <h2 class="text-lg font-bold text-slate-800" id="rec-pdf-nombre">APA Pilsen 280</h2>
-                <p class="text-slate-500 font-mono" id="rec-pdf-batch">Lote: 280 Lts</p>
+                <p class="text-slate-500 font-mono" id="rec-pdf-batch">Batch: 280 Lts</p>
             </div>
         </div>
 
         <div class="grid grid-cols-6 gap-2 bg-slate-100 p-3 rounded text-center font-mono border border-slate-200">
-            <div><span class="block text-[9px] text-slate-500">OG / DI</span><strong id="rec-pdf-og">1.052</strong></div>
-            <div><span class="block text-[9px] text-slate-500">FG / DF</span><strong id="rec-pdf-fg">1.013</strong></div>
+            <div><span class="block text-[9px] text-slate-500">OG / D.I.</span><strong id="rec-pdf-og">1.052</strong></div>
+            <div><span class="block text-[9px] text-slate-500">FG / D.F.</span><strong id="rec-pdf-fg">1.013</strong></div>
             <div><span class="block text-[9px] text-slate-500">ABV</span><strong id="rec-pdf-abv-val">5.1%</strong></div>
             <div><span class="block text-[9px] text-slate-500">IBU</span><strong id="rec-pdf-ibu-val">33.8</strong></div>
             <div><span class="block text-[9px] text-slate-500">COLOR</span><strong id="rec-pdf-srm-val">6.2 SRM</strong></div>
@@ -637,7 +637,7 @@
             </div>
 
             <div>
-                <h3 class="text-xs font-bold text-amber-800 uppercase border-b border-slate-200 pb-1 mb-2">Lúpulos y Levadura</h3>
+                <h3 class="text-xs font-bold text-amber-800 uppercase border-b border-slate-200 pb-1 mb-2">Lúpulos & Levadura</h3>
                 <ul id="rec-pdf-lupulos" class="space-y-1 text-slate-800"></ul>
             </div>
         </div>
@@ -663,21 +663,21 @@
         </div>
 
         <table class="w-full text-left border-collapse my-2">
-            <encabezado>
+            <thead>
                 <tr class="bg-amber-100 text-amber-900 border-b border-amber-200">
                     <th class="p-2">Presentación</th>
                     <th class="p-2">Estilo</th>
-                    <th class="p-2 text-center">Cantón.</th>
+                    <th class="p-2 text-center">Cant.</th>
                     <th class="p-2 text-right">Precio U.</th>
                     <th class="p-2 text-right">Subtotal</th>
                 </tr>
             </thead>
             <tbody id="pdf-items-body">
             </tbody>
-        </tabla>
+        </table>
 
         <div class="flex justify-between items-center pt-3 border-t border-slate-300 font-bold">
-            <span class="text-sm">IMPORTACIÓN TOTAL:</span>
+            <span class="text-sm">TOTAL IMPORTE:</span>
             <span id="pdf-total" class="text-base text-amber-800">$0</span>
         </div>
 
@@ -697,7 +697,7 @@
             apa_pilsen_280: {
                 id: 'apa_pilsen_280',
                 nombre: "APA Pilsen 280",
-                lote: 280,
+                batch: 280,
                 diTeorica: "1.052",
                 dfTeorica: "1.013",
                 abv: "5.1",
@@ -710,21 +710,21 @@
                 tempMac: "66 °C",
                 aguaLav: 173,
                 tempLav: "75 °C",
-                salesMac: [{ nombre: "Yypsum (Sulfato de Calcio)", cantidad: 30 }, { nombre: "Cloruro de Calcio", cantidad: 20 }],
-                salesLav: [{ nombre: "Yeso", cantidad: 15 }],
+                salesMac: [{ nombre: "Gypsum (Sulfato de Calcio)", cantidad: 30 }, { nombre: "Cloruro de Calcio", cantidad: 20 }],
+                salesLav: [{ nombre: "Gypsum", cantidad: 15 }],
                 densPre: "1.049",
                 ltsPre: 310,
                 tiempoHervor: 60,
-                evaporación: 6,
+                evaporacion: 6,
                 trub: 10,
                 tiempoEnfriado: 30,
                 granos: [
                     { nombre: "Pilsner US Cargill", cantidad: 55 },
                     { nombre: "Melanoidin Malt (Ba-Malt)", cantidad: 5 },
-                    { nombre: "Carapils (Dextrina) Ba-Malt", cantidad: 5 }
+                    { nombre: "Carapils (Dextrine) Ba-Malt", cantidad: 5 }
                 ],
                 lupulos: [
-                    { nombre: "Colón", cantidad: 300, momento: "60 min" },
+                    { nombre: "Columbus", cantidad: 300, momento: "60 min" },
                     { nombre: "Cascade", cantidad: 500, momento: "Whirlpool" }
                 ]
             }
@@ -736,20 +736,20 @@
         ];
 
         const clientesIniciales = [
-            { id: 'c1', nombre: 'Bar El Portal', teléfono: '5493421234567', dirección: 'Av. Pellegrini 1500', saldo: -150000, movimientos: [{ fecha: '2026-09-10', concepto: 'Entrega 2 Barriles 50L', monto: -150000, items: [] }] }
+            { id: 'c1', nombre: 'Bar El Portal', telefono: '5493421234567', direccion: 'Av. Pellegrini 1500', saldo: -150000, movimientos: [{ fecha: '2026-09-10', concepto: 'Entrega 2 Barriles 50L', monto: -150000, items: [] }] }
         ];
 
         let recetas = JSON.parse(localStorage.getItem('alb_recetas')) || recetasIniciales;
         let barriles = JSON.parse(localStorage.getItem('alb_barriles')) || barrilesIniciales;
         let clientes = JSON.parse(localStorage.getItem('alb_clientes')) || clientesIniciales;
 
-        función guardarStorage() {
+        function guardarStorage() {
             localStorage.setItem('alb_recetas', JSON.stringify(recetas));
             localStorage.setItem('alb_barriles', JSON.stringify(barriles));
             localStorage.setItem('alb_clientes', JSON.stringify(clientes));
         }
 
-        función switchTab(tabId) {
+        function switchTab(tabId) {
             document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('active', 'bg-amber-500', 'text-slate-950');
@@ -761,18 +761,18 @@
             activeBtn.classList.add('active');
 
             if (tabId === 'recetas') renderRecetas();
-            si (tabId === 'stock') renderBarriles();
+            if (tabId === 'stock') renderBarriles();
             if (tabId === 'cc') renderClientes();
         }
 
         // --- MÓDULO RECETAS ---
-        función renderRecetas() {
-            const contenedor = document.getElementById('parrilla-recetas');
+        function renderRecetas() {
+            const container = document.getElementById('grilla-recetas');
             let html = '';
             Object.keys(recetas).forEach(key => {
-                const r = recetas[clave];
-                const salesMacTxt = (r.salesMac && r.salesMac.length > 0)? r.salesMac.map(s => `${s.nombre}: ${s.cantidad}g`).join(', ') : 'Ninguna';
-                const salesLavTxt = (r.salesLav && r.salesLav.length > 0)? r.salesLav.map(s => `${s.nombre}: ${s.cantidad}g`).join(', ') : 'Ninguna';
+                const r = recetas[key];
+                const salesMacTxt = (r.salesMac && r.salesMac.length > 0) ? r.salesMac.map(s => `${s.nombre}: ${s.cantidad}g`).join(', ') : 'Ninguna';
+                const salesLavTxt = (r.salesLav && r.salesLav.length > 0) ? r.salesLav.map(s => `${s.nombre}: ${s.cantidad}g`).join(', ') : 'Ninguna';
 
                 html += `
                     <div class="card p-5 space-y-4 flex flex-col justify-between">
@@ -780,14 +780,14 @@
                             <div class="flex justify-between items-start border-b border-slate-700 pb-3">
                                 <div>
                                     <h3 class="font-bold text-amber-400 text-lg">${r.nombre}</h3>
-                                    Lote: ${r.batch || 280} Lts</strong> | Levadura: ${r.levadura || 'N/A'}</strong></span>
+                                    <span class="text-xs text-slate-400">Batch: <strong class="text-slate-200 font-mono">${r.batch || 280} Lts</strong> | Levadura: <strong class="text-slate-200">${r.levadura || 'N/A'}</strong></span>
                                 </div>
                                 <span class="text-xs font-mono bg-amber-500/10 border border-amber-500/30 text-amber-300 px-2.5 py-1 rounded-lg font-bold">${r.abv || '--'}% ABV</span>
                             </div>
 
                             <div class="grid grid-cols-5 gap-1 my-3 bg-slate-900/80 p-2 rounded-lg text-center font-mono text-xs border border-slate-700/60">
-                                <div><span class="block text-[9px] text-slate-400">DI</span><strong class="text-amber-300">${r.diTeorica}</strong></div>
-                                <div><span class="block text-[9px] text-slate-400">DF</span><strong class="text-slate-300">${r.dfTeorica || '--'}</strong></div>
+                                <div><span class="block text-[9px] text-slate-400">D.I.</span><strong class="text-amber-300">${r.diTeorica}</strong></div>
+                                <div><span class="block text-[9px] text-slate-400">D.F.</span><strong class="text-slate-300">${r.dfTeorica || '--'}</strong></div>
                                 <div><span class="block text-[9px] text-slate-400">IBU</span><strong class="text-emerald-400">${r.ibu || '--'}</strong></div>
                                 <div><span class="block text-[9px] text-slate-400">SRM</span><strong class="text-amber-500">${r.srm || '--'}</strong></div>
                                 <div><span class="block text-[9px] text-slate-400">EFIC.</span><strong class="text-blue-400">${r.eficiencia || '70'}%</strong></div>
@@ -799,8 +799,8 @@
                                         <p>💧 Macerado: <strong class="text-slate-100">${r.aguaIni || '--'} Lts</strong> (${r.tempAguaIni || '--'} / Mac: ${r.tempMac || '--'})</p>
                                         <p>🚿 Lavado: <strong class="text-slate-100">${r.aguaLav || '--'} Lts</strong> (${r.tempLav || '--'})</p>
                                     </div>
-                                    <p class="text-slate-400">🧪 Ventas Mac: <span class="text-slate-300">${salesMacTxt}</span></p>
-                                    <p class="text-slate-400">🧪 Lavandería de ventas: <span class="text-slate-300">${salesLavTxt}</span></p>
+                                    <p class="text-slate-400">🧪 Sales Mac: <span class="text-slate-300">${salesMacTxt}</span></p>
+                                    <p class="text-slate-400">🧪 Sales Lav: <span class="text-slate-300">${salesLavTxt}</span></p>
                                 </div>
 
                                 <div class="bg-slate-900/40 p-2 rounded border border-slate-800 text-[11px] text-slate-300 grid grid-cols-2 gap-2">
@@ -836,11 +836,11 @@
                         </div>
                     </div>`;
             });
-            contenedor.innerHTML = html;
+            container.innerHTML = html;
             actualizarSelectRecetas();
         }
 
-        función mostrarFormularioReceta() {
+        function mostrarFormularioReceta() {
             document.getElementById('rec-sales-mac-inputs').innerHTML = '';
             document.getElementById('rec-sales-lav-inputs').innerHTML = '';
             document.getElementById('rec-granos-inputs').innerHTML = '';
@@ -861,7 +861,7 @@
             const div = document.createElement('div');
             div.className = 'flex gap-2 item-sal-' + tipo;
             div.innerHTML = `<input type="text" value="${nombre}" placeholder="ej. Gypsum" class="sal-nombre flex-1 bg-slate-900 border border-slate-700 rounded p-1.5 text-xs"><input type="number" value="${cant}" placeholder="Grs" class="sal-cant w-20 bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-amber-400 font-bold"><button onclick="this.parentElement.remove()" class="text-red-400 font-bold px-1">×</button>`;
-            contenedor.appendChild(div);
+            container.appendChild(div);
         }
 
         function agregarFilaGrano(nombre = '', cant = '') {
@@ -874,11 +874,11 @@
         function agregarFilaLupulo(nombre = '', cant = '', momento = '') {
             const div = document.createElement('div');
             div.className = 'flex gap-2';
-            div.innerHTML = `<input type="text" value="${nombre}" placeholder="Lúpulo" class="rec-lupulo-nombre flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs"><input type="number" value="${cant}" placeholder="Grs" class="rec-lupulo-cant w-20 bg-slate-900 border border-slate-700 rounded p-2 text-xs"><input type="text" value="${momento}" placeholder="Momento" class="rec-lupulo-momento w-28 bg-slate-900 border b order-slate-700 rounded p-2 text-xs"><button onclick="this.parentElement.remove()" class="text-red-400 font-bold px-1">×</button>`;
+            div.innerHTML = `<input type="text" value="${nombre}" placeholder="Lúpulo" class="rec-lupulo-nombre flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs"><input type="number" value="${cant}" placeholder="Grs" class="rec-lupulo-cant w-20 bg-slate-900 border border-slate-700 rounded p-2 text-xs"><input type="text" value="${momento}" placeholder="Momento" class="rec-lupulo-momento w-28 bg-slate-900 border border-slate-700 rounded p-2 text-xs"><button onclick="this.parentElement.remove()" class="text-red-400 font-bold px-1">×</button>`;
             document.getElementById('rec-lupulos-inputs').appendChild(div);
         }
 
-        función guardarReceta() {
+        function guardarReceta() {
             const nombre = document.getElementById('rec-nombre').value.trim();
             if (!nombre) return alert("Ingrese el nombre de la receta.");
 
@@ -908,23 +908,23 @@
             });
 
             recetas[id] = {
-                identificación,
+                id,
                 nombre,
-                lote: parseFloat(document.getElementById('rec-batch').value) || 280,
+                batch: parseFloat(document.getElementById('rec-batch').value) || 280,
                 diTeorica: document.getElementById('rec-di').value.trim() || '1.050',
                 dfTeorica: document.getElementById('rec-df').value.trim() || '1.010',
                 abv: document.getElementById('rec-abv').value.trim() || '5.0',
                 ibu: document.getElementById('rec-ibu').value.trim() || '30',
                 srm: document.getElementById('rec-srm').value.trim() || '6.0',
                 eficiencia: document.getElementById('rec-eficiencia').value.trim() || '70',
-                levadura: document.getElementById('rec-levadura').value.trim() || 'Estados Unidos-05',
+                levadura: document.getElementById('rec-levadura').value.trim() || 'US-05',
                 aguaIni: parseFloat(document.getElementById('rec-agua-ini').value) || 0,
                 tempAguaIni: document.getElementById('rec-temp-agua-ini').value.trim(),
                 tempMac: document.getElementById('rec-temp-mac').value.trim(),
                 aguaLav: parseFloat(document.getElementById('rec-agua-lav').value) || 0,
                 tempLav: document.getElementById('rec-temp-lav').value.trim(),
-                ventasMac,
-                ventasLav,
+                salesMac,
+                salesLav,
                 densPre: document.getElementById('rec-dens-pre').value.trim(),
                 ltsPre: parseFloat(document.getElementById('rec-lts-pre').value) || 0,
                 tiempoHervor: parseFloat(document.getElementById('rec-tiempo-hervor').value) || 60,
@@ -936,23 +936,23 @@
             };
 
             guardarStorage();
-            ocultarFormularReceta();
+            ocultarFormularioReceta();
             renderRecetas();
         }
 
-        función eliminarReceta(clave) {
-            if (confirm("¿Eliminar receta?")) { eliminar recetas[clave]; guardarAlmacenamiento(); renderRecetas(); }
+        function eliminarReceta(key) {
+            if (confirm("¿Eliminar receta?")) { delete recetas[key]; guardarStorage(); renderRecetas(); }
         }
 
-        función actualizarSelectRecetas() {
+        function actualizarSelectRecetas() {
             const select = document.getElementById('select-receta');
             let html = '<option value="">-- Seleccionar Receta --</option>';
             Object.keys(recetas).forEach(key => html += `<option value="${key}">${recetas[key].nombre}</option>`);
             select.innerHTML = html;
         }
 
-        función usarRecetaEnCoccion(key) {
-            switchTab('cocción');
+        function usarRecetaEnCoccion(key) {
+            switchTab('coccion');
             document.getElementById('select-receta').value = key;
             cargarRecetaEnCoccion();
         }
@@ -960,8 +960,8 @@
         // --- MÓDULO COCCIÓN ---
         function cargarRecetaEnCoccion() {
             const key = document.getElementById('select-receta').value;
-            const receta = recetas[clave];
-            si (!receta) regresar;
+            const receta = recetas[key];
+            if (!receta) return;
 
             document.getElementById('coc-estilo').value = receta.nombre;
             if (receta.aguaIni) document.getElementById('coc-agua-lts').value = receta.aguaIni;
@@ -980,7 +980,7 @@
                 htmlG += `<div class="flex gap-4 items-center"><input type="text" value="${g.nombre}" readonly class="flex-1 bg-slate-900/50 border border-slate-700 rounded p-2 text-sm text-slate-300"><div class="flex items-center gap-2"><input type="number" value="${g.cantidad}" oninput="calcularTotalGranos()" class="input-grano w-28 bg-slate-900 border border-slate-700 rounded p-2 text-sm font-bold text-amber-400"><span class="text-xs text-slate-400">KG</span></div></div>`;
             });
             document.getElementById('contenedor-granos').innerHTML = htmlG;
-            document.getElementById('total-granos').innerText = `TOTALES EN KGS: ${totalKg} kg`;
+            document.getElementById('total-granos').innerText = `KGS TOTALES: ${totalKg} kg`;
 
             let htmlL = '';
             receta.lupulos.forEach(l => {
@@ -989,63 +989,63 @@
             document.getElementById('contenedor-lupulos').innerHTML = htmlL;
         }
 
-        función calcularTotalGranos() {
-            sea ​​total = 0;
+        function calcularTotalGranos() {
+            let total = 0;
             document.querySelectorAll('.input-grano').forEach(inp => total += parseFloat(inp.value) || 0);
-            document.getElementById('total-granos').innerText = `TOTALES EN KGS: ${total} kg`;
+            document.getElementById('total-granos').innerText = `KGS TOTALES: ${total} kg`;
         }
 
-        función guardarCoccion() {
+        function guardarCoccion() {
             const diReal = document.getElementById('di-real-coccion').value;
             if (diReal) document.getElementById('ferm-di-real').value = diReal;
             document.getElementById('ferm-estilo').value = document.getElementById('coc-estilo').value;
             document.getElementById('ferm-lote').value = document.getElementById('coc-lote').value;
             alert("Cocción guardada. Datos transferidos a Fermentación.");
-            switchTab('fermentación');
+            switchTab('fermentacion');
         }
 
         // --- MÓDULO FERMENTACIÓN & PDF ---
-        función renderTablaFermentacion() {
+        function renderTablaFermentacion() {
             const tbody = document.getElementById('tabla-dias-fermentacion');
             let html = '';
-            para (sea i = 1; i <= 18; i++) {
+            for (let i = 1; i <= 18; i++) {
                 html += `<tr class="hover:bg-slate-750"><td class="p-2 border border-slate-700 font-bold text-center text-amber-400 font-mono">${i}</td><td class="p-1 border border-slate-700"><input type="date" class="bg-slate-900 border-0 w-full p-1 rounded text-xs"></td><td class="p-1 border border-slate-700"><input type="text" placeholder="1.0XX" class="bg-slate-900 border-0 w-full p-1 rounded text-xs font-mono text-amber-300"></td><td class="p-1 border border-slate-700"><input type="text" placeholder="°C" class="bg-slate-900 border-0 w-full p-1 rounded text-xs"></td><td class="p-1 border border-slate-700"><input type="text" placeholder="°C" class="bg-slate-900 border-0 w-full p-1 rounded text-xs"></td><td class="p-1 border border-slate-700"><input type="text" placeholder="pH" class="bg-slate-900 border-0 w-full p-1 rounded text-xs"></td><td class="p-1 border border-slate-700"><input type="text" placeholder="Detalle..." class="bg-slate-900 border-0 w-full p-1 rounded text-xs"></td></tr>`;
             }
             tbody.innerHTML = html;
         }
 
-        función calcularABV() {
+        function calcularABV() {
             const di = parseFloat(document.getElementById('ferm-di-real').value);
             const df = parseFloat(document.getElementById('ferm-df').value);
             const res = document.getElementById('resultado-abv');
-            si (!isNaN(di) && !isNaN(df) && di > df) {
+            if (!isNaN(di) && !isNaN(df) && di > df) {
                 res.innerText = `${((di - df) * 131.25).toFixed(2)} %`;
             } else res.innerText = '-- %';
         }
 
-        función descargarCoccionPDF() {
-            elemento const = document.getElementById('area-impresion-coccion');
-            elemento.classList.add('pdf-export-mode');
-            const opt ​​= { margen: 8, nombre de archivo: `Planilla_Coccion.pdf`, html2canvas: { escala: 2 }, jsPDF: { unidad: 'mm', formato: 'a4' } };
+        function descargarCoccionPDF() {
+            const element = document.getElementById('area-impresion-coccion');
+            element.classList.add('pdf-export-mode');
+            const opt = { margin: 8, filename: `Planilla_Coccion.pdf`, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4' } };
             html2pdf().set(opt).from(element).save().then(() => element.classList.remove('pdf-export-mode'));
         }
 
-        función descargarFermentacionPDF() {
-            elemento const = document.getElementById('area-impresion-fermentacion');
-            elemento.classList.add('pdf-export-mode');
-            const opt ​​= { margin: 8, filename: `Control_Fermentacion.pdf`, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4' } };
+        function descargarFermentacionPDF() {
+            const element = document.getElementById('area-impresion-fermentacion');
+            element.classList.add('pdf-export-mode');
+            const opt = { margin: 8, filename: `Control_Fermentacion.pdf`, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4' } };
             html2pdf().set(opt).from(element).save().then(() => element.classList.remove('pdf-export-mode'));
         }
 
-        función descargarRecetaPDF(clave) {
-            const r = recetas[clave];
-            si (!r) regresar;
+        function descargarRecetaPDF(key) {
+            const r = recetas[key];
+            if (!r) return;
 
-            const salesMacTxt = (r.salesMac && r.salesMac.length > 0)? r.salesMac.map(s => `${s.nombre} (${s.cantidad}g)`).join(', ') : 'Ninguna';
-            const salesLavTxt = (r.salesLav && r.salesLav.length > 0)? r.salesLav.map(s => `${s.nombre} (${s.cantidad}g)`).join(', ') : 'Ninguna';
+            const salesMacTxt = (r.salesMac && r.salesMac.length > 0) ? r.salesMac.map(s => `${s.nombre} (${s.cantidad}g)`).join(', ') : 'Ninguna';
+            const salesLavTxt = (r.salesLav && r.salesLav.length > 0) ? r.salesLav.map(s => `${s.nombre} (${s.cantidad}g)`).join(', ') : 'Ninguna';
 
             document.getElementById('rec-pdf-nombre').innerText = r.nombre;
-            document.getElementById('rec-pdf-batch').innerText = `Lote: ${r.batch || 280} Lts`;
+            document.getElementById('rec-pdf-batch').innerText = `Batch: ${r.batch || 280} Lts`;
             document.getElementById('rec-pdf-og').innerText = r.diTeorica;
             document.getElementById('rec-pdf-fg').innerText = r.dfTeorica || '--';
             document.getElementById('rec-pdf-abv-val').innerText = `${r.abv || '--'}%`;
@@ -1054,10 +1054,10 @@
             document.getElementById('rec-pdf-efic').innerText = `${r.eficiencia || '70'}%`;
 
             document.getElementById('rec-pdf-agua-det').innerHTML = `
-                <div><strong>Agua Macerada:</strong> ${r.aguaIni || '--'} L (${r.tempAguaIni || '--'} / Mac: ${r.tempMac || '--'})</div>
-                <div><strong>Macerado de ventas:</strong> ${salesMacTxt}</div>
-                <div><strong>Agua Lavada:</strong> ${r.aguaLav || '--'} L (${r.tempLav || '--'})</div>
-                <div><strong>Lavado de ventas:</strong> ${salesLavTxt}</div>
+                <div><strong>Agua Macerado:</strong> ${r.aguaIni || '--'} L (${r.tempAguaIni || '--'} / Mac: ${r.tempMac || '--'})</div>
+                <div><strong>Sales Macerado:</strong> ${salesMacTxt}</div>
+                <div><strong>Agua Lavado:</strong> ${r.aguaLav || '--'} L (${r.tempLav || '--'})</div>
+                <div><strong>Sales Lavado:</strong> ${salesLavTxt}</div>
                 <div><strong>Densidad Pre-Hervor:</strong> ${r.densPre || '--'} (${r.ltsPre || '--'} L)</div>
                 <div><strong>Hervor / Enfriado:</strong> ${r.tiempoHervor || 60} min (Evap: ${r.evaporacion || 6}%)</div>
             `;
@@ -1066,23 +1066,23 @@
             document.getElementById('rec-pdf-lupulos').innerHTML = r.lupulos.map(l => `<li class="border-b border-slate-100 py-1 flex justify-between"><span>${l.nombre} (${l.momento})</span><strong class="font-mono">${l.cantidad} grs</strong></li>`).join('') + `<li class="pt-2"><strong>Levadura:</strong> ${r.levadura || 'N/A'}</li>`;
 
             const element = document.getElementById('plantilla-pdf-receta');
-            elemento.classList.remove('oculto');
+            element.classList.remove('hidden');
 
-            const opt ​​= { margin: 10, filename: `Receta_Tecnica_${r.nombre.replace(/\s+/g, '_')}.pdf`, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4' } };
+            const opt = { margin: 10, filename: `Receta_Tecnica_${r.nombre.replace(/\s+/g, '_')}.pdf`, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4' } };
             html2pdf().set(opt).from(element).save().then(() => element.classList.add('hidden'));
         }
 
         // --- MÓDULO BARRILES ---
         const etiquetasEstado = {
             vacio_sucio: { texto: 'Vacío - Sucio', clase: 'bg-slate-700 text-slate-300' },
-            vacio_limpio: { texto: 'Vacío - Limpio', clase: 'bg-blue-500/20 texto-azul-400 borde borde-azul-500/30' },
+            vacio_limpio: { texto: 'Vacío - Limpio', clase: 'bg-blue-500/20 text-blue-400 border border-blue-500/30' },
             vacio_sanitizado: { texto: 'Vacío - Sanitizado', clase: 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' },
             lleno_fabrica: { texto: 'Lleno en fábrica', clase: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' },
             entregado_cliente: { texto: 'Entregado en cliente', clase: 'bg-amber-500/20 text-amber-400 border border-amber-500/30' },
             mantenimiento: { texto: 'En Mantenimiento', clase: 'bg-red-500/20 text-red-400 border border-red-500/30' }
         };
 
-        función renderBarriles() {
+        function renderBarriles() {
             const container = document.getElementById('grilla-barriles');
             let html = '';
             barriles.forEach((b, idx) => {
@@ -1098,8 +1098,8 @@
                             </div>
                             <div class="text-xs space-y-1 text-slate-300">
                                 <p>Capacidad: <span class="font-mono font-semibold">${b.capacidad}</span> | Conector: <span class="font-mono font-semibold text-emerald-400">${conector}</span></p>
-                                ${b.cerveza? `<p>Cerveza: <span class="font-semibold text-slate-100">${b.cerveza}</span></p>` : ''}
-                                ${b.cliente? `<p>Ubicación: <span class="text-amber-300 font-semibold">${b.cliente}</span></p>` : ''}
+                                ${b.cerveza ? `<p>Cerveza: <span class="font-semibold text-slate-100">${b.cerveza}</span></p>` : ''}
+                                ${b.cliente ? `<p>Ubicación: <span class="text-amber-300 font-semibold">${b.cliente}</span></p>` : ''}
                             </div>
                         </div>
                         <div class="pt-2 border-t border-slate-700 flex justify-end no-print">
@@ -1107,20 +1107,20 @@
                         </div>
                     </div>`;
             });
-            contenedor.innerHTML = html;
+            container.innerHTML = html;
         }
 
-        función mostrarModalBarril() {
+        function mostrarModalBarril() {
             document.getElementById('barril-codigo').value = '';
             document.getElementById('barril-cerveza').value = '';
             document.getElementById('barril-conector').value = 'G';
-            alternarCamposEstadoBarril();
+            toggleCamposEstadoBarril();
             document.getElementById('modal-barril').classList.remove('hidden');
         }
 
         function cerrarModalBarril() { document.getElementById('modal-barril').classList.add('hidden'); }
 
-        función alternarCamposEstadoBarril() {
+        function toggleCamposEstadoBarril() {
             const estado = document.getElementById('barril-estado').value;
             const campoCerveza = document.getElementById('campo-barril-cerveza');
             const campoCliente = document.getElementById('campo-barril-cliente');
@@ -1134,18 +1134,18 @@
             }
         }
 
-        función editarBarril(idx) {
+        function editarBarril(idx) {
             const b = barriles[idx];
             document.getElementById('barril-codigo').value = b.codigo;
             document.getElementById('barril-capacidad').value = b.capacidad;
             document.getElementById('barril-conector').value = b.conector || 'G';
             document.getElementById('barril-estado').value = b.estado;
             document.getElementById('barril-cerveza').value = b.cerveza || '';
-            alternarCamposEstadoBarril();
+            toggleCamposEstadoBarril();
             document.getElementById('modal-barril').classList.remove('hidden');
         }
 
-        función guardarBarril() {
+        function guardarBarril() {
             const codigo = document.getElementById('barril-codigo').value.trim();
             const capacidad = document.getElementById('barril-capacidad').value;
             const conector = document.getElementById('barril-conector').value;
@@ -1156,10 +1156,10 @@
             if (!codigo) return alert("Ingrese el código del barril.");
 
             const idx = barriles.findIndex(b => b.codigo === codigo);
-            const obj = { código, capacidad, conector, estado, cerveza, cliente };
+            const obj = { codigo, capacidad, conector, estado, cerveza, cliente };
 
-            si (idx >= 0) barriles[idx] = obj;
-            de lo contrario barriles.push(obj);
+            if (idx >= 0) barriles[idx] = obj;
+            else barriles.push(obj);
 
             guardarStorage();
             cerrarModalBarril();
@@ -1167,7 +1167,7 @@
         }
 
         // --- MÓDULO CLIENTES & CUENTAS CORRIENTES ---
-        función renderClientes() {
+        function renderClientes() {
             const container = document.getElementById('grilla-clientes');
             let html = '';
             clientes.forEach(c => {
@@ -1222,23 +1222,23 @@
                         </div>
                     </div>`;
             });
-            contenedor.innerHTML = html;
+            container.innerHTML = html;
         }
 
-        función mostrarModalCliente() {
+        function mostrarModalCliente() { 
             document.getElementById('modal-cliente-titulo').innerText = 'Nuevo Cliente';
             document.getElementById('cli-id-editar').value = '';
             document.getElementById('cli-nombre').value = '';
             document.getElementById('cli-telefono').value = '';
             document.getElementById('cli-direccion').value = '';
-            document.getElementById('modal-cliente').classList.remove('hidden');
+            document.getElementById('modal-cliente').classList.remove('hidden'); 
         }
 
         function cerrarModalCliente() { document.getElementById('modal-cliente').classList.add('hidden'); }
 
-        función editarCliente(id) {
+        function editarCliente(id) {
             const cli = clientes.find(c => c.id === id);
-            si (!cli) regresar;
+            if (!cli) return;
 
             document.getElementById('modal-cliente-titulo').innerText = 'Editar Cliente';
             document.getElementById('cli-id-editar').value = cli.id;
@@ -1249,23 +1249,23 @@
             document.getElementById('modal-cliente').classList.remove('hidden');
         }
 
-        función guardarCliente() {
+        function guardarCliente() {
             const editId = document.getElementById('cli-id-editar').value;
             const nombre = document.getElementById('cli-nombre').value.trim();
-            const teléfono = document.getElementById('cli-telefono').value.trim();
+            const telefono = document.getElementById('cli-telefono').value.trim();
             const direccion = document.getElementById('cli-direccion').value.trim();
 
             if (!nombre) return alert("Ingrese el nombre del cliente.");
 
-            si (editId) {
+            if (editId) {
                 const idx = clientes.findIndex(c => c.id === editId);
-                si (idx >= 0) {
+                if (idx >= 0) {
                     clientes[idx].nombre = nombre;
                     clientes[idx].telefono = telefono;
                     clientes[idx].direccion = direccion;
                 }
-            } demás {
-                clientes.push({ id: 'c_' + Date.now(), nombre, teléfono, dirección, saldo: 0, movimientos: [] });
+            } else {
+                clientes.push({ id: 'c_' + Date.now(), nombre, telefono, direccion, saldo: 0, movimientos: [] });
             }
 
             guardarStorage();
@@ -1273,9 +1273,9 @@
             renderClientes();
         }
 
-        función eliminarCliente(id) {
+        function eliminarCliente(id) {
             const cli = clientes.find(c => c.id === id);
-            si (!cli) regresar;
+            if (!cli) return;
 
             if (confirm(`¿Estás seguro de dar de baja al cliente "${cli.nombre}"?`)) {
                 clientes = clientes.filter(c => c.id !== id);
@@ -1295,29 +1295,29 @@
             
             document.getElementById('contenedor-filas-remito').innerHTML = '';
             agregarFilaRemito();
-            alternarFormularioRemito();
+            toggleFormularioRemito();
             document.getElementById('modal-movimiento').classList.remove('hidden');
         }
 
         function cerrarModalMovimiento() { document.getElementById('modal-movimiento').classList.add('hidden'); }
 
-        función alternarFormularioRemito() {
+        function toggleFormularioRemito() {
             const tipo = document.getElementById('mov-tipo').value;
             const secRemito = document.getElementById('seccion-remito-items');
             const secCobro = document.getElementById('seccion-cobro-directo');
 
-            si (tipo === 'entrega') {
+            if (tipo === 'entrega') {
                 secRemito.classList.remove('hidden');
-                secCobro.classList.add('oculto');
-            } demás {
-                secRemito.classList.add('oculto');
+                secCobro.classList.add('hidden');
+            } else {
+                secRemito.classList.add('hidden');
                 secCobro.classList.remove('hidden');
             }
             calcularTotalMovimiento();
         }
 
         function agregarFilaRemito() {
-            const contenedor = document.getElementById('contenedor-filas-remito');
+            const container = document.getElementById('contenedor-filas-remito');
             const div = document.createElement('div');
             div.className = 'grid grid-cols-12 gap-2 items-center fila-remito-item';
 
@@ -1330,21 +1330,21 @@
                 <input type="number" value="0" min="0" oninput="calcularTotalMovimiento()" placeholder="Precio U." class="col-span-2 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-right font-mono item-precio">
                 <button onclick="this.parentElement.remove(); calcularTotalMovimiento();" class="col-span-1 text-red-400 hover:text-red-300 font-bold text-center">×</button>
             `;
-            contenedor.appendChild(div);
+            container.appendChild(div);
             calcularTotalMovimiento();
         }
 
-        función calcularTotalMovimiento() {
+        function calcularTotalMovimiento() {
             const tipo = document.getElementById('mov-tipo').value;
-            sea ​​total = 0;
+            let total = 0;
 
-            si (tipo === 'entrega') {
+            if (tipo === 'entrega') {
                 document.querySelectorAll('.fila-remito-item').forEach(fila => {
                     const cant = parseFloat(fila.querySelector('.item-cant').value) || 0;
                     const precio = parseFloat(fila.querySelector('.item-precio').value) || 0;
                     total += (cant * precio);
                 });
-            } demás {
+            } else {
                 total = parseFloat(document.getElementById('mov-monto-cobro').value) || 0;
             }
 
@@ -1355,21 +1355,21 @@
             const clienteId = document.getElementById('mov-cliente-select').value;
             const tipo = document.getElementById('mov-tipo').value;
             const cli = clientes.find(c => c.id === clienteId);
-            si (!cli) regresar;
+            if (!cli) return;
 
             let conceptoText = '';
-            sea ​​itemsArray = [];
-            sea ​​montoTotal = 0;
+            let itemsArray = [];
+            let montoTotal = 0;
 
-            si (tipo === 'entrega') {
+            if (tipo === 'entrega') {
                 document.querySelectorAll('.fila-remito-item').forEach(fila => {
                     const pres = fila.querySelector('.item-presentacion').value;
                     const estilo = fila.querySelector('.item-estilo').value.trim() || 'Varios';
                     const cant = parseFloat(fila.querySelector('.item-cant').value) || 0;
                     const precio = parseFloat(fila.querySelector('.item-precio').value) || 0;
-                    const sub = no puede * precio;
+                    const sub = cant * precio;
 
-                    si (cant > 0) {
+                    if (cant > 0) {
                         itemsArray.push({ presentacion: pres, estilo, cantidad: cant, precioUnitario: precio, subtotal: sub });
                         montoTotal += sub;
                     }
@@ -1378,7 +1378,7 @@
                 if (itemsArray.length === 0) return alert("Agregue al menos un ítem al remito.");
                 conceptoText = `Entrega de Cerveza (${itemsArray.length} descrip.)`;
                 montoTotal = -Math.abs(montoTotal);
-            } demás {
+            } else {
                 conceptoText = document.getElementById('mov-concepto-cobro').value.trim() || 'Cobro / Pago recibido';
                 montoTotal = parseFloat(document.getElementById('mov-monto-cobro').value) || 0;
                 if (montoTotal <= 0) return alert("Ingrese un monto de cobro válido.");
@@ -1389,9 +1389,9 @@
             if (!cli.movimientos) cli.movimientos = [];
             cli.movimientos.unshift({
                 fecha: new Date().toISOString().split('T')[0],
-                concepto: conceptoTexto,
+                concepto: conceptoText,
                 monto: montoTotal,
-                elementos: array de elementos
+                items: itemsArray
             });
 
             guardarStorage();
@@ -1399,24 +1399,24 @@
             renderClientes();
         }
 
-        función enviarWhatsapp(clienteId) {
+        function enviarWhatsapp(clienteId) {
             const c = clientes.find(item => item.id === clienteId);
-            si (!c) regresar;
+            if (!c) return;
 
             const ultMov = (c.movimientos && c.movimientos[0]) ? c.movimientos[0] : { concepto: 'Estado de Cuenta', monto: 0, items: [] };
             
             let texto = `*REMITO DE ENTREGA - CERVECERÍA ALBARDÓN*\n`;
             texto += `*Cliente:* ${c.nombre}\n`;
-            texto += `*Fecha:* ${ultMov.fecha || nueva Fecha().toISOString().split('T')[0]}\n`;
+            texto += `*Fecha:* ${ultMov.fecha || new Date().toISOString().split('T')[0]}\n`;
             texto += `-------------------------------------\n`;
 
-            Si (ultMov.items && ultMov.items.length > 0) {
+            if (ultMov.items && ultMov.items.length > 0) {
                 ultMov.items.forEach(it => {
                     texto += `• ${it.cantidad}x ${it.presentacion} (${it.estilo}) - $${it.precioUnitario} c/u = $${it.subtotal.toLocaleString()}\n`;
                 });
-            } demás {
+            } else {
                 texto += `*Detalle:* ${ultMov.concepto}\n`;
-                texto += `*Importar:* $${Math.abs(ultMov.monto).toLocaleString()}\n`;
+                texto += `*Importe:* $${Math.abs(ultMov.monto).toLocaleString()}\n`;
             }
 
             texto += `-------------------------------------\n`;
@@ -1427,7 +1427,7 @@
             window.open(`https://wa.me/${c.telefono}?text=${encodeURIComponent(texto)}`, '_blank');
         }
 
-        función descargarRemitoPDF(clienteId, movIdx) {
+        function descargarRemitoPDF(clienteId, movIdx) {
             const c = clientes.find(item => item.id === clienteId);
             if (!c || !c.movimientos[movIdx]) return;
 
@@ -1435,8 +1435,8 @@
             
             document.getElementById('pdf-fecha').innerText = `Fecha: ${m.fecha}`;
             document.getElementById('pdf-cliente').innerText = c.nombre;
-            document.getElementById('pdf-direccion').innerText = c.direccion || 'N / A';
-            document.getElementById('pdf-telefono').innerText = c.telefono || 'N / A';
+            document.getElementById('pdf-direccion').innerText = c.direccion || 'N/A';
+            document.getElementById('pdf-telefono').innerText = c.telefono || 'N/A';
 
             let bodyHTML = '';
             m.items.forEach(it => {
@@ -1454,9 +1454,9 @@
             document.getElementById('pdf-total').innerText = `$ ${Math.abs(m.monto).toLocaleString()}`;
 
             const element = document.getElementById('plantilla-pdf-remito');
-            elemento.classList.remove('oculto');
+            element.classList.remove('hidden');
 
-            const opt ​​= { margen: 10, nombre de archivo: `Remito_Albardon_${c.nombre.replace(/\s+/g, '_')}_${m.fecha}.pdf`, html2canvas: { escala: 2 }, jsPDF: { unidad: 'mm', formato: 'a4' } };
+            const opt = { margin: 10, filename: `Remito_Albardon_${c.nombre.replace(/\s+/g, '_')}_${m.fecha}.pdf`, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4' } };
             html2pdf().set(opt).from(element).save().then(() => element.classList.add('hidden'));
         }
 
