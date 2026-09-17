@@ -1440,7 +1440,7 @@
             window.open(`https://wa.me/${c.telefono}?text=${encodeURIComponent(texto)}`, '_blank');
         }
 
-       function descargarRemitoPDF(clienteId, movIdx) {
+      function descargarRemitoPDF(clienteId, movIdx) {
             const c = clientes.find(item => item.id === clienteId);
             if (!c || !c.movimientos || !c.movimientos[movIdx]) return;
 
@@ -1448,7 +1448,7 @@
             const element = document.getElementById('plantilla-pdf-remito');
             if (!element) return;
 
-            // Cargar datos en la plantilla
+            // Cargar datos en los elementos HTML del remito
             document.getElementById('pdf-fecha').innerText = `Fecha: ${m.fecha}`;
             document.getElementById('pdf-cliente').innerText = c.nombre;
             document.getElementById('pdf-direccion').innerText = c.direccion || 'N/A';
@@ -1460,12 +1460,12 @@
             if (m.items && m.items.length > 0) {
                 m.items.forEach(it => {
                     bodyHTML += `
-                        <tr class="border-b border-gray-200">
-                            <td class="p-2">${it.presentacion}</td>
-                            <td class="p-2">${it.estilo}</td>
-                            <td class="p-2 text-center">${it.cantidad}</td>
-                            <td class="p-2 text-right">$${it.precioUnitario.toLocaleString()}</td>
-                            <td class="p-2 text-right font-bold">$${it.subtotal.toLocaleString()}</td>
+                        <tr style="border-bottom: 1px solid #e5e7eb;">
+                            <td style="padding: 8px;">${it.presentacion}</td>
+                            <td style="padding: 8px;">${it.estilo}</td>
+                            <td style="padding: 8px; text-align: center;">${it.cantidad}</td>
+                            <td style="padding: 8px; text-align: right;">$${it.precioUnitario.toLocaleString()}</td>
+                            <td style="padding: 8px; text-align: right; font-weight: bold;">$${it.subtotal.toLocaleString()}</td>
                         </tr>
                     `;
                     totalEntrega += it.subtotal;
@@ -1482,36 +1482,18 @@
             document.getElementById('pdf-saldo-anterior').innerText = `$ ${saldoAnterior.toLocaleString()}`;
             document.getElementById('pdf-saldo-total').innerText = `$ ${saldoTotalAcumulado.toLocaleString()}`;
 
-            // Hacer visible temporalmente la plantilla dentro de la pantalla
-            element.style.display = 'block';
-            element.style.position = 'fixed';
-            element.style.top = '0';
-            element.style.left = '0';
-            element.style.zIndex = '99999';
-            element.style.background = '#ffffff';
+            // Abrir ventana limpia e imprimir como PDF de forma nativa
+            const ventana = window.open('', '_blank', 'height=600,width=800');
+            ventana.document.write('<html><head><title>Remito Albardón - ' + c.nombre + '</title>');
+            ventana.document.write('<script src="https://cdn.tailwindcss.com"><\/script>');
+            ventana.document.write('</head><body style="background:#fff; padding:20px;">');
+            ventana.document.write(element.innerHTML);
+            ventana.document.write('</body></html>');
+            ventana.document.close();
 
-            const opt = { 
-                margin: 10, 
-                filename: `Remito_Albardon_${c.nombre.replace(/\s+/g, '_')}_${m.fecha}.pdf`, 
-                html2canvas: { 
-                    scale: 2, 
-                    backgroundColor: '#ffffff', 
-                    useCORS: true,
-                    scrollX: 0,
-                    scrollY: 0
-                }, 
-                jsPDF: { unit: 'mm', format: 'a4' } 
-            };
-
-            // Esperar un frame del navegador para renderizar el contenido antes de procesar el PDF
-            requestAnimationFrame(() => {
-                setTimeout(() => {
-                    html2pdf().set(opt).from(element).save().then(() => {
-                        element.style.display = 'none';
-                    }).catch(err => {
-                        console.error("Error al generar PDF:", err);
-                        element.style.display = 'none';
-                    });
-                }, 150);
-            });
+            setTimeout(() => {
+                ventana.focus();
+                ventana.print();
+                ventana.close();
+            }, 500);
         }
