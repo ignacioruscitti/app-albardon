@@ -1445,7 +1445,9 @@
             if (!c || !c.movimientos || !c.movimientos[movIdx]) return;
 
             const m = c.movimientos[movIdx];
-            
+            const element = document.getElementById('plantilla-pdf-remito');
+            if (!element) return;
+
             document.getElementById('pdf-fecha').innerText = `Fecha: ${m.fecha}`;
             document.getElementById('pdf-cliente').innerText = c.nombre;
             document.getElementById('pdf-direccion').innerText = c.direccion || 'N/A';
@@ -1471,7 +1473,6 @@
 
             document.getElementById('pdf-items-body').innerHTML = bodyHTML;
 
-            // Cálculo de montos y saldos
             const importeEntrega = Math.abs(m.monto || totalEntrega);
             const saldoTotalAcumulado = c.saldo; 
             const saldoAnterior = saldoTotalAcumulado + importeEntrega; 
@@ -1480,38 +1481,24 @@
             document.getElementById('pdf-saldo-anterior').innerText = `$ ${saldoAnterior.toLocaleString()}`;
             document.getElementById('pdf-saldo-total').innerText = `$ ${saldoTotalAcumulado.toLocaleString()}`;
 
-            const element = document.getElementById('plantilla-pdf-remito');
-
-            // 1. Quitar 'hidden' y forzar visibilidad con estilos directos
-            element.classList.remove('hidden');
-            element.style.display = 'block';
-            element.style.position = 'fixed';
-            element.style.top = '0';
-            element.style.left = '0';
-            element.style.zIndex = '-9999'; // Lo mantiene visible para el renderer pero detrás de la UI
-
             const opt = { 
                 margin: 10, 
                 filename: `Remito_Albardon_${c.nombre.replace(/\s+/g, '_')}_${m.fecha}.pdf`, 
-                html2canvas: { 
-                    scale: 2, 
-                    backgroundColor: '#ffffff', 
-                    useCORS: true,
-                    logging: false
-                }, 
+                html2canvas: { scale: 2, backgroundColor: '#ffffff', useCORS: true }, 
                 jsPDF: { unit: 'mm', format: 'a4' } 
             };
 
-            // 2. Dar un pequeño delay (100ms) para que el DOM renderice el texto e imágenes antes de capturar
-            setTimeout(() => {
-                html2pdf().set(opt).from(element).save().then(() => {
-                    // Ocultar de nuevo al finalizar
-                    element.style.display = 'none';
-                    element.classList.add('hidden');
-                }).catch(err => {
-                    console.error("Error al generar PDF:", err);
-                    element.style.display = 'none';
-                    element.classList.add('hidden');
-                });
-            }, 100);
+            html2pdf().set(opt).from(element).save().catch(err => {
+                console.error("Error al generar PDF:", err);
+            });
         }
+
+        // --- INICIALIZACIÓN ---
+        document.getElementById('coc-fecha').valueAsDate = new Date();
+        document.getElementById('ferm-fecha').valueAsDate = new Date();
+        actualizarSelectRecetas();
+        renderRecetas();
+        renderTablaFermentacion();
+    </script>
+</body>
+</html>
