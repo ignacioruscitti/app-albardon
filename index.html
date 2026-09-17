@@ -1469,3 +1469,59 @@
     </script>
 </body>
 </html>
+const cant = parseInt(fila.querySelector('.item-cantidad').value) || 0;
+                    if (cant > 0) {
+                        itemsArray.push({ presentacion: pres, estilo: estilo, cantidad: cant });
+                        conceptoText += `${cant}x ${pres} (${estilo}); `;
+                        
+                        // Restar del stock de barriles si corresponde
+                        const bIndex = barriles.findIndex(b => b.capacidad === pres && b.estilo.toLowerCase() === estilo.toLowerCase());
+                        if (bIndex !== -1 && barriles[bIndex].llenos >= cant) {
+                            barriles[bIndex].llenos -= cant;
+                        }
+                    }
+                });
+                if (itemsArray.length === 0) {
+                    alert('Debes ingresar al menos un ítem con cantidad mayor a 0');
+                    return;
+                }
+            } else {
+                conceptoText = document.getElementById('mov-concepto-pago').value.trim() || 'Pago / Cobro registrado';
+                montoTotal = parseFloat(document.getElementById('mov-monto-pago').value) || 0;
+                if (montoTotal <= 0) {
+                    alert('Ingresa un monto válido');
+                    return;
+                }
+            }
+
+            // Registrar movimiento en el cliente
+            cli.movimientos.push({
+                id: Date.now().toString(),
+                fecha: new Date().toISOString().split('T')[0],
+                tipo: tipo,
+                concepto: conceptoText,
+                items: itemsArray,
+                monto: montoTotal
+            });
+
+            // Actualizar saldo
+            if (tipo === 'pago') {
+                cli.saldo -= montoTotal;
+            }
+
+            guardarDatos();
+            renderClientes();
+            renderBarriles();
+            cerrarModalMovimiento();
+        }
+
+        // --- INICIALIZACIÓN ---
+        window.addEventListener('DOMContentLoaded', () => {
+            if (typeof renderTablaFermentacion === 'function') renderTablaFermentacion();
+            if (typeof renderRecetas === 'function') renderRecetas();
+            if (typeof renderBarriles === 'function') renderBarriles();
+            if (typeof renderClientes === 'function') renderClientes();
+        });
+    </script>
+</body>
+</html>
