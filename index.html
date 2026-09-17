@@ -1444,8 +1444,7 @@
             window.open(`https://wa.me/${c.telefono}?text=${encodeURIComponent(texto)}`, '_blank');
         }
 
-        function descargarRemitoPDF(clienteId, movIdx) {
-            const c = clientes.find(item => item.id === clienteId);
+      const c = clientes.find(item => item.id === clienteId);
             if (!c || !c.movimientos || !c.movimientos[movIdx]) return;
 
             const m = c.movimientos[movIdx];
@@ -1484,20 +1483,20 @@
             document.getElementById('pdf-saldo-anterior').innerText = `$ ${saldoAnterior.toLocaleString()}`;
             document.getElementById('pdf-saldo-total').innerText = `$ ${saldoTotalAcumulado.toLocaleString()}`;
 
-            // Mostrar plantilla para html2pdf
+            // Muestra temporalmente el elemento para la captura
             const element = document.getElementById('plantilla-pdf-remito');
-            element.classList.remove('hidden', 'opacity-0');
+            element.classList.remove('hidden');
 
             const opt = { 
                 margin: 10, 
                 filename: `Remito_Albardon_${c.nombre.replace(/\s+/g, '_')}_${m.fecha}.pdf`, 
-                html2canvas: { scale: 2 }, 
+                html2canvas: { scale: 2, backgroundColor: '#ffffff', useCORS: true }, 
                 jsPDF: { unit: 'mm', format: 'a4' } 
             };
 
-            // Guardar PDF y volver a ocultar la plantilla
+            // Genera el PDF y vuelve a ocultar la plantilla
             html2pdf().set(opt).from(element).save().then(() => {
-                element.classList.add('hidden', 'opacity-0');
+                element.classList.add('hidden');
             });
         }
 
@@ -1508,7 +1507,5 @@
         renderRecetas();
         renderTablaFermentacion();
     </script>
-</body>
-</html>
 </body>
 </html>
