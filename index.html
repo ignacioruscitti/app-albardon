@@ -1446,7 +1446,7 @@
 
         function descargarRemitoPDF(clienteId, movIdx) {
             const c = clientes.find(item => item.id === clienteId);
-            if (!c || !c.movimientos[movIdx]) return;
+            if (!c || !c.movimientos || !c.movimientos[movIdx]) return;
 
             const m = c.movimientos[movIdx];
             
@@ -1456,25 +1456,49 @@
             document.getElementById('pdf-telefono').innerText = c.telefono || 'N/A';
 
             let bodyHTML = '';
-            m.items.forEach(it => {
-                bodyHTML += `
-                    <tr class="border-b border-slate-200">
-                        <td class="p-2">${it.presentacion}</td>
-                        <td class="p-2">${it.estilo}</td>
-                        <td class="p-2 text-center">${it.cantidad}</td>
-                        <td class="p-2 text-right">$${it.precioUnitario.toLocaleString()}</td>
-                        <td class="p-2 text-right font-bold">$${it.subtotal.toLocaleString()}</td>
-                    </tr>
-                `;
-            });
+            let totalEntrega = 0;
+
+            if (m.items && m.items.length > 0) {
+                m.items.forEach(it => {
+                    bodyHTML += `
+                        <tr class="border-b border-gray-200">
+                            <td class="p-2">${it.presentacion}</td>
+                            <td class="p-2">${it.estilo}</td>
+                            <td class="p-2 text-center">${it.cantidad}</td>
+                            <td class="p-2 text-right">$${it.precioUnitario.toLocaleString()}</td>
+                            <td class="p-2 text-right font-bold">$${it.subtotal.toLocaleString()}</td>
+                        </tr>
+                    `;
+                    totalEntrega += it.subtotal;
+                });
+            }
+
             document.getElementById('pdf-items-body').innerHTML = bodyHTML;
-            document.getElementById('pdf-total').innerText = `$ ${Math.abs(m.monto).toLocaleString()}`;
 
+            // Cálculo de montos y saldos
+            const importeEntrega = Math.abs(m.monto || totalEntrega);
+            const saldoTotalAcumulado = c.saldo; 
+            const saldoAnterior = saldoTotalAcumulado + importeEntrega; 
+
+            document.getElementById('pdf-total-entrega').innerText = `$ ${importeEntrega.toLocaleString()}`;
+            document.getElementById('pdf-saldo-anterior').innerText = `$ ${saldoAnterior.toLocaleString()}`;
+            document.getElementById('pdf-saldo-total').innerText = `$ ${saldoTotalAcumulado.toLocaleString()}`;
+
+            // Mostrar plantilla para html2pdf
             const element = document.getElementById('plantilla-pdf-remito');
-            element.classList.remove('hidden');
+            element.classList.remove('hidden', 'opacity-0');
 
-            const opt = { margin: 10, filename: `Remito_Albardon_${c.nombre.replace(/\s+/g, '_')}_${m.fecha}.pdf`, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4' } };
-            html2pdf().set(opt).from(element).save().then(() => element.classList.add('hidden'));
+            const opt = { 
+                margin: 10, 
+                filename: `Remito_Albardon_${c.nombre.replace(/\s+/g, '_')}_${m.fecha}.pdf`, 
+                html2canvas: { scale: 2 }, 
+                jsPDF: { unit: 'mm', format: 'a4' } 
+            };
+
+            // Guardar PDF y volver a ocultar la plantilla
+            html2pdf().set(opt).from(element).save().then(() => {
+                element.classList.add('hidden', 'opacity-0');
+            });
         }
 
         // --- INICIALIZACIÓN ---
@@ -1484,5 +1508,7 @@
         renderRecetas();
         renderTablaFermentacion();
     </script>
+</body>
+</html>
 </body>
 </html>
