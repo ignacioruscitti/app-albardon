@@ -1440,7 +1440,7 @@
             window.open(`https://wa.me/${c.telefono}?text=${encodeURIComponent(texto)}`, '_blank');
         }
 
-      function descargarRemitoPDF(clienteId, movIdx) {
+     function descargarRemitoPDF(clienteId, movIdx) {
             const c = clientes.find(item => item.id === clienteId);
             if (!c || !c.movimientos || !c.movimientos[movIdx]) return;
 
@@ -1448,7 +1448,7 @@
             const element = document.getElementById('plantilla-pdf-remito');
             if (!element) return;
 
-            // Cargar datos en los elementos HTML del remito
+            // Cargar datos
             document.getElementById('pdf-fecha').innerText = `Fecha: ${m.fecha}`;
             document.getElementById('pdf-cliente').innerText = c.nombre;
             document.getElementById('pdf-direccion').innerText = c.direccion || 'N/A';
@@ -1460,12 +1460,12 @@
             if (m.items && m.items.length > 0) {
                 m.items.forEach(it => {
                     bodyHTML += `
-                        <tr style="border-bottom: 1px solid #e5e7eb;">
-                            <td style="padding: 8px;">${it.presentacion}</td>
-                            <td style="padding: 8px;">${it.estilo}</td>
-                            <td style="padding: 8px; text-align: center;">${it.cantidad}</td>
-                            <td style="padding: 8px; text-align: right;">$${it.precioUnitario.toLocaleString()}</td>
-                            <td style="padding: 8px; text-align: right; font-weight: bold;">$${it.subtotal.toLocaleString()}</td>
+                        <tr class="border-b border-gray-200">
+                            <td class="p-2">${it.presentacion}</td>
+                            <td class="p-2">${it.estilo}</td>
+                            <td class="p-2 text-center">${it.cantidad}</td>
+                            <td class="p-2 text-right">$${it.precioUnitario.toLocaleString()}</td>
+                            <td class="p-2 text-right font-bold">$${it.subtotal.toLocaleString()}</td>
                         </tr>
                     `;
                     totalEntrega += it.subtotal;
@@ -1482,12 +1482,14 @@
             document.getElementById('pdf-saldo-anterior').innerText = `$ ${saldoAnterior.toLocaleString()}`;
             document.getElementById('pdf-saldo-total').innerText = `$ ${saldoTotalAcumulado.toLocaleString()}`;
 
-            // Abrir ventana limpia e imprimir como PDF de forma nativa
-            const ventana = window.open('', '_blank', 'height=600,width=800');
+            // Usar la función de impresión nativa del navegador (imprime o guarda como PDF limpio)
+            const contenido = element.innerHTML;
+            const ventana = window.open('', '', 'height=700,width=900');
+            
             ventana.document.write('<html><head><title>Remito Albardón - ' + c.nombre + '</title>');
             ventana.document.write('<script src="https://cdn.tailwindcss.com"><\/script>');
-            ventana.document.write('</head><body style="background:#fff; padding:20px;">');
-            ventana.document.write(element.innerHTML);
+            ventana.document.write('</head><body class="bg-white p-8">');
+            ventana.document.write(contenido);
             ventana.document.write('</body></html>');
             ventana.document.close();
 
@@ -1497,3 +1499,11 @@
                 ventana.close();
             }, 500);
         }
+
+        // --- INICIALIZACIÓN ---
+        document.getElementById('coc-fecha').valueAsDate = new Date();
+        document.getElementById('ferm-fecha').valueAsDate = new Date();
+        actualizarSelectRecetas();
+        renderRecetas();
+        renderTablaFermentacion();
+    </script>
