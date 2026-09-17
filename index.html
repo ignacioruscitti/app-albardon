@@ -644,68 +644,70 @@
     </div>
 
     <!-- PLANTILLA OCULTA PARA IMPRESIÓN DE REMITO PDF -->
-   <div class="flex justify-between items-center border-b pb-4 mb-4">
-            <div class="flex items-center gap-3">
-                <!-- Reemplaza "logo.png" por la ruta o archivo de tu logo -->
-                <img src="logo.png" alt="Logo Albardón" class="h-12 w-auto object-contain" />
-                <div>
-                    <h1 class="text-2xl font-bold tracking-wider text-black">ALBARDÓN</h1>
-                    <p class="text-slate-500 font-bold text-[10px]">CERVEZA ARTESANAL SANTAFESINA</p>
-                </div>
-            </div>
-            <div class="text-right">
-                <h2 class="text-base font-bold text-slate-800">REMITO DE ENTREGA</h2>
-                <p class="text-slate-500 text-xs" id="pdf-fecha">Fecha: --/--/----</p>
-            </div>
-        </div>
-
-        <div class="border-b border-slate-200 pb-3 text-xs">
-            <p><strong>CLIENTE:</strong> <span id="pdf-cliente">--</span></p>
-            <p><strong>DIRECCIÓN:</strong> <span id="pdf-direccion">--</span></p>
-            <p><strong>TELÉFONO:</strong> <span id="pdf-telefono">--</span></p>
-        </div>
-
-        <table class="w-full text-left border-collapse my-2 text-xs">
-            <thead>
-                <tr class="bg-amber-100 text-amber-900 border-b border-amber-200">
-                    <th class="p-2">Presentación</th>
-                    <th class="p-2">Estilo</th>
-                    <th class="p-2 text-center">Cant.</th>
-                    <th class="p-2 text-right">Precio U.</th>
-                    <th class="p-2 text-right">Subtotal</th>
-                </tr>
-            </thead>
-            <tbody id="pdf-items-body">
-            </tbody>
-        </table>
-
-        <!-- Sección de Saldos de Cuenta Corriente -->
-        <div class="flex justify-end pt-3 border-t border-slate-300">
-            <div class="w-1/2 text-right space-y-1 text-xs">
-                <div class="flex justify-between text-slate-600">
-                    <span>Entrega Actual:</span>
-                    <span id="pdf-total-entrega" class="font-semibold">$ 0</span>
-                </div>
-                <div class="flex justify-between text-slate-600">
-                    <span>Saldo Anterior:</span>
-                    <span id="pdf-saldo-anterior" class="font-semibold">$ 0</span>
-                </div>
-                <div class="flex justify-between text-sm font-bold text-slate-900 border-t pt-1">
-                    <span>Saldo Total Acumulado:</span>
-                    <span id="pdf-saldo-total" class="text-amber-900">$ 0</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="pt-8 grid grid-cols-2 gap-8 text-center text-[10px] text-slate-500">
+   <!-- Plantilla del Remito para PDF (Oculta por defecto) -->
+<div id="plantilla-pdf-remito" class="hidden fixed top-0 left-0 w-[800px] bg-white text-black p-8 z-[-9999] opacity-0 pointer-events-none">
+    <div class="flex justify-between items-center border-b border-gray-300 pb-4 mb-4">
+        <div class="flex items-center gap-4">
+            <!-- Reemplaza "logo.png" con la ruta de tu logo -->
+            <img src="logo.png" alt="Logo Albardón" class="h-16 w-auto object-contain" />
             <div>
-                <p class="border-t border-slate-400 pt-1">Firma / Aclaración Cliente</p>
+                <h1 class="text-2xl font-bold tracking-wider text-black">ALBARDÓN</h1>
+                <p class="text-gray-600 font-bold text-xs">CERVEZA ARTESANAL SANTAFESINA</p>
             </div>
-            <div>
-                <p class="border-t border-slate-400 pt-1">Cervecería Albardón</p>
+        </div>
+        <div class="text-right">
+            <h2 class="text-lg font-bold text-gray-800">REMITO DE ENTREGA</h2>
+            <p class="text-gray-600 text-xs" id="pdf-fecha">Fecha: --/--/----</p>
+        </div>
+    </div>
+
+    <div class="border-b border-gray-300 pb-3 mb-4 text-xs text-gray-800">
+        <p><strong>CLIENTE:</strong> <span id="pdf-cliente">--</span></p>
+        <p><strong>DIRECCIÓN:</strong> <span id="pdf-direccion">--</span></p>
+        <p><strong>TELÉFONO:</strong> <span id="pdf-telefono">--</span></p>
+    </div>
+
+    <table class="w-full text-left border-collapse my-4 text-xs text-black">
+        <thead>
+            <tr class="bg-gray-100 text-gray-900 border-b border-gray-300">
+                <th class="p-2 border-b">Presentación</th>
+                <th class="p-2 border-b">Estilo</th>
+                <th class="p-2 text-center border-b">Cant.</th>
+                <th class="p-2 text-right border-b">Precio U.</th>
+                <th class="p-2 text-right border-b">Subtotal</th>
+            </tr>
+        </thead>
+        <tbody id="pdf-items-body" class="divide-y divide-gray-200">
+        </tbody>
+    </table>
+
+    <!-- Sección de Saldos -->
+    <div class="flex justify-end pt-3 border-t border-gray-300">
+        <div class="w-1/2 text-right space-y-1 text-xs text-gray-800">
+            <div class="flex justify-between">
+                <span>Entrega Actual:</span>
+                <span id="pdf-total-entrega" class="font-semibold text-black">$ 0</span>
+            </div>
+            <div class="flex justify-between">
+                <span>Saldo Anterior:</span>
+                <span id="pdf-saldo-anterior" class="font-semibold text-black">$ 0</span>
+            </div>
+            <div class="flex justify-between text-sm font-bold border-t border-gray-300 pt-2 mt-1 text-black">
+                <span>Saldo Total Acumulado:</span>
+                <span id="pdf-saldo-total">$ 0</span>
             </div>
         </div>
     </div>
+
+    <div class="pt-12 grid grid-cols-2 gap-8 text-center text-[10px] text-gray-600">
+        <div>
+            <p class="border-t border-gray-400 pt-1">Firma / Aclaración Cliente</p>
+        </div>
+        <div>
+            <p class="border-t border-gray-400 pt-1">Cervecería Albardón</p>
+        </div>
+    </div>
+</div>
     <!-- LÓGICA JAVASCRIPT INTEGRADA -->
     <script>
         const recetasIniciales = {
