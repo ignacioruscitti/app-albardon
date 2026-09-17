@@ -1448,6 +1448,7 @@
             const element = document.getElementById('plantilla-pdf-remito');
             if (!element) return;
 
+            // Cargar datos en la plantilla
             document.getElementById('pdf-fecha').innerText = `Fecha: ${m.fecha}`;
             document.getElementById('pdf-cliente').innerText = c.nombre;
             document.getElementById('pdf-direccion').innerText = c.direccion || 'N/A';
@@ -1481,24 +1482,36 @@
             document.getElementById('pdf-saldo-anterior').innerText = `$ ${saldoAnterior.toLocaleString()}`;
             document.getElementById('pdf-saldo-total').innerText = `$ ${saldoTotalAcumulado.toLocaleString()}`;
 
+            // Hacer visible temporalmente la plantilla dentro de la pantalla
+            element.style.display = 'block';
+            element.style.position = 'fixed';
+            element.style.top = '0';
+            element.style.left = '0';
+            element.style.zIndex = '99999';
+            element.style.background = '#ffffff';
+
             const opt = { 
                 margin: 10, 
                 filename: `Remito_Albardon_${c.nombre.replace(/\s+/g, '_')}_${m.fecha}.pdf`, 
-                html2canvas: { scale: 2, backgroundColor: '#ffffff', useCORS: true }, 
+                html2canvas: { 
+                    scale: 2, 
+                    backgroundColor: '#ffffff', 
+                    useCORS: true,
+                    scrollX: 0,
+                    scrollY: 0
+                }, 
                 jsPDF: { unit: 'mm', format: 'a4' } 
             };
 
-            html2pdf().set(opt).from(element).save().catch(err => {
-                console.error("Error al generar PDF:", err);
+            // Esperar un frame del navegador para renderizar el contenido antes de procesar el PDF
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    html2pdf().set(opt).from(element).save().then(() => {
+                        element.style.display = 'none';
+                    }).catch(err => {
+                        console.error("Error al generar PDF:", err);
+                        element.style.display = 'none';
+                    });
+                }, 150);
             });
         }
-
-        // --- INICIALIZACIÓN ---
-        document.getElementById('coc-fecha').valueAsDate = new Date();
-        document.getElementById('ferm-fecha').valueAsDate = new Date();
-        actualizarSelectRecetas();
-        renderRecetas();
-        renderTablaFermentacion();
-    </script>
-</body>
-</html>
