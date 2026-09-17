@@ -1416,7 +1416,7 @@
             renderClientes();
         }
 
-        function enviarWhatsapp(clienteId) {
+       function enviarWhatsapp(clienteId) {
             const c = clientes.find(item => item.id === clienteId);
             if (!c) return;
 
@@ -1444,7 +1444,8 @@
             window.open(`https://wa.me/${c.telefono}?text=${encodeURIComponent(texto)}`, '_blank');
         }
 
-      const c = clientes.find(item => item.id === clienteId);
+        function descargarRemitoPDF(clienteId, movIdx) {
+            const c = clientes.find(item => item.id === clienteId);
             if (!c || !c.movimientos || !c.movimientos[movIdx]) return;
 
             const m = c.movimientos[movIdx];
