@@ -1086,6 +1086,8 @@
         }
 
         // --- MÓDULO BARRILES ---
+        let barrilEditandoIdx = null;
+
         const etiquetasEstado = {
             vacio_sucio: { texto: 'Vacío - Sucio', clase: 'bg-slate-700 text-slate-300' },
             vacio_limpio: { texto: 'Vacío - Limpio', clase: 'bg-blue-500/20 text-blue-400 border border-blue-500/30' },
@@ -1097,6 +1099,8 @@
 
         function renderBarriles() {
             const container = document.getElementById('grilla-barriles');
+            if (!container) return;
+
             let html = '';
             barriles.forEach((b, idx) => {
                 const est = etiquetasEstado[b.estado] || { texto: b.estado, clase: 'bg-slate-700' };
@@ -1124,37 +1128,59 @@
         }
 
         function mostrarModalBarril() {
+            barrilEditandoIdx = null; // Resetea para indicar que es un alta nueva
             document.getElementById('barril-codigo').value = '';
-            document.getElementById('barril-cerveza').value = '';
+            document.getElementById('barril-capacidad').value = '50';
             document.getElementById('barril-conector').value = 'G';
+            document.getElementById('barril-estado').value = 'vacio_sucio';
+            document.getElementById('barril-cerveza').value = '';
             toggleCamposEstadoBarril();
             document.getElementById('modal-barril').classList.remove('hidden');
         }
 
-        function cerrarModalBarril() { document.getElementById('modal-barril').classList.add('hidden'); }
+        function cerrarModalBarril() { 
+            barrilEditandoIdx = null;
+            document.getElementById('modal-barril').classList.add('hidden'); 
+        }
 
         function toggleCamposEstadoBarril() {
             const estado = document.getElementById('barril-estado').value;
             const campoCerveza = document.getElementById('campo-barril-cerveza');
             const campoCliente = document.getElementById('campo-barril-cliente');
 
-            campoCerveza.classList.toggle('hidden', !(estado === 'lleno_fabrica' || estado === 'entregado_cliente'));
-            campoCliente.classList.toggle('hidden', estado !== 'entregado_cliente');
+            if (campoCerveza) {
+                campoCerveza.classList.toggle('hidden', !(estado === 'lleno_fabrica' || estado === 'entregado_cliente'));
+            }
+            
+            if (campoCliente) {
+                campoCliente.classList.toggle('hidden', estado !== 'entregado_cliente');
+            }
 
             if (estado === 'entregado_cliente') {
                 const selectC = document.getElementById('barril-cliente-select');
-                selectC.innerHTML = clientes.map(c => `<option value="${c.nombre}">${c.nombre}</option>`).join('');
+                if (selectC && typeof clientes !== 'undefined') {
+                    selectC.innerHTML = clientes.map(c => `<option value="${c.nombre}">${c.nombre}</option>`).join('');
+                }
             }
         }
 
         function editarBarril(idx) {
+            barrilEditandoIdx = idx; // Se almacena la posición del barril seleccionado
             const b = barriles[idx];
+            if (!b) return;
+
             document.getElementById('barril-codigo').value = b.codigo;
             document.getElementById('barril-capacidad').value = b.capacidad;
             document.getElementById('barril-conector').value = b.conector || 'G';
             document.getElementById('barril-estado').value = b.estado;
             document.getElementById('barril-cerveza').value = b.cerveza || '';
             toggleCamposEstadoBarril();
+
+            if (b.estado === 'entregado_cliente' && b.cliente) {
+                const selectC = document.getElementById('barril-cliente-select');
+                if (selectC) selectC.value = b.cliente;
+            }
+
             document.getElementById('modal-barril').classList.remove('hidden');
         }
 
@@ -1164,21 +1190,29 @@
             const conector = document.getElementById('barril-conector').value;
             const estado = document.getElementById('barril-estado').value;
             const cerveza = document.getElementById('barril-cerveza').value.trim();
-            const cliente = estado === 'entregado_cliente' ? document.getElementById('barril-cliente-select').value : '';
+            const selectCliente = document.getElementById('barril-cliente-select');
+            const cliente = estado === 'entregado_cliente' && selectCliente ? selectCliente.value : '';
 
             if (!codigo) return alert("Ingrese el código del barril.");
 
-            const idx = barriles.findIndex(b => b.codigo === codigo);
             const obj = { codigo, capacidad, conector, estado, cerveza, cliente };
 
-            if (idx >= 0) barriles[idx] = obj;
-            else barriles.push(obj);
+            if (barrilEditandoIdx !== null && barrilEditandoIdx >= 0) {
+                // Actualiza el barril existente en su posición exacta
+                barriles[barrilEditandoIdx] = obj;
+                barrilEditandoIdx = null;
+            } else {
+                // Si no se estaba editando, se agrega como nuevo
+                barriles.push(obj);
+            }
 
-            guardarStorage();
+            if (typeof guardarStorage === 'function') {
+                guardarStorage();
+            }
+            
             cerrarModalBarril();
             renderBarriles();
         }
-
         // --- MÓDULO CLIENTES & CUENTAS CORRIENTES ---
         function renderClientes() {
             const container = document.getElementById('grilla-clientes');
