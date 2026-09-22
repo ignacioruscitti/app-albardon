@@ -704,7 +704,7 @@
         </div>
     </div>
 </div>
-    <!-- LÓGICA JAVASCRIPT INTEGRADA -->
+<!-- LÓGICA JAVASCRIPT INTEGRADA -->
     <script>
         const recetasIniciales = {
             apa_pilsen_280: {
@@ -762,7 +762,7 @@
             localStorage.setItem('alb_clientes', JSON.stringify(clientes));
         }
 
-     function switchTab(tabId) {
+        function switchTab(tabId) {
             document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('active', 'bg-amber-500', 'text-slate-950');
@@ -777,16 +777,12 @@
             if (activeBtn) {
                 activeBtn.classList.add('active', 'bg-amber-500', 'text-slate-950');
             }
-        }
-            document.getElementById('tab-' + tabId).classList.remove('hidden');
-            const activeBtn = document.getElementById('btn-' + tabId);
-            activeBtn.classList.add('active');
 
-            if (tabId === 'recetas') renderRecetas();
-            if (tabId === 'stock') renderBarriles();
-            if (tabId === 'cc') renderClientes();
+            // Renderizar la vista correspondiente al cambiar de pestaña
+            if (tabId === 'recetas' && typeof renderRecetas === 'function') renderRecetas();
+            if (tabId === 'stock' && typeof renderBarriles === 'function') renderBarriles();
+            if (tabId === 'cc' && typeof renderClientes === 'function') renderClientes();
         }
-
         // --- MÓDULO RECETAS ---
         function renderRecetas() {
             const container = document.getElementById('grilla-recetas');
