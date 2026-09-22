@@ -761,35 +761,52 @@
             localStorage.setItem('alb_barriles', JSON.stringify(barriles));
             localStorage.setItem('alb_clientes', JSON.stringify(clientes));
         }
-
-        function switchTab(tabId) {
+function switchTab(tabId) {
+            // 1. Ocultar todas las secciones principales
             document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
+
+            // 2. Quitar estilo activo de todos los botones
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('active', 'bg-amber-500', 'text-slate-950');
             });
 
-            const activeSection = document.getElementById(tabId);
+            // 3. Buscar la sección a mostrar (soporta variaciones de ID como 'stock' o 'barriles')
+            let activeSection = document.getElementById(tabId) || 
+                                document.getElementById('tab-' + tabId);
+
+            if (!activeSection) {
+                if (tabId === 'stock') activeSection = document.getElementById('barriles') || document.getElementById('tab-barriles');
+                if (tabId === 'barriles') activeSection = document.getElementById('stock') || document.getElementById('tab-stock');
+                if (tabId === 'cc') activeSection = document.getElementById('clientes') || document.getElementById('tab-clientes');
+                if (tabId === 'clientes') activeSection = document.getElementById('cc') || document.getElementById('tab-cc');
+            }
+
             if (activeSection) {
                 activeSection.classList.remove('hidden');
             }
 
-            const activeBtn = document.getElementById('btn-' + tabId);
+            // 4. Marcar como activo el botón cliqueado
+            const activeBtn = document.getElementById('btn-' + tabId) || 
+                              document.querySelector(`[onclick*="${tabId}"]`);
             if (activeBtn) {
                 activeBtn.classList.add('active', 'bg-amber-500', 'text-slate-950');
             }
 
-            // Renderizar la vista correspondiente al cambiar de pestaña
-            if (tabId === 'recetas' && typeof renderRecetas === 'function') renderRecetas();
+            // 5. Volver a renderizar los datos de la sección elegida
+            if ((tabId === 'recetas') && typeof renderRecetas === 'function') renderRecetas();
             if ((tabId === 'stock' || tabId === 'barriles') && typeof renderBarriles === 'function') renderBarriles();
-            if (tabId === 'cc' && typeof renderClientes === 'function') renderClientes();
+            if ((tabId === 'cc' || tabId === 'clientes') && typeof renderClientes === 'function') renderClientes();
+            if ((tabId === 'cocciones' || tabId === 'lotes') && typeof renderCocciones === 'function') renderCocciones();
         }
 
-        // Cargar y mostrar datos apenas arranca la app
+        // Cargar y renderizar todo al abrir la app
         document.addEventListener('DOMContentLoaded', () => {
             if (typeof renderRecetas === 'function') renderRecetas();
             if (typeof renderBarriles === 'function') renderBarriles();
             if (typeof renderClientes === 'function') renderClientes();
+            if (typeof renderCocciones === 'function') renderCocciones();
         });
+     ;
         // --- MÓDULO RECETAS ---
         function renderRecetas() {
             const container = document.getElementById('grilla-recetas');
