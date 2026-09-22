@@ -762,7 +762,7 @@
             localStorage.setItem('alb_clientes', JSON.stringify(clientes));
         }
 
-      function switchTab(tabId) {
+     function switchTab(tabId) {
             document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('active', 'bg-amber-500', 'text-slate-950');
@@ -778,7 +778,6 @@
                 activeBtn.classList.add('active', 'bg-amber-500', 'text-slate-950');
             }
         }
-            
             document.getElementById('tab-' + tabId).classList.remove('hidden');
             const activeBtn = document.getElementById('btn-' + tabId);
             activeBtn.classList.add('active');
