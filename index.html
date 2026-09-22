@@ -780,9 +780,16 @@
 
             // Renderizar la vista correspondiente al cambiar de pestaña
             if (tabId === 'recetas' && typeof renderRecetas === 'function') renderRecetas();
-            if (tabId === 'stock' && typeof renderBarriles === 'function') renderBarriles();
+            if ((tabId === 'stock' || tabId === 'barriles') && typeof renderBarriles === 'function') renderBarriles();
             if (tabId === 'cc' && typeof renderClientes === 'function') renderClientes();
         }
+
+        // Cargar y mostrar datos apenas arranca la app
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof renderRecetas === 'function') renderRecetas();
+            if (typeof renderBarriles === 'function') renderBarriles();
+            if (typeof renderClientes === 'function') renderClientes();
+        });
         // --- MÓDULO RECETAS ---
         function renderRecetas() {
             const container = document.getElementById('grilla-recetas');
