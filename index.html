@@ -704,26 +704,47 @@
         </div>
     </div>
 </div>
-<!-- LÓGICA JAVASCRIPT INTEGRADA --><!-- LÓGICA JAVASCRIPT INTEGRADA -->
-    <!-- 1. Librerías necesarias de Firebase -->
+<!-- LÓGICA JAVASCRIPT INTEGRADA -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
     <script>
-        // 2. Aquí pegas el objeto "firebaseConfig" completo que te dio Firebase:
+        // Configuración de Firebase con tus credenciales reales
         const firebaseConfig = {
-            apiKey: "TU_API_KEY",
+            apiKey: "AIzaSyAswKR_MWSkekcjGVB-fZModbIN0KmHtKA",
             authDomain: "albardon-gestion.firebaseapp.com",
             projectId: "albardon-gestion",
             storageBucket: "albardon-gestion.firebasestorage.app",
             messagingSenderId: "814953766890",
-            appId: "TU_APP_ID"
+            appId: "1:814953766890:web:8c539d223c41d22adadc93",
+            measurementId: "G-TFYLB7W3SW"
         };
 
-        // 3. Conexión a la base de datos
+        // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        // Función para cambiar de pestaña/módulo
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('border-amber-600', 'text-amber-600', 'font-bold');
+                btn.classList.add('text-gray-500');
+            });
+
+            const selectedTab = document.getElementById(tabId);
+            if (selectedTab) {
+                selectedTab.classList.remove('hidden');
+            }
+
+            const activeBtn = document.getElementById('btn-' + tabId);
+            if (activeBtn) {
+                activeBtn.classList.add('border-amber-600', 'text-amber-600', 'font-bold');
+                activeBtn.classList.remove('text-gray-500');
+            }
+        }
         // 4. Tus datos iniciales (recetas, barriles, clientes)
         const recetasIniciales = { ... };
         const barrilesIniciales = [ ... ];
