@@ -1693,7 +1693,7 @@ function switchTab(tabId) {
             const fermFecha = document.getElementById('ferm-fecha');
             if (fermFecha) fermFecha.valueAsDate = new Date();
 
-            // Ejecución de renderizados iniciales
+            // Renderizados iniciales
             if (typeof actualizarSelectRecetas === 'function') actualizarSelectRecetas();
             if (typeof renderRecetas === 'function') renderRecetas();
             if (typeof renderTablaFermentacion === 'function') renderTablaFermentacion();
