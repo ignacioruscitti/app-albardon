@@ -1686,7 +1686,7 @@ function switchTab(tabId) {
             }, 500);
         }
 
-       /// --- INICIALIZACIÓN Y ARRANQUE ---
+     // --- INICIALIZACIÓN Y ARRANQUE ---
         document.addEventListener('DOMContentLoaded', () => {
             const cocFecha = document.getElementById('coc-fecha');
             if (cocFecha) cocFecha.valueAsDate = new Date();
@@ -1701,9 +1701,6 @@ function switchTab(tabId) {
             if (typeof switchTab === 'function') switchTab('recetas');
             if (typeof iniciarSincronizacion === 'function') iniciarSincronizacion();
         });
-    } catch (e) {
-        console.error("Error detectado en la carga:", e);
-    }
     </script>
 </body>
 </html>
