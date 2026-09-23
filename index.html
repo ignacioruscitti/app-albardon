@@ -1633,8 +1633,7 @@ function switchTab(tabId) {
             const m = c.movimientos[movIdx];
             const element = document.getElementById('plantilla-pdf-remito');
             if (!element) return;
-
-            // Cargar datos
+// Cargar datos
             document.getElementById('pdf-fecha').innerText = `Fecha: ${m.fecha}`;
             document.getElementById('pdf-cliente').innerText = c.nombre;
             document.getElementById('pdf-direccion').innerText = c.direccion || 'N/A';
@@ -1668,7 +1667,7 @@ function switchTab(tabId) {
             document.getElementById('pdf-saldo-anterior').innerText = `$ ${saldoAnterior.toLocaleString()}`;
             document.getElementById('pdf-saldo-total').innerText = `$ ${saldoTotalAcumulado.toLocaleString()}`;
 
-            // Usar la función de impresión nativa del navegador (imprime o guarda como PDF limpio)
+            // Usar la función de impresión nativa del navegador
             const contenido = element.innerHTML;
             const ventana = window.open('', '', 'height=700,width=900');
             
@@ -1684,9 +1683,9 @@ function switchTab(tabId) {
                 ventana.print();
                 ventana.close();
             }, 500);
-        }
+        } // <- AQUÍ FALTABA ESTA LLAVE (Cierra la función de impresión PDF)
 
-   // --- INICIALIZACIÓN Y ARRANQUE ---
+        // --- INICIALIZACIÓN Y ARRANQUE ---
         document.addEventListener('DOMContentLoaded', () => {
             const cocFecha = document.getElementById('coc-fecha');
             if (cocFecha) cocFecha.valueAsDate = new Date();
