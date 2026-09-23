@@ -1659,10 +1659,26 @@ function switchTab(tabId) {
             }, 500);
         }
 
-        // --- INICIALIZACIÓN ---
-        document.getElementById('coc-fecha').valueAsDate = new Date();
-        document.getElementById('ferm-fecha').valueAsDate = new Date();
-        actualizarSelectRecetas();
-        renderRecetas();
-        renderTablaFermentacion();
+       // --- INICIALIZACIÓN ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Cargar fecha actual en inputs si existen
+            const cocFecha = document.getElementById('coc-fecha');
+            if (cocFecha) cocFecha.valueAsDate = new Date();
+
+            const fermFecha = document.getElementById('ferm-fecha');
+            if (fermFecha) fermFecha.valueAsDate = new Date();
+
+            // Renderizar vistas iniciales
+            if (typeof actualizarSelectRecetas === 'function') actualizarSelectRecetas();
+            if (typeof renderRecetas === 'function') renderRecetas();
+            if (typeof renderTablaFermentacion === 'function') renderTablaFermentacion();
+
+            // Seleccionar pestaña por defecto y arrancar sincronización
+            switchTab('recetas');
+            if (typeof iniciarSincronizacion === 'function') {
+                iniciarSincronizacion();
+            }
+        });
     </script>
+</body>
+</html>
