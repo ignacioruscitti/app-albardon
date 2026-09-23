@@ -704,7 +704,64 @@
         </div>
     </div>
 </div>
-<!-- LÓGICA JAVASCRIPT INTEGRADA -->
+<!-- LÓGICA JAVASCRIPT INTEGRADA --><!-- LÓGICA JAVASCRIPT INTEGRADA -->
+    <!-- 1. Librerías necesarias de Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        // 2. Aquí pegas el objeto "firebaseConfig" completo que te dio Firebase:
+        const firebaseConfig = {
+            apiKey: "TU_API_KEY",
+            authDomain: "albardon-gestion.firebaseapp.com",
+            projectId: "albardon-gestion",
+            storageBucket: "albardon-gestion.firebasestorage.app",
+            messagingSenderId: "814953766890",
+            appId: "TU_APP_ID"
+        };
+
+        // 3. Conexión a la base de datos
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // 4. Tus datos iniciales (recetas, barriles, clientes)
+        const recetasIniciales = { ... };
+        const barrilesIniciales = [ ... ];
+        const clientesIniciales = [ ... ];
+
+        // 5. Reemplazo de funciones para guardar en la Nube
+        function guardarStorage() {
+            db.collection("albardon_app").doc("barriles").set({ lista: barriles });
+            db.collection("albardon_app").doc("recetas").set({ mapa: recetas });
+            db.collection("albardon_app").doc("clientes").set({ lista: clientes });
+        }
+
+        function iniciarSincronizacion() {
+            db.collection("albardon_app").doc("barriles").onSnapshot(doc => {
+                if (doc.exists && doc.data().lista) {
+                    barriles = doc.data().lista;
+                    if (typeof renderBarriles === 'function') renderBarriles();
+                }
+            });
+
+            db.collection("albardon_app").doc("recetas").onSnapshot(doc => {
+                if (doc.exists && doc.data().mapa) {
+                    recetas = doc.data().mapa;
+                    if (typeof renderRecetas === 'function') renderRecetas();
+                }
+            });
+
+            db.collection("albardon_app").doc("clientes").onSnapshot(doc => {
+                if (doc.exists && doc.data().lista) {
+                    clientes = doc.data().lista;
+                    if (typeof renderClientes === 'function') renderClientes();
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            iniciarSincronizacion();
+        });
     <script>
         const recetasIniciales = {
             apa_pilsen_280: {
