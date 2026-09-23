@@ -709,7 +709,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
     <script>
-        // Función global para cambiar de pestaña (declarada arriba para que no dependa de otros scripts)
+        // Función global de navegación (bloque independiente)
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(content => {
                 content.classList.add('hidden');
@@ -746,6 +746,8 @@
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+
+        // ... resto de tus variables y funciones ...
 
         // ... resto de tu código
 
@@ -1684,24 +1686,24 @@ function switchTab(tabId) {
             }, 500);
         }
 
-       // --- INICIALIZACIÓN Y ARRANQUE ---
+       /// --- INICIALIZACIÓN Y ARRANQUE ---
         document.addEventListener('DOMContentLoaded', () => {
-            // Asignación de fechas si los campos existen
             const cocFecha = document.getElementById('coc-fecha');
             if (cocFecha) cocFecha.valueAsDate = new Date();
 
             const fermFecha = document.getElementById('ferm-fecha');
             if (fermFecha) fermFecha.valueAsDate = new Date();
 
-            // Renderizados iniciales
             if (typeof actualizarSelectRecetas === 'function') actualizarSelectRecetas();
             if (typeof renderRecetas === 'function') renderRecetas();
             if (typeof renderTablaFermentacion === 'function') renderTablaFermentacion();
 
-            // Navegación por defecto y sincronización
             if (typeof switchTab === 'function') switchTab('recetas');
             if (typeof iniciarSincronizacion === 'function') iniciarSincronizacion();
         });
+    } catch (e) {
+        console.error("Error detectado en la carga:", e);
+    }
     </script>
 </body>
 </html>
