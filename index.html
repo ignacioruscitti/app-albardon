@@ -709,7 +709,31 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
     <script>
-        // Configuración de Firebase con tus credenciales reales
+        // Función global para cambiar de pestaña (declarada arriba para que no dependa de otros scripts)
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('border-amber-600', 'text-amber-600', 'font-bold');
+                btn.classList.add('text-gray-500');
+            });
+
+            const selectedTab = document.getElementById(tabId);
+            if (selectedTab) {
+                selectedTab.classList.remove('hidden');
+            }
+
+            const activeBtn = document.getElementById('btn-' + tabId);
+            if (activeBtn) {
+                activeBtn.classList.add('border-amber-600', 'text-amber-600', 'font-bold');
+                activeBtn.classList.remove('text-gray-500');
+            }
+        }
+    </script>
+
+    <script>
+        // Configuración de Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyAswKR_MWSkekcjGVB-fZModbIN0KmHtKA",
             authDomain: "albardon-gestion.firebaseapp.com",
@@ -720,9 +744,10 @@
             measurementId: "G-TFYLB7W3SW"
         };
 
-        // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+
+        // ... resto de tu código
 
         // Función para cambiar de pestaña/módulo
         function switchTab(tabId) {
