@@ -820,8 +820,9 @@ if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 
-// Conexión explícita a la base de datos 'default' creada en la consola
-const db = firebase.firestore(firebase.app(), "default");
+// Inicializamos la conexión apuntando de forma exacta a tu base de datos 'default'
+const db = firebase.firestore();
+db.settings({ databaseId: 'default' });
     // 1. Datos iniciales de resguardo
     const recetasIniciales = {
         apa_pilsen_280: {
