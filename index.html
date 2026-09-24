@@ -1627,7 +1627,7 @@ function switchTab(tabId) {
             renderClientes();
         }
 
-       function enviarWhatsapp(clienteId) {
+      function enviarWhatsapp(clienteId) {
             const c = clientes.find(item => item.id === clienteId);
             if (!c) return;
 
@@ -1655,14 +1655,15 @@ function switchTab(tabId) {
             window.open(`https://wa.me/${c.telefono}?text=${encodeURIComponent(texto)}`, '_blank');
         }
 
-     function descargarRemitoPDF(clienteId, movIdx) {
+        function descargarRemitoPDF(clienteId, movIdx) {
             const c = clientes.find(item => item.id === clienteId);
             if (!c || !c.movimientos || !c.movimientos[movIdx]) return;
 
             const m = c.movimientos[movIdx];
             const element = document.getElementById('plantilla-pdf-remito');
             if (!element) return;
-// Cargar datos
+
+            // Cargar datos
             document.getElementById('pdf-fecha').innerText = `Fecha: ${m.fecha}`;
             document.getElementById('pdf-cliente').innerText = c.nombre;
             document.getElementById('pdf-direccion').innerText = c.direccion || 'N/A';
@@ -1712,7 +1713,7 @@ function switchTab(tabId) {
                 ventana.print();
                 ventana.close();
             }, 500);
-        } // <- AQUÍ FALTABA ESTA LLAVE (Cierra la función de impresión PDF)
+        }
 
         // --- INICIALIZACIÓN Y ARRANQUE ---
         document.addEventListener('DOMContentLoaded', () => {
