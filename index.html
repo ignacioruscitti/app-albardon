@@ -809,6 +809,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
 <script>
+
 // Configuración e Inicialización de Firebase
 const firebaseConfig = {
     apiKey: "AIzaSyAswKR_MWSkekcjGVB-fZModbIN0KmHtKA",
@@ -820,8 +821,8 @@ if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 
-// Inicializamos Firestore indicando el ID exacto de tu base de datos 'default'
-const db = firebase.firestore(firebase.app(), 'default');
+// Inicializamos apuntando al ID exacto de la base de datos
+const db = firebase.firestore(firebase.app(), "default");
     // 1. Datos iniciales de resguardo
     const recetasIniciales = {
         apa_pilsen_280: {
