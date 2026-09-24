@@ -964,7 +964,7 @@ const db = firebase.firestore();
         if (typeof renderCocciones === 'function') renderCocciones();
     });
 </script>
-       // --- MÓDULO RECETAS ---
+    <script>   // --- MÓDULO RECETAS ---
 function renderRecetas() {
     const contenedor = document.getElementById('parrilla-recetas');
     if (!contenedor) return;
@@ -1381,7 +1381,7 @@ function descargarRecetaPDF(clave) {
     } else {
         elemento.classList.add('hidden');
     }
-}
+} </script>
       // --- MÓDULO BARRILES ---
 let barrilEditandoIdx = null;
 
