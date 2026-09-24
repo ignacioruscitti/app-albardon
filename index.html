@@ -1649,12 +1649,26 @@ function editarCliente(id) {
 }
 
 function guardarCliente() {
-    const editId = document.getElementById('cli-id-editar').value;
-    const nombre = document.getElementById('cli-nombre').value.trim();
-    const telefono = document.getElementById('cli-telefono').value.trim();
-    const direccion = document.getElementById('cli-direccion').value.trim();
+    const inputEditId = document.getElementById('cli-id-editar');
+    const inputNombre = document.getElementById('cli-nombre');
+    const inputTelefono = document.getElementById('cli-telefono');
+    const inputDireccion = document.getElementById('cli-direccion');
 
-    if (!nombre) return alert("Ingrese el nombre del cliente.");
+    // Validación defensiva por si algún elemento no está en el DOM
+    if (!inputNombre) {
+        alert("Error: No se encuentra el campo del nombre del cliente en el HTML.");
+        return;
+    }
+
+    const editId = inputEditId ? inputEditId.value : '';
+    const nombre = inputNombre.value.trim();
+    const telefono = inputTelefono ? inputTelefono.value.trim() : '';
+    const direccion = inputDireccion ? inputDireccion.value.trim() : '';
+
+    if (!nombre) {
+        alert("Ingrese el nombre del cliente.");
+        return;
+    }
 
     if (editId) {
         const idx = clientes.findIndex(c => c.id === editId);
@@ -1664,7 +1678,14 @@ function guardarCliente() {
             clientes[idx].direccion = direccion;
         }
     } else {
-        clientes.push({ id: 'c_' + Date.now(), nombre, telefono, direccion, saldo: 0, movimientos: [] });
+        clientes.push({ 
+            id: 'c_' + Date.now(), 
+            nombre, 
+            telefono, 
+            direccion, 
+            saldo: 0, 
+            movimientos: [] 
+        });
     }
 
     if (typeof guardarStorage === 'function') guardarStorage();
