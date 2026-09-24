@@ -812,17 +812,21 @@
 
 // Configuración e Inicialización de Firebase
 const firebaseConfig = {
-    apiKey: "AIzaSyAswKR_MWSkekcjGVB-fZModbIN0KmHtKA",
-    authDomain: "albardon-app.firebaseapp.com",
-    projectId: "albardon-app"
+    apiKey: "AIzaSyD1_M4Gz_8A85HZWQ9_YqlnTXIQH0c6l48",
+    authDomain: "albardon-gestion-53ea9.firebaseapp.com",
+    projectId: "albardon-gestion-53ea9",
+    storageBucket: "albardon-gestion-53ea9.firebasestorage.app",
+    messagingSenderId: "360483957612",
+    appId: "1:360483957612:web:14131d08ff542895c4e149"
 };
 
+// Inicializamos la app con los scripts globales de Firebase
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 
-// Inicializamos apuntando al ID exacto de la base de datos
-const db = firebase.firestore(firebase.app(), "default");
+// Conectamos a Firestore apuntando directo a la base de datos por defecto (default)
+const db = firebase.firestore();
     // 1. Datos iniciales de resguardo
     const recetasIniciales = {
         apa_pilsen_280: {
