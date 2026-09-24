@@ -705,204 +705,154 @@
     </div>
 </div>
 <!-- LÓGICA JAVASCRIPT INTEGRADA -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
-    <script>
-        // Función global de navegación (bloque independiente)
-        función switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.add('oculto');
-            });
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('border-amber-600', 'text-amber-600', 'font-bold');
-                btn.classList.add('text-gray-500');
-            });
+<script>
+    // Configuración e Inicialización de Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyAswKR_MWSkekcjGVB-fZModbIN0KmHtKA",
+        authDomain: "albardon-app.firebaseapp.com",
+        projectId: "albardon-app"
+    };
 
-            const selectedTab = document.getElementById(tabId);
-            si (pestaña seleccionada) {
-                SelectedTab.classList.remove('hidden');
-            }
-
-            const activeBtn = document.getElementById('btn-' + tabId);
-            si (activeBtn) {
-                activeBtn.classList.add('border-amber-600', 'text-amber-600', 'font-bold');
-                activeBtn.classList.remove('text-gray-500');
-            }
-        }
-    </script>
-<!-- 1. NAVEGACIÓN INDEPENDIENTE (SIN TOCAR) -->
-<!-- 1. NAVEGACIÓN INDEPENDIENTE -->
-    <script>
-        función switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(content => {
-@@ -759,8 +759,8 @@
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-
-    <!-- 3. LÓGICA PRINCIPAL DE LA APLICACIÓN -->
-    <script>
-        
-        // Configuración de Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyAswKR_MWSkekcjGVB-fZModbIN0KmHtKA",
-@@ -775,960 +775,933 @@
+    if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+    }
+    const db = firebase.firestore();
 
-        // ... resto de tus variables y funciones ...
-
-        // ... resto de tu código
-
-        // Función para cambiar de pestaña/módulo
-        función switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.add('oculto');
-            });
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('border-amber-600', 'text-amber-600', 'font-bold');
-                btn.classList.add('text-gray-500');
-            });
-
-            const selectedTab = document.getElementById(tabId);
-            si (pestaña seleccionada) {
-                SelectedTab.classList.remove('hidden');
-            }
-
-            const activeBtn = document.getElementById('btn-' + tabId);
-            si (activeBtn) {
-                activeBtn.classList.add('border-amber-600', 'text-amber-600', 'font-bold');
-                activeBtn.classList.remove('text-gray-500');
-            }
+    // 1. Datos iniciales de resguardo
+    const recetasIniciales = {
+        apa_pilsen_280: {
+            id: 'apa_pilsen_280',
+            nombre: "APA Pilsen 280",
+            lote: 280,
+            diTeorica: "1.052",
+            dfTeorica: "1.013",
+            abv: "5.1",
+            ibu: "33.8",
+            srm: "6.2",
+            eficiencia: "73",
+            levadura: "US-05 (200 grs)",
+            aguaIni: 195,
+            tempAguaIni: "73 °C",
+            tempMac: "66 °C",
+            aguaLav: 173,
+            tempLav: "75 °C",
+            salesMac: [{ nombre: "Gypsum (Sulfato de Calcio)", cantidad: 30 }, { nombre: "Cloruro de Calcio", cantidad: 20 }],
+            salesLav: [{ nombre: "Yeso", cantidad: 15 }],
+            densPre: "1.049",
+            ltsPre: 310,
+            tiempoHervor: 60,
+            evaporación: 6,
+            trub: 10,
+            tiempoEnfriado: 30,
+            granos: [
+                { nombre: "Pilsner US Cargill", cantidad: 55 },
+                { nombre: "Melanoidin Malt (Ba-Malt)", cantidad: 5 },
+                { nombre: "Carapils (Dextrina) Ba-Malt", cantidad: 5 }
+            ],
+            lupulos: [
+                { nombre: "Colón", cantidad: 300, momento: "60 min" },
+                { nombre: "Cascade", cantidad: 500, momento: "Whirlpool" }
+            ]
         }
-        
+    };
 
-        // 5. Reemplazo de funciones para guardar en la Nube
-        función guardarStorage() {
-            db.collection("albardon_app").doc("barriles").set({ lista: barriles });
-            db.collection("albardon_app").doc("recetas").set({ mapa: recetas });
-            db.collection("albardon_app").doc("clientes").set({ lista: clientes });
+    const barrilesIniciales = [
+        { codigo: 'K-01', capacidad: '50L', conector: 'G', estado: 'vacio_limpio', cerveza: '', cliente: '' },
+        { codigo: 'K-02', capacidad: '50L', conector: 'G', estado: 'lleno_fabrica', cerveza: 'APA Pilsen 280 (L-2026-01)', cliente: '' }
+    ];
+
+    const clientesIniciales = [
+        { id: 'c1', nombre: 'Bar El Portal', teléfono: '5493421234567', dirección: 'Av. Pellegrini 1500', saldo: -150000, movimientos: [{ fecha: '2026-09-10', concepto: 'Entrega 2 Barriles 50L', monto: -150000, items: [] }] }
+    ];
+
+    let recetas = JSON.parse(localStorage.getItem('alb_recetas')) || recetasIniciales;
+    let barriles = JSON.parse(localStorage.getItem('alb_barriles')) || barrilesIniciales;
+    let clientes = JSON.parse(localStorage.getItem('alb_clientes')) || clientesIniciales;
+
+    // 2. Funciones de almacenamiento e integración con Nube
+    function guardarStorage() {
+        localStorage.setItem('alb_recetas', JSON.stringify(recetas));
+        localStorage.setItem('alb_barriles', JSON.stringify(barriles));
+        localStorage.setItem('alb_clientes', JSON.stringify(clientes));
+
+        if (typeof db !== 'undefined') {
+            db.collection("albardon_app").doc("barriles").set({ lista: barriles }).catch(e => console.error(e));
+            db.collection("albardon_app").doc("recetas").set({ mapa: recetas }).catch(e => console.error(e));
+            db.collection("albardon_app").doc("clientes").set({ lista: clientes }).catch(e => console.error(e));
         }
+    }
 
-        function iniciarSincronización() {
-            db.collection("albardon_app").doc("barriles").onSnapshot(doc => {
-                Si (doc.exists && doc.data().lista) {
-                    barriles = doc.data().lista;
-                    if (typeof renderBarriles === 'function') renderBarriles();
-                }
-            });
+    function iniciarSincronización() {
+        if (typeof db === 'undefined') return;
 
-            db.collection("albardon_app").doc("recetas").onSnapshot(doc => {
-                Si (doc.exists && doc.data().mapa) {
-                    recetas = doc.data().map;
-                    if (typeof renderRecetas === 'function') renderRecetas();
-                }
-            });
-
-            db.collection("albardon_app").doc("clientes").onSnapshot(doc => {
-                Si (doc.exists && doc.data().lista) {
-                    clientes = doc.data().lista;
-                    if (typeof renderClientes === 'function') renderClientes();
-                }
-            });
-
-
-        document.addEventListener('DOMContentLoaded', () => {
-            iniciarSincronización();
+        db.collection("albardon_app").doc("barriles").onSnapshot(doc => {
+            if (doc.exists && doc.data().lista) {
+                barriles = doc.data().lista;
+                if (typeof renderBarriles === 'function') renderBarriles();
+            }
         });
 
-     const recetasIniciales = {
-            apa_pilsen_280: {
-                id: 'apa_pilsen_280',
-                nombre: "APA Pilsen 280",
-                lote: 280,
-                diTeorica: "1.052",
-                dfTeorica: "1.013",
-                abv: "5.1",
-                ibu: "33.8",
-                srm: "6.2",
-                eficiencia: "73",
-                levadura: "US-05 (200 grs)",
-                aguaIni: 195,
-                tempAguaIni: "73 °C",
-                tempMac: "66 °C",
-                aguaLav: 173,
-                tempLav: "75 °C",
-                salesMac: [{ nombre: "Yypsum (Sulfato de Calcio)", cantidad: 30 }, { nombre: "Cloruro de Calcio", cantidad: 20 }],
-                salesLav: [{ nombre: "Yeso", cantidad: 15 }],
-                densPre: "1.049",
-                ltsPre: 310,
-                tiempoHervor: 60,
-                evaporación: 6,
-                trub: 10,
-                tiempoEnfriado: 30,
-                granos: [
-                    { nombre: "Pilsner US Cargill", cantidad: 55 },
-                    { nombre: "Melanoidin Malt (Ba-Malt)", cantidad: 5 },
-                    { nombre: "Carapils (Dextrina) Ba-Malt", cantidad: 5 }
-                ],
-                lupulos: [
-                    { nombre: "Colón", cantidad: 300, momento: "60 min" },
-                    { nombre: "Cascade", cantidad: 500, momento: "Whirlpool" }
-                ]
+        db.collection("albardon_app").doc("recetas").onSnapshot(doc => {
+            if (doc.exists && doc.data().mapa) {
+                recetas = doc.data().mapa;
+                if (typeof renderRecetas === 'function') renderRecetas();
             }
-        };
+        });
 
-        const barrilesIniciales = [
-            { codigo: 'K-01', capacidad: '50L', conector: 'G', estado: 'vacio_limpio', cerveza: '', cliente: '' },
-            { codigo: 'K-02', capacidad: '50L', conector: 'G', estado: 'lleno_fabrica', cerveza: 'APA Pilsen 280 (L-2026-01)', cliente: '' }
-        ];
+        db.collection("albardon_app").doc("clientes").onSnapshot(doc => {
+            if (doc.exists && doc.data().lista) {
+                clientes = doc.data().lista;
+                if (typeof renderClientes === 'function') renderClientes();
+            }
+        });
+    }
 
-        const clientesIniciales = [
-            { id: 'c1', nombre: 'Bar El Portal', teléfono: '5493421234567', dirección: 'Av. Pellegrini 1500', saldo: -150000, movimientos: [{ fecha: '2026-09-10', concepto: 'Entrega 2 Barriles 50L', monto: -150000, items: [] }] }
-        ];
+    // 3. Navegación global entre secciones
+    function switchTab(tabId) {
+        // Ocultar todas las secciones principales
+        document.querySelectorAll('main > section, .tab-content').forEach(sec => sec.classList.add('hidden', 'oculto'));
 
-        let recetas = JSON.parse(localStorage.getItem('alb_recetas')) || recetasIniciales;
-        let barriles = JSON.parse(localStorage.getItem('alb_barriles')) || barrilesIniciales;
-        let clientes = JSON.parse(localStorage.getItem('alb_clientes')) || clientesIniciales;
+        // Desmarcar botones activos
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active', 'bg-amber-500', 'text-slate-950', 'border-amber-600', 'text-amber-600', 'font-bold');
+            btn.classList.add('text-gray-500');
+        });
 
-        función guardarStorage() {
-            localStorage.setItem('alb_recetas', JSON.stringify(recetas));
-            localStorage.setItem('alb_barriles', JSON.stringify(barriles));
-            localStorage.setItem('alb_clientes', JSON.stringify(clientes));
+        // Buscar la sección a mostrar
+        let activeSection = document.getElementById(tabId) || document.getElementById('tab-' + tabId);
+
+        if (!activeSection) {
+            if (tabId === 'stock') activeSection = document.getElementById('barriles') || document.getElementById('tab-barriles');
+            if (tabId === 'barriles') activeSection = document.getElementById('stock') || document.getElementById('tab-stock');
+            if (tabId === 'cc') activeSection = document.getElementById('clientes') || document.getElementById('tab-clientes');
+            if (tabId === 'clientes') activeSection = document.getElementById('cc') || document.getElementById('tab-cc');
         }
-función switchTab(tabId) {
-            // 1. Ocultar todas las secciones principales
-            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
 
-            // 2. Quitar estilo activo de todos los botones
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active', 'bg-amber-500', 'text-slate-950');
-            });
-
-            // 3. Buscar la sección a mostrar (soporta variaciones de ID como 'stock' o 'barriles')
-            let activeSection = document.getElementById(tabId) ||
-                                document.getElementById('tab-' + tabId);
-
-            si (!activeSection) {
-                if (tabId === 'stock') activeSection = document.getElementById('barriles') || document.getElementById('tab-barriles');
-                if (tabId === 'barriles') activeSection = document.getElementById('stock') || document.getElementById('tab-stock');
-                if (tabId === 'cc') activeSection = document.getElementById('clientes') || document.getElementById('tab-clientes');
-                if (tabId === 'clientes') activeSection = document.getElementById('cc') || document.getElementById('tab-cc');
-            }
-
-            si (sección activa) {
-                activeSection.classList.remove('hidden');
-            }
-
-            // 4. Marcar como activo el botón clicado
-            const activeBtn = document.getElementById('btn-' + tabId) ||
-                              document.querySelector(`[onclick*="${tabId}"]`);
-            si (activeBtn) {
-                activeBtn.classList.add('active', 'bg-amber-500', 'text-slate-950');
-            }
-
-            // 5. Volver a renderizar los datos de la sección elegida
-            if ((tabId === 'recetas') && typeof renderRecetas === 'función') renderRecetas();
-            if ((tabId === 'stock' || tabId === 'barriles') && typeof renderBarriles === 'function') renderBarriles();
-            if ((tabId === 'cc' || tabId === 'clientes') && typeof renderClientes === 'function') renderClientes();
-            if ((tabId === 'cocciones' || tabId === 'lotes') && typeof renderCocciones === 'función') renderCocciones();
+        if (activeSection) {
+            activeSection.classList.remove('hidden', 'oculto');
         }
+
+        // Marcar el botón presionado
+        const activeBtn = document.getElementById('btn-' + tabId) || document.querySelector(`[onclick*="${tabId}"]`);
+        if (activeBtn) {
+            activeBtn.classList.add('active', 'bg-amber-500', 'text-slate-950', 'border-amber-600', 'font-bold');
+            activeBtn.classList.remove('text-gray-500');
+        }
+
+        // Renderizar datos del módulo activo
+        if ((tabId === 'recetas') && typeof renderRecetas === 'function') renderRecetas();
+        if ((tabId === 'stock' || tabId === 'barriles') && typeof renderBarriles === 'function') renderBarriles();
+        if ((tabId === 'cc' || tabId === 'clientes') && typeof renderClientes === 'function') renderClientes();
+        if ((tabId === 'cocciones' || tabId === 'lotes') && typeof renderCocciones === 'function') renderCocciones();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        iniciarSincronización();
+    });
+</script>
 
         // Cargar y renderizar todo al abrir la aplicación
         document.addEventListener('DOMContentLoaded', () => {
