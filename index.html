@@ -809,7 +809,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
 <script>
- // Configuración e Inicialización de Firebase
+// Configuración e Inicialización de Firebase
 const firebaseConfig = {
     apiKey: "AIzaSyAswKR_MWSkekcjGVB-fZModbIN0KmHtKA",
     authDomain: "albardon-app.firebaseapp.com",
@@ -820,11 +820,8 @@ if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 
-// Inicialización estándar de Firestore
-const db = firebase.firestore();
-
-// Conectamos explícitamente a la base de datos 'default' recién creada
-const db = firebase.app().firestore('default');
+// Forzamos la conexión explícita a la base de datos por defecto con paréntesis
+const db = firebase.firestore(firebase.app(), "(default)");
     // 1. Datos iniciales de resguardo
     const recetasIniciales = {
         apa_pilsen_280: {
