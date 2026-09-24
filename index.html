@@ -542,7 +542,7 @@
     </div>
 </div>
 
-        <!-- ==================== MÓDULO 5: CUENTAS CORRIENTES & CLIENTES ===================== -->
+   <script>     <!-- ==================== MÓDULO 5: CUENTAS CORRIENTES & CLIENTES ===================== -->
 <section id="tab-cc" class="space-y-6 hidden">
     <div class="card p-4 flex flex-wrap justify-between items-center gap-4 no-print">
         <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
@@ -803,7 +803,8 @@
             <p class="border-t border-gray-400 pt-1">Cervecería Albardón</p>
         </div>
     </div>
-</div>
+</div> </script> 
+    
 <!-- LÓGICA JAVASCRIPT INTEGRADA -->
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -1382,6 +1383,7 @@ function descargarRecetaPDF(clave) {
         elemento.classList.add('hidden');
     }
 } </script>
+    
     <script>  // --- MÓDULO BARRILES ---
 let barrilEditandoIdx = null;
 
@@ -1549,7 +1551,8 @@ function eliminarBarril(idx) {
         renderBarriles();
     }
 } </script>
-   // --- MÓDULO CLIENTES & CUENTAS CORRIENTES ---
+    
+  <script> // --- MÓDULO CLIENTES & CUENTAS CORRIENTES ---
 function renderClientes() {
     const container = document.getElementById('grilla-clientes');
     if (!container) return;
@@ -1914,8 +1917,9 @@ function descargarRemitoPDF(clienteId, movIdx) {
             ventana.close();
         }, 500);
     }
-}
-     // --- INICIALIZACIÓN Y ARRANQUE ---
+} </script>
+    
+  <script>   // --- INICIALIZACIÓN Y ARRANQUE ---
 document.addEventListener('DOMContentLoaded', () => {
     const cocFecha = document.getElementById('coc-fecha');
     if (cocFecha) cocFecha.valueAsDate = new Date();
