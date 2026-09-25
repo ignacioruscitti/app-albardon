@@ -1090,6 +1090,7 @@ function agregarFilaLupulo(nombre = '', cant = '', momento = '') {
 
 function guardarReceta() {
     console.log("¡Hiciste clic en Guardar Receta!");
+
     const nombreInput = document.getElementById('rec-nombre');
     if (!nombreInput) {
         alert("Error: No se encuentra el campo del nombre de la receta.");
@@ -1103,11 +1104,10 @@ function guardarReceta() {
     }
 
     // Asegurarnos de que recetas sea un objeto válido
-    if (!recetas || typeof recetas !== 'object' || Array.isArray(recetas)) {
-        recetas = {};
+    if (!window.recetas || typeof window.recetas !== 'object' || Array.isArray(window.recetas)) {
+        window.recetas = {};
     }
 
-    // Generar un ID único y seguro basado en timestamp si es nueva, o limpiar el nombre
     const id = 'rec_' + Date.now();
 
     const granos = [];
@@ -1177,30 +1177,34 @@ function guardarReceta() {
         lupulos
     };
 
-    if (typeof guardarStorage === 'function') guardarStorage();
-    if (typeof ocultarFormularioReceta === 'function') ocultarFormularioReceta();
-    
-    // Llamamos a la interfaz unificada para refrescar tanto el listado como el select de cocción
-    actualizarInterfazRecetas();
-}
+    // Guardado seguro en storage
+    if (typeof guardarStorage === 'function') {
+        guardarStorage();
+    } else {
+        localStorage.setItem('recetas', JSON.stringify(recetas));
+    }
 
-function actualizarInterfazRecetas() {
-    // 1. Actualiza automáticamente el combo de la pantalla de Cocción
+    // Ocultar formulario si existe la función
+    if (typeof ocultarFormularioReceta === 'function') {
+        ocultarFormularioReceta();
+    }
+
+    // Actualizar el select de cocción de forma directa y segura
     const select = document.getElementById('select-receta');
     if (select) {
         let html = '<option value="">-- Seleccionar Receta --</option>';
-        if (typeof recetas === 'object' && recetas !== null) {
-            Object.keys(recetas).forEach(key => {
-                html += `<option value="${key}">${recetas[key].nombre}</option>`;
-            });
-        }
+        Object.keys(recetas).forEach(key => {
+            html += `<option value="${key}">${recetas[key].nombre}</option>`;
+        });
         select.innerHTML = html;
     }
 
-    // 2. Refresca el listado del módulo Recetas
+    // Renderizar listado de recetas si existe la función
     if (typeof renderRecetas === 'function') {
         renderRecetas();
     }
+
+    console.log("¡Receta guardada y UI actualizada con éxito!");
 }
         // --- MÓDULO COCCIÓN ---
 function cargarRecetaEnCoccion() {
