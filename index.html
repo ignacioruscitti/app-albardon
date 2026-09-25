@@ -1258,7 +1258,7 @@ function actualizarSelectRecetas() {
     if (!select) return;
     
     let html = '<option value="">-- Seleccionar Receta --</option>';
-    Object.keys(recetas).keys().forEach(key => {
+    Object.keys(recetas).forEach(key => {
         html += `<option value="${key}">${recetas[key].nombre}</option>`;
     });
     select.innerHTML = html;
