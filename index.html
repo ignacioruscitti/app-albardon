@@ -1290,7 +1290,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Variable global para los barriles
 let barriles = [];
-
+<script>
 // Función para inicializar y cargar los barriles desde localStorage
 function inicializarBarrilesStorage() {
     let datosGuardados = localStorage.getItem('alb_barriles') || localStorage.getItem('barriles');
@@ -1435,7 +1435,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderBarriles();
 });
 </script>
-
+<script>
 // Función para renderizar la grilla de barriles en pantalla
 function renderBarriles(filtroEstado = 'TODOS') {
     const contenedor = document.getElementById('grilla-barriles');
