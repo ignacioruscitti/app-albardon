@@ -965,13 +965,26 @@ const db = firebase.firestore();
         if (typeof renderCocciones === 'function') renderCocciones();
     });
 </script>
-    <script>   // --- MÓDULO RECETAS ---
+    // --- MÓDULO RECETAS (COMPLETO Y CORREGIDO) ---
+
 function renderRecetas() {
     const contenedor = document.getElementById('parrilla-recetas');
     if (!contenedor) return;
     
+    // Validar que recetas sea un objeto válido
+    if (!window.recetas || typeof window.recetas !== 'object' || Array.isArray(window.recetas)) {
+        window.recetas = {};
+    }
+
     let html = '';
-    Object.keys(recetas).forEach(key => {
+    const keys = Object.keys(recetas);
+
+    if (keys.length === 0) {
+        contenedor.innerHTML = '<div class="col-span-full text-center py-8 text-slate-400"><i class="fa-solid fa-book-open text-3xl mb-2 block"></i>No hay recetas guardadas todavía.</div>';
+        return;
+    }
+
+    keys.forEach(key => {
         const r = recetas[key];
         const salesMacTxt = (r.salesMac && r.salesMac.length > 0) ? r.salesMac.map(s => `${s.nombre}: ${s.cantidad}g`).join(', ') : 'Ninguna';
         const salesLavTxt = (r.salesLav && r.salesLav.length > 0) ? r.salesLav.map(s => `${s.nombre}: ${s.cantidad}g`).join(', ') : 'Ninguna';
@@ -1027,8 +1040,8 @@ function renderRecetas() {
 
                 <div class="pt-3 border-t border-slate-700 flex justify-between items-center no-print">
                     <div class="flex gap-2">
-                        <button onclick="eliminarReceta('${key}')" title="Eliminar Receta" class="text-red-400 hover:text-red-300 text-xs"><i class="fa-solid fa-trash"></i></button>
-                        <button onclick="descargarRecetaPDF('${key}')" title="Descargar PDF Técnico" class="text-amber-400 hover:text-amber-300 text-xs font-bold flex items-center gap-1">
+                        <button onclick="eliminarReceta('${key}')" title="Eliminar Receta" class="text-red-400 hover:text-red-300 text-xs p-1"><i class="fa-solid fa-trash"></i></button>
+                        <button onclick="descargarRecetaPDF('${key}')" title="Descargar PDF Técnico" class="text-amber-400 hover:text-amber-300 text-xs font-bold flex items-center gap-1 p-1">
                             <i class="fa-solid fa-file-pdf"></i> PDF
                         </button>
                     </div>
@@ -1044,29 +1057,43 @@ function renderRecetas() {
 }
 
 function mostrarFormularioReceta() {
-    document.getElementById('rec-sales-mac-inputs').innerHTML = '';
-    document.getElementById('rec-sales-lav-inputs').innerHTML = '';
-    document.getElementById('rec-granos-inputs').innerHTML = '';
-    document.getElementById('rec-lupulos-inputs').innerHTML = '';
+    const macInputs = document.getElementById('rec-sales-mac-inputs');
+    const lavInputs = document.getElementById('rec-sales-lav-inputs');
+    const granosInputs = document.getElementById('rec-granos-inputs');
+    const lupulosInputs = document.getElementById('rec-lupulos-inputs');
+
+    if (macInputs) macInputs.innerHTML = '';
+    if (lavInputs) lavInputs.innerHTML = '';
+    if (granosInputs) granosInputs.innerHTML = '';
+    if (lupulosInputs) lupulosInputs.innerHTML = '';
 
     agregarFilaSal('macerado');
     agregarFilaSal('lavado');
     agregarFilaGrano();
     agregarFilaLupulo();
 
-    document.getElementById('form-receta-panel').classList.remove('hidden');
+    const panel = document.getElementById('form-receta-panel');
+    if (panel) panel.classList.remove('hidden');
 }
 
 function ocultarFormularioReceta() { 
-    document.getElementById('form-receta-panel').classList.add('hidden'); 
+    const panel = document.getElementById('form-receta-panel');
+    if (panel) panel.classList.add('hidden'); 
 }
 
 function agregarFilaSal(tipo, nombre = '', cant = '') {
-    const container = document.getElementById(tipo === 'macerado' ? 'rec-sales-mac-inputs' : 'rec-sales-lav-inputs');
+    const containerId = tipo === 'macerado' ? 'rec-sales-mac-inputs' : 'rec-sales-lav-inputs';
+    const container = document.getElementById(containerId);
     if (!container) return;
+
     const div = document.createElement('div');
-    div.className = 'flex gap-2 item-sal-' + tipo;
-    div.innerHTML = `<input type="text" value="${nombre}" placeholder="ej. Gypsum" class="sal-nombre flex-1 bg-slate-900 border border-slate-700 rounded p-1.5 text-xs"><input type="number" value="${cant}" placeholder="Grs" class="sal-cant w-20 bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-amber-400 font-bold"><button type="button" onclick="this.parentElement.remove()" class="text-red-400 font-bold px-1">×</button>`;
+    // Corregido: se asegura la clase exacta para la captura posterior
+    div.className = `flex gap-2 item-sal-${tipo}`;
+    div.innerHTML = `
+        <input type="text" value="${nombre}" placeholder="ej. Gypsum" class="sal-nombre flex-1 bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-slate-100">
+        <input type="number" value="${cant}" placeholder="Grs" class="sal-cant w-20 bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-amber-400 font-bold">
+        <button type="button" onclick="this.parentElement.remove()" class="text-red-400 font-bold px-1 hover:text-red-300">×</button>
+    `;
     container.appendChild(div);
 }
 
@@ -1074,8 +1101,12 @@ function agregarFilaGrano(nombre = '', cant = '') {
     const container = document.getElementById('rec-granos-inputs');
     if (!container) return;
     const div = document.createElement('div');
-    div.className = 'flex gap-2';
-    div.innerHTML = `<input type="text" value="${nombre}" placeholder="Malta" class="rec-grano-nombre flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs"><input type="number" value="${cant}" placeholder="Kg" class="rec-grano-cant w-20 bg-slate-900 border border-slate-700 rounded p-2 text-xs"><button type="button" onclick="this.parentElement.remove()" class="text-red-400 font-bold px-1">×</button>`;
+    div.className = 'flex gap-2 item-grano';
+    div.innerHTML = `
+        <input type="text" value="${nombre}" placeholder="Malta" class="rec-grano-nombre flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-slate-100">
+        <input type="number" value="${cant}" placeholder="Kg" class="rec-grano-cant w-20 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-amber-300 font-bold">
+        <button type="button" onclick="this.parentElement.remove()" class="text-red-400 font-bold px-1 hover:text-red-300">×</button>
+    `;
     container.appendChild(div);
 }
 
@@ -1083,14 +1114,17 @@ function agregarFilaLupulo(nombre = '', cant = '', momento = '') {
     const container = document.getElementById('rec-lupulos-inputs');
     if (!container) return;
     const div = document.createElement('div');
-    div.className = 'flex gap-2';
-    div.innerHTML = `<input type="text" value="${nombre}" placeholder="Lúpulo" class="rec-lupulo-nombre flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs"><input type="number" value="${cant}" placeholder="Grs" class="rec-lupulo-cant w-20 bg-slate-900 border border-slate-700 rounded p-2 text-xs"><input type="text" value="${momento}" placeholder="Momento" class="rec-lupulo-momento w-28 bg-slate-900 border border-slate-700 rounded p-2 text-xs"><button type="button" onclick="this.parentElement.remove()" class="text-red-400 font-bold px-1">×</button>`;
+    div.className = 'flex gap-2 item-lupulo';
+    div.innerHTML = `
+        <input type="text" value="${nombre}" placeholder="Lúpulo" class="rec-lupulo-nombre flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-slate-100">
+        <input type="number" value="${cant}" placeholder="Grs" class="rec-lupulo-cant w-20 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-amber-300 font-bold">
+        <input type="text" value="${momento}" placeholder="Momento" class="rec-lupulo-momento w-28 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-slate-300">
+        <button type="button" onclick="this.parentElement.remove()" class="text-red-400 font-bold px-1 hover:text-red-300">×</button>
+    `;
     container.appendChild(div);
 }
 
 function guardarReceta() {
-    console.log("¡Hiciste clic en Guardar Receta!");
-
     const nombreInput = document.getElementById('rec-nombre');
     if (!nombreInput) {
         alert("Error: No se encuentra el campo del nombre de la receta.");
@@ -1103,7 +1137,6 @@ function guardarReceta() {
         return;
     }
 
-    // Asegurarnos de que recetas sea un objeto válido
     if (!window.recetas || typeof window.recetas !== 'object' || Array.isArray(window.recetas)) {
         window.recetas = {};
     }
@@ -1177,34 +1210,39 @@ function guardarReceta() {
         lupulos
     };
 
-    // Guardado seguro en storage
+    // Guardado persistente
     if (typeof guardarStorage === 'function') {
         guardarStorage();
     } else {
         localStorage.setItem('recetas', JSON.stringify(recetas));
     }
 
-    // Ocultar formulario si existe la función
-    if (typeof ocultarFormularioReceta === 'function') {
-        ocultarFormularioReceta();
-    }
+    ocultarFormularioReceta();
+    renderRecetas();
+    actualizarSelectRecetas();
+}
 
-    // Actualizar el select de cocción de forma directa y segura
+function actualizarSelectRecetas() {
     const select = document.getElementById('select-receta');
-    if (select) {
-        let html = '<option value="">-- Seleccionar Receta --</option>';
-        Object.keys(recetas).forEach(key => {
-            html += `<option value="${key}">${recetas[key].nombre}</option>`;
-        });
-        select.innerHTML = html;
-    }
+    if (!select) return;
+    
+    let html = '<option value="">-- Seleccionar Receta --</option>';
+    Object.keys(recetas).forEach(key => {
+        html += `<option value="${key}">${recetas[key].nombre}</option>`;
+    });
+    select.innerHTML = html;
+}
 
-    // Renderizar listado de recetas si existe la función
-    if (typeof renderRecetas === 'function') {
+function eliminarReceta(key) {
+    if (confirm("¿Estás seguro de que deseas eliminar esta receta?")) {
+        delete recetas[key];
+        if (typeof guardarStorage === 'function') {
+            guardarStorage();
+        } else {
+            localStorage.setItem('recetas', JSON.stringify(recetas));
+        }
         renderRecetas();
     }
-
-    console.log("¡Receta guardada y UI actualizada con éxito!");
 }
         // --- MÓDULO COCCIÓN ---
 function cargarRecetaEnCoccion() {
