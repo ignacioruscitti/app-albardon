@@ -1286,7 +1286,156 @@ function eliminarReceta(key) {
 document.addEventListener("DOMContentLoaded", () => {
     renderRecetas();
 });
+    // --- MÓDULO DE BARRILES ---
+
+// Variable global para los barriles
+let barriles = [];
+
+// Función para inicializar y cargar los barriles desde localStorage
+function inicializarBarrilesStorage() {
+    let datosGuardados = localStorage.getItem('alb_barriles') || localStorage.getItem('barriles');
+    if (!datosGuardados) {
+        barriles = [];
+        return;
+    }
+
+    try {
+        let parsed = JSON.parse(datosGuardados);
+        if (Array.isArray(parsed)) {
+            barriles = parsed;
+        } else if (typeof parsed === 'object' && parsed !== null) {
+            // Si por algo se guardó como objeto, lo pasamos a array
+            barriles = Object.values(parsed);
+        } else {
+            barriles = [];
+        }
+    } catch (e) {
+        console.error("Error al leer los barriles:", e);
+        barriles = [];
+    }
+}
+
+// Función para mostrar el modal de alta/edición
+function mostrarModalBarril() {
+    const modal = document.getElementById('modal-barril');
+    const form = document.getElementById('form-barril');
+    if (form) form.reset();
+    document.getElementById('barril-id').value = '';
+    document.getElementById('modal-barril-titulo').innerText = 'Registrar Nuevo Barril';
+    if (modal) modal.classList.remove('hidden');
+}
+
+// Función para cerrar el modal
+function cerrarModalBarril() {
+    const modal = document.getElementById('modal-barril');
+    if (modal) modal.classList.add('hidden');
+}
+
+// Función que captura el submit del formulario y guarda el barril
+function guardarBarril(event) {
+    event.preventDefault();
+
+    const id = document.getElementById('barril-id').value || 'barril_' + Date.now();
+    const codigo = document.getElementById('barril-codigo').value.trim();
+    const capacidad = parseInt(document.getElementById('barril-capacidad').value) || 50;
+    const conector = document.getElementById('barril-conector').value;
+    const estado = document.getElementById('barril-estado').value;
+    const lote = document.getElementById('barril-lote').value.trim();
+    const ubicacion = document.getElementById('barril-ubicacion').value.trim();
+
+    // Verificamos si ya existe para editar o crear uno nuevo
+    const index = barriles.findIndex(b => b.id === id);
+    const nuevoBarril = { id, codigo, capacidad, conector, estado, lote, ubicacion };
+
+    if (index >= 0) {
+        barriles[index] = nuevoBarril;
+    } else {
+        barriles.push(nuevoBarril);
+    }
+
+    // Guardar en localStorage y nube mediante tu función existente
+    if (typeof guardarStorage === 'function') {
+        guardarStorage();
+    } else {
+        localStorage.setItem('alb_barriles', JSON.stringify(barriles));
+    }
+
+    cerrarModalBarril();
+    renderBarriles();
+}
+
+// Función para renderizar la grilla de barriles en pantalla
+function renderBarriles(filtroEstado = 'TODOS') {
+    const contenedor = document.getElementById('grilla-barriles');
+    if (!contenedor) return;
+
+    let barrilesFiltrados = barriles;
+    if (filtroEstado !== 'TODOS') {
+        barrilesFiltrados = barriles.filter(b => b.estado === filtroEstado);
+    }
+
+    if (barrilesFiltrados.length === 0) {
+        contenedor.innerHTML = '<div class="col-span-full text-center py-8 text-slate-400"><i class="fa-solid fa-boxes-stacked text-3xl mb-2 block"></i>No hay barriles registrados en esta categoría.</div>';
+        return;
+    }
+
+    let html = '';
+    barrilesFiltrados.forEach(b => {
+        let badgeColor = 'bg-slate-800 text-slate-300 border-slate-700';
+        if (b.estado === 'LLENO_FABRICA') badgeColor = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
+        if (b.estado === 'EN_CLIENTE') badgeColor = 'bg-blue-500/10 text-blue-400 border-blue-500/30';
+        if (b.estado === 'MANTENIMIENTO') badgeColor = 'bg-amber-500/10 text-amber-400 border-amber-500/30';
+
+        html += `
+            <div class="card p-4 space-y-3 bg-slate-900 border border-slate-800 rounded-xl flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-start border-b border-slate-800 pb-2">
+                        <div>
+                            <h4 class="font-bold text-amber-400 font-mono text-sm">${b.codigo}</h4>
+                            <span class="text-[10px] text-slate-400">Capacidad: <strong>${b.capacidad} Lts</strong> | Conector: <strong>Tipo ${b.conector}</strong></span>
+                        </div>
+                        <span class="text-[10px] font-mono border px-2 py-0.5 rounded-md font-bold ${badgeColor}">${b.estado}</span>
+                    </div>
+                    <div class="mt-2 space-y-1 text-[11px] text-slate-300">
+                        <p>📦 Lote: <strong class="font-mono text-slate-100">${b.lote || 'Ninguno'}</strong></p>
+                        <p>📍 Ubicación: <strong class="text-slate-100">${b.ubicacion || 'Fábrica'}</strong></p>
+                    </div>
+                </div>
+                <div class="pt-2 border-t border-slate-800 flex justify-end gap-2">
+                    <button onclick="eliminarBarril('${b.id}')" class="text-red-400 hover:text-red-300 text-xs p-1"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            </div>
+        `;
+    });
+
+    contenedor.innerHTML = html;
+}
+
+// Función de filtrado por botones
+function filtrarBarriles(estado) {
+    renderBarriles(estado);
+}
+
+// Función para eliminar barril
+function eliminarBarril(id) {
+    if (confirm("¿Estás seguro de eliminar este barril del inventario?")) {
+        barriles = barriles.filter(b => b.id !== id);
+        if (typeof guardarStorage === 'function') {
+            guardarStorage();
+        } else {
+            localStorage.setItem('alb_barriles', JSON.stringify(barriles));
+        }
+        renderBarriles();
+    }
+}
+
+// Inicializar al cargar la página
+document.addEventListener("DOMContentLoaded", () => {
+    inicializarBarrilesStorage();
+    renderBarriles();
+});
 </script>
+
  <script>       // --- MÓDULO COCCIÓN ---
 function cargarRecetaEnCoccion() {
     const selectReceta = document.getElementById('select-receta');
