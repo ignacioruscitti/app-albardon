@@ -1311,31 +1311,50 @@ function eliminarReceta(key) {
 
 
 // ==========================================
-// MÓDULO 2: BARRILES (Inventario y Grilla)
+// MÓDULO 2: BARRILES DEFINITIVO (Inventario y Grilla)
 // ==========================================
+
+// Aseguramos el espacio global sin colisiones
 if (typeof window.barriles === 'undefined') {
     window.barriles = [];
 }
 
+// Función robusta para inicializar y cargar desde cualquier clave de almacenamiento
 function inicializarBarrilesStorage() {
+    // Buscamos en todas las posibles claves que usa la app
     let datosGuardados = localStorage.getItem('alb_barriles') || localStorage.getItem('barriles');
-    if (!datosGuardados) {
-        window.barriles = [];
-        if (typeof renderBarriles === 'function') {
-            renderBarriles('TODOS');
-        }
-        return;
-    }
-    try {
-        let parsed = JSON.parse(datosGuardados);
-        window.barriles = Array.isArray(parsed) ? parsed : (typeof parsed === 'object' && parsed !== null ? Object.values(parsed) : []);
-    } catch (e) {
-        console.error("Error al leer los barriles:", e);
-        window.barriles = [];
-    }
     
-    if (typeof renderBarriles === 'function') {
-        renderBarriles('TODOS');
+    if (datosGuardados) {
+        try {
+            let parsed = JSON.parse(datosGuardados);
+            // Soportamos tanto si viene como array directo como si está dentro de un objeto { lista: [...] }
+            if (Array.isArray(parsed)) {
+                window.barriles = parsed;
+            } else if (parsed && typeof parsed === 'object') {
+                window.barriles = parsed.lista || Object.values(parsed);
+            } else {
+                window.barriles = [];
+            }
+        } catch (e) {
+            console.error("Error al parsear los barriles:", e);
+            window.barriles = [];
+        }
+    } else {
+        window.barriles = [];
+    }
+
+    // Forzamos el renderizado inmediato si el contenedor ya existe
+    intentarRenderizarBarriles();
+}
+
+// Función auxiliar para reintentar pintar si el DOM aún está cargando las pestañas
+function intentarRenderizarBarriles(filtroEstado = 'TODOS', intentos = 0) {
+    const contenedor = document.getElementById('grilla-barriles');
+    if (contenedor) {
+        renderBarriles(filtroEstado);
+    } else if (intentos < 5) {
+        // Si la pestaña de barriles no está activa o el HTML no cargó, reintentamos en un momento
+        setTimeout(() => intentarRenderizarBarriles(filtroEstado, intentos + 1), 100);
     }
 }
 
@@ -1343,8 +1362,10 @@ function mostrarModalBarril() {
     const modal = document.getElementById('modal-barril');
     const form = document.getElementById('form-barril');
     if (form) form.reset();
-    document.getElementById('barril-id').value = '';
-    document.getElementById('modal-barril-titulo').innerText = 'Registrar Nuevo Barril';
+    const inputId = document.getElementById('barril-id');
+    if (inputId) inputId.value = '';
+    const titulo = document.getElementById('modal-barril-titulo');
+    if (titulo) titulo.innerText = 'Registrar Nuevo Barril';
     if (modal) modal.classList.remove('hidden');
 }
 
@@ -1354,17 +1375,29 @@ function cerrarModalBarril() {
 }
 
 function guardarBarril(event) {
-    event.preventDefault();
+    if (event && typeof event.preventDefault === 'function') {
+        event.preventDefault();
+    }
 
-    const id = document.getElementById('barril-id').value || 'barril_' + Date.now();
-    const codigo = document.getElementById('barril-codigo').value.trim();
-    const capacidad = parseInt(document.getElementById('barril-capacidad').value) || 50;
-    const conector = document.getElementById('barril-conector').value;
-    const estado = document.getElementById('barril-estado').value;
-    const lote = document.getElementById('barril-lote').value.trim();
-    const ubicacion = document.getElementById('barril-ubicacion').value.trim();
+    const idInput = document.getElementById('barril-id');
+    const codigoInput = document.getElementById('barril-codigo');
+    const capacidadInput = document.getElementById('barril-capacidad');
+    const conectorInput = document.getElementById('barril-conector');
+    const estadoInput = document.getElementById('barril-estado');
+    const loteInput = document.getElementById('barril-lote');
+    const ubicacionInput = document.getElementById('barril-ubicacion');
 
-    if (!Array.isArray(window.barriles)) window.barriles = [];
+    const id = (idInput && idInput.value) ? idInput.value : 'barril_' + Date.now();
+    const codigo = codigoInput ? codigoInput.value.trim() : 'S/N';
+    const capacidad = capacidadInput ? (parseInt(capacidadInput.value) || 50) : 50;
+    const conector = conectorInput ? conectorInput.value : 'S';
+    const estado = estadoInput ? estadoInput.value : 'LLENO_FABRICA';
+    const lote = loteInput ? loteInput.value.trim() : '';
+    const ubicacion = ubicacionInput ? ubicacionInput.value.trim() : 'Fábrica';
+
+    if (!Array.isArray(window.barriles)) {
+        window.barriles = [];
+    }
 
     const index = window.barriles.findIndex(b => b.id === id);
     const nuevoBarril = { id, codigo, capacidad, conector, estado, lote, ubicacion };
@@ -1375,18 +1408,22 @@ function guardarBarril(event) {
         window.barriles.push(nuevoBarril);
     }
 
-    localStorage.setItem('alb_barriles', JSON.stringify(window.barriles));
+    // Guardado unificado y redundante para garantizar persistencia
+    const datosString = JSON.stringify(window.barriles);
+    localStorage.setItem('alb_barriles', datosString);
+    localStorage.setItem('barriles', datosString);
+
     if (typeof guardarStorage === 'function') {
         guardarStorage();
     }
 
-    if (typeof db !== 'undefined') {
+    if (typeof db !== 'undefined' && db.collection) {
         db.collection("albardon_app").doc("barriles").set({ lista: window.barriles })
           .catch(e => console.error("Error al sincronizar barril en nube:", e));
     }
 
     cerrarModalBarril();
-    renderBarriles();
+    renderBarriles('TODOS');
 }
 
 function renderBarriles(filtroEstado = 'TODOS') {
@@ -1449,15 +1486,20 @@ function eliminarBarril(id) {
         if (Array.isArray(window.barriles)) {
             window.barriles = window.barriles.filter(b => b.id !== id && b.codigo !== id);
         }
+        
+        const datosString = JSON.stringify(window.barriles);
+        localStorage.setItem('alb_barriles', datosString);
+        localStorage.setItem('barriles', datosString);
+
         if (typeof guardarStorage === 'function') {
             guardarStorage();
-        } else {
-            localStorage.setItem('alb_barriles', JSON.stringify(window.barriles));
         }
-        renderBarriles();
+
+        renderBarriles('TODOS');
     }
 }
 
+// Disparador seguro al cargar el documento
 document.addEventListener('DOMContentLoaded', () => {
     inicializarBarrilesStorage();
 });
