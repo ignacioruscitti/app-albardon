@@ -1323,6 +1323,9 @@ function inicializarBarrilesStorage() {
     if (!datosGuardados) {
         window.barriles = [];
         barriles = [];
+        if (typeof renderBarriles === 'function') {
+            renderBarriles('TODOS');
+        }
         return;
     }
     try {
@@ -1334,6 +1337,11 @@ function inicializarBarrilesStorage() {
         console.error("Error al leer los barriles:", e);
         window.barriles = [];
         barriles = [];
+    }
+    
+    // Llamamos al renderizado para que dibuje los barriles inmediatamente
+    if (typeof renderBarriles === 'function') {
+        renderBarriles('TODOS');
     }
 }
 
