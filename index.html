@@ -923,8 +923,8 @@ const db = firebase.firestore();
         });
     }
 
-    // 3. Navegación global entre secciones
-   function switchTab(tabId) {
+  // 3. Navegación global entre secciones
+    function switchTab(tabId) {
         // Ocultar todas las secciones principales
         document.querySelectorAll('main > section, .tab-content').forEach(sec => sec.classList.add('hidden', 'oculto'));
 
@@ -934,46 +934,53 @@ const db = firebase.firestore();
             btn.classList.add('text-gray-500');
         });
 
-        // Buscar la sección a mostrar
+        // Buscar la sección a mostrar de forma flexible
         let activeSection = document.getElementById(tabId) || document.getElementById('tab-' + tabId);
 
         if (!activeSection) {
-            if (tabId === 'stock') activeSection = document.getElementById('barriles') || document.getElementById('tab-barriles');
-            if (tabId === 'barriles') activeSection = document.getElementById('stock') || document.getElementById('tab-stock');
-            if (tabId === 'cc') activeSection = document.getElementById('clientes') || document.getElementById('tab-clientes');
-            if (tabId === 'clientes') activeSection = document.getElementById('cc') || document.getElementById('tab-cc');
+            if (tabId.includes('stock') || tabId.includes('barril')) {
+                activeSection = document.getElementById('barriles') || document.getElementById('stock') || document.getElementById('tab-barriles') || document.getElementById('tab-stock');
+            } else if (tabId.includes('cliente') || tabId === 'cc') {
+                activeSection = document.getElementById('clientes') || document.getElementById('cc') || document.getElementById('tab-clientes') || document.getElementById('tab-cc');
+            } else if (tabId.includes('receta')) {
+                activeSection = document.getElementById('recetas') || document.getElementById('tab-recetas');
+            } else if (tabId.includes('coccion') || tabId.includes('lote')) {
+                activeSection = document.getElementById('cocciones') || document.getElementById('lotes') || document.getElementById('tab-cocciones');
+            }
         }
 
         if (activeSection) {
             activeSection.classList.remove('hidden', 'oculto');
         }
 
-        // Marcar el botón presionado
+        // Marcar el botón presionado de forma segura
         const activeBtn = document.getElementById('btn-' + tabId) || document.querySelector(`[onclick*="${tabId}"]`);
         if (activeBtn) {
             activeBtn.classList.add('active', 'bg-amber-500', 'text-slate-950', 'border-amber-600', 'font-bold');
             activeBtn.classList.remove('text-gray-500');
         }
 
-        // Renderizar datos del módulo activo (versión segura y limpia)
-        if (tabId === 'recetas' && typeof renderRecetas === 'function') {
+        // Renderizar datos del módulo activo según el identificador
+        if ((tabId.includes('receta')) && typeof renderRecetas === 'function') {
             renderRecetas();
         }
-        if ((tabId === 'stock' || tabId === 'barriles' || tabId === 'barriles-stock') && typeof renderBarriles === 'function') {
+        if ((tabId.includes('stock') || tabId.includes('barril')) && typeof renderBarriles === 'function') {
             renderBarriles('TODOS');
         }
-        if ((tabId === 'cc' || tabId === 'clientes') && typeof renderClientes === 'function') {
+        if ((tabId === 'cc' || tabId.includes('cliente')) && typeof renderClientes === 'function') {
             renderClientes();
         }
-        if ((tabId === 'cocciones' || tabId === 'lotes') && typeof renderCocciones === 'function') {
+        if ((tabId.includes('coccion') || tabId.includes('lote')) && typeof renderCocciones === 'function') {
             renderCocciones();
         }
-    }
+    } // <--- ¡Esta llave cerraba mal o faltaba y rompía todo el script!
+
     // 4. Inicialización al cargar la aplicación
     document.addEventListener('DOMContentLoaded', () => {
-        iniciarSincronización();
+        if (typeof iniciarSincronización === 'function') iniciarSincronización();
+        if (typeof inicializarRecetasStorage === 'function') inicializarRecetasStorage();
         if (typeof renderRecetas === 'function') renderRecetas();
-        if (typeof renderBarriles === 'function') renderBarriles();
+        if (typeof renderBarriles === 'function') renderBarriles('TODOS');
         if (typeof renderClientes === 'function') renderClientes();
         if (typeof renderCocciones === 'function') renderCocciones();
     });
@@ -1010,7 +1017,6 @@ function inicializarRecetasStorage() {
 
 // Ejecutar el rescate al cargar
 inicializarRecetasStorage();
-
 // ==========================================
 // MÓDULO 1: RECETAS (Rescate y Renderizado)
 // ==========================================
