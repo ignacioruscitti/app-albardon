@@ -966,6 +966,39 @@ const db = firebase.firestore();
     });
 </script>
 <script>
+// --- FUNCIÓN DE RESCATE Y CARGA DE DATOS ---
+function inicializarRecetasStorage() {
+    let datosGuardados = localStorage.getItem('recetas');
+    if (!datosGuardados) {
+        window.recetas = {};
+        return;
+    }
+
+    try {
+        let parsed = JSON.parse(datosGuardados);
+        
+        // Si las recetas viejas estaban guardadas como Array, las convertimos a Objeto
+        if (Array.isArray(parsed)) {
+            window.recetas = {};
+            parsed.forEach((r, index) => {
+                const id = r.id || ('rec_legacy_' + index);
+                window.recetas[id] = r;
+            });
+            localStorage.setItem('recetas', JSON.stringify(window.recetas));
+        } else if (typeof parsed === 'object' && parsed !== null) {
+            window.recetas = parsed;
+        } else {
+            window.recetas = {};
+        }
+    } catch (e) {
+        console.error("Error al leer las recetas del almacenamiento:", e);
+        window.recetas = {};
+    }
+}
+
+// Ejecutar el rescate al cargar
+inicializarRecetasStorage();
+
 // --- MÓDULO RECETAS (COMPLETO Y CORREGIDO) ---
 
 function renderRecetas() {
@@ -1225,7 +1258,7 @@ function actualizarSelectRecetas() {
     if (!select) return;
     
     let html = '<option value="">-- Seleccionar Receta --</option>';
-    Object.keys(recetas).forEach(key => {
+    Object.keys(recetas).keys().forEach(key => {
         html += `<option value="${key}">${recetas[key].nombre}</option>`;
     });
     select.innerHTML = html;
@@ -1242,6 +1275,11 @@ function eliminarReceta(key) {
         renderRecetas();
     }
 }
+
+// Ejecutar el renderizado inicial al cargar la vista de recetas
+document.addEventListener("DOMContentLoaded", () => {
+    renderRecetas();
+});
 </script>
  <script>       // --- MÓDULO COCCIÓN ---
 function cargarRecetaEnCoccion() {
