@@ -1402,6 +1402,9 @@ function renderBarriles(filtroEstado = 'TODOS') {
         if (b.estado === 'EN_CLIENTE') badgeColor = 'bg-blue-500/10 text-blue-400 border-blue-500/30';
         if (b.estado === 'MANTENIMIENTO') badgeColor = 'bg-amber-500/10 text-amber-400 border-amber-500/30';
 
+        // Definimos el estilo de la cerveza con respaldo por si usa otro nombre de propiedad
+        const estiloCerveza = b.cerveza || b.estilo || 'No especificado';
+
         html += `
             <div class="card p-4 space-y-3 bg-slate-900 border border-slate-800 rounded-xl flex flex-col justify-between">
                 <div>
@@ -1413,12 +1416,13 @@ function renderBarriles(filtroEstado = 'TODOS') {
                         <span class="text-[10px] font-mono border px-2 py-0.5 rounded-md font-bold ${badgeColor}">${b.estado}</span>
                     </div>
                     <div class="mt-2 space-y-1 text-[11px] text-slate-300">
+                        <p>🍺 Estilo: <strong class="text-amber-200">${estiloCerveza}</strong></p>
                         <p>📦 Lote: <strong class="font-mono text-slate-100">${b.lote || 'Ninguno'}</strong></p>
                         <p>📍 Ubicación: <strong class="text-slate-100">${b.ubicacion || 'Fábrica'}</strong></p>
                     </div>
                 </div>
                 <div class="pt-2 border-t border-slate-800 flex justify-end gap-2">
-                    <button onclick="eliminarBarril('${b.id}')" class="text-red-400 hover:text-red-300 text-xs p-1"><i class="fa-solid fa-trash"></i></button>
+                    <button onclick="eliminarBarril('${b.id || b.codigo}')" class="text-red-400 hover:text-red-300 text-xs p-1"><i class="fa-solid fa-trash"></i></button>
                 </div>
             </div>
         `;
@@ -1433,7 +1437,7 @@ function filtrarBarriles(estado) {
 
 function eliminarBarril(id) {
     if (confirm("¿Estás seguro de eliminar este barril del inventario?")) {
-        barriles = barriles.filter(b => b.id !== id);
+        barriles = barriles.filter(b => b.id !== id && b.codigo !== id);
         if (typeof guardarStorage === 'function') {
             guardarStorage();
         } else {
@@ -1442,7 +1446,6 @@ function eliminarBarril(id) {
         renderBarriles();
     }
 }
-
 // ==========================================
 // INICIALIZACIÓN GLOBAL AL CARGAR LA PÁGINA
 // ==========================================
