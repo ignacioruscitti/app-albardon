@@ -955,12 +955,22 @@ const db = firebase.firestore();
             activeBtn.classList.remove('text-gray-500');
         }
 
-        // Renderizar datos del módulo activo
-        if ((tabId === 'recetas') && typeof renderRecetas === 'function') renderRecetas();
-        if ((tabId === 'stock' || tabId === 'barriles') && typeof renderBarriles === 'function') renderBarriles();
-        if ((tabId === 'cc' || tabId === 'clientes') && typeof renderClientes === 'function') renderClientes();
-        if ((tabId === 'cocciones' || tabId === 'lotes') && typeof renderCocciones === 'function') renderCocciones();
-    }
+       // Renderizar datos del módulo activo (versión blindada)
+        if (tabId === 'recetas' && typeof renderRecetas === 'function') {
+            renderRecetas();
+        }
+        
+        // Detecta cualquier ID que contenga stock, barriles o grilla
+        if ((tabId.includes('stock') || tabId.includes('barril') || tabId === 'barriles-stock') && typeof renderBarriles === 'function') {
+            renderBarriles('TODOS');
+        }
+        
+        if ((tabId === 'cc' || tabId.includes('cliente')) && typeof renderClientes === 'function') {
+            renderClientes();
+        }
+        if ((tabId.includes('coccion') || tabId.includes('lote')) && typeof renderCocciones === 'function') {
+            renderCocciones();
+        }
 
     // 4. Inicialización al cargar la aplicación
     document.addEventListener('DOMContentLoaded', () => {
