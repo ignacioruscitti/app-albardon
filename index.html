@@ -1178,8 +1178,28 @@ function guardarReceta() {
 
     if (typeof guardarStorage === 'function') guardarStorage();
     if (typeof ocultarFormularioReceta === 'function') ocultarFormularioReceta();
-    if (typeof renderRecetas === 'function') renderRecetas();
-    if (typeof actualizarSelectRecetas === 'function') actualizarSelectRecetas();
+    
+    // Llamamos a la interfaz unificada para refrescar tanto el listado como el select de cocción
+    actualizarInterfazRecetas();
+}
+
+function actualizarInterfazRecetas() {
+    // 1. Actualiza automáticamente el combo de la pantalla de Cocción
+    const select = document.getElementById('select-receta');
+    if (select) {
+        let html = '<option value="">-- Seleccionar Receta --</option>';
+        if (typeof recetas === 'object' && recetas !== null) {
+            Object.keys(recetas).forEach(key => {
+                html += `<option value="${key}">${recetas[key].nombre}</option>`;
+            });
+        }
+        select.innerHTML = html;
+    }
+
+    // 2. Refresca el listado del módulo Recetas
+    if (typeof renderRecetas === 'function') {
+        renderRecetas();
+    }
 }
         // --- MÓDULO COCCIÓN ---
 function cargarRecetaEnCoccion() {
