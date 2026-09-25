@@ -1503,6 +1503,27 @@ function eliminarBarril(id) {
 document.addEventListener('DOMContentLoaded', () => {
     inicializarBarrilesStorage();
 });
+    // ==========================================
+// PARCHE AUTOMÁTICO DE VISIBILIDAD DE BARRILES
+// ==========================================
+const observadorBarriles = new MutationObserver(() => {
+    const contenedor = document.getElementById('grilla-barriles');
+    // Si el contenedor existe, es visible y tiene datos guardados, renderiza automáticamente
+    if (contenedor && contenedor.offsetParent !== null) {
+        if (Array.isArray(window.barriles) && window.barriles.length > 0 && contenedor.innerHTML.includes('No hay barriles')) {
+            renderBarriles('TODOS');
+        }
+    }
+});
+
+// Activamos el vigía apenas carga el documento
+document.addEventListener('DOMContentLoaded', () => {
+    inicializarBarrilesStorage();
+    const grilla = document.getElementById('grilla-barriles');
+    if (grilla) {
+        observadorBarriles.observe(document.body, { childList: true, subtree: true, attributes: true });
+    }
+});
 // ==========================================
 // INICIALIZACIÓN GLOBAL AL CARGAR LA PÁGINA
 // ==========================================
