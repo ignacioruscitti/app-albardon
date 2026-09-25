@@ -1089,91 +1089,97 @@ function agregarFilaLupulo(nombre = '', cant = '', momento = '') {
 }
 
 function guardarReceta() {
-    const nombre = document.getElementById('rec-nombre').value.trim();
-    if (!nombre) return alert("Ingrese el nombre de la receta.");
+    const nombreInput = document.getElementById('rec-nombre');
+    if (!nombreInput) {
+        alert("Error: No se encuentra el campo del nombre de la receta.");
+        return;
+    }
 
-    const id = nombre.toLowerCase().replace(/[^a-z0-9]/g, '_');
+    const nombre = nombreInput.value.trim();
+    if (!nombre) {
+        alert("Ingrese el nombre de la receta.");
+        return;
+    }
+
+    // Asegurarnos de que recetas sea un objeto válido
+    if (!recetas || typeof recetas !== 'object' || Array.isArray(recetas)) {
+        recetas = {};
+    }
+
+    // Generar un ID único y seguro basado en timestamp si es nueva, o limpiar el nombre
+    const id = 'rec_' + Date.now();
+
     const granos = [];
     const lupulos = [];
     const salesMac = [];
     const salesLav = [];
 
     document.querySelectorAll('.item-sal-macerado').forEach(f => {
-        const nom = f.querySelector('.sal-nombre').value.trim();
-        const cant = parseFloat(f.querySelector('.sal-cant').value) || 0;
+        const nom = f.querySelector('.sal-nombre')?.value.trim() || '';
+        const cant = parseFloat(f.querySelector('.sal-cant')?.value) || 0;
         if (nom) salesMac.push({ nombre: nom, cantidad: cant });
     });
 
     document.querySelectorAll('.item-sal-lavado').forEach(f => {
-        const nom = f.querySelector('.sal-nombre').value.trim();
-        const cant = parseFloat(f.querySelector('.sal-cant').value) || 0;
+        const nom = f.querySelector('.sal-nombre')?.value.trim() || '';
+        const cant = parseFloat(f.querySelector('.sal-cant')?.value) || 0;
         if (nom) salesLav.push({ nombre: nom, cantidad: cant });
     });
 
     document.querySelectorAll('.rec-grano-nombre').forEach((inp, idx) => {
-        if (inp.value.trim()) granos.push({ nombre: inp.value.trim(), cantidad: parseFloat(document.querySelectorAll('.rec-grano-cant')[idx].value) || 0 });
+        const cantInp = document.querySelectorAll('.rec-grano-cant')[idx];
+        if (inp.value.trim()) {
+            granos.push({ 
+                nombre: inp.value.trim(), 
+                cantidad: cantInp ? parseFloat(cantInp.value) || 0 : 0 
+            });
+        }
     });
 
     document.querySelectorAll('.rec-lupulo-nombre').forEach((inp, idx) => {
-        if (inp.value.trim()) lupulos.push({ nombre: inp.value.trim(), cantidad: parseFloat(document.querySelectorAll('.rec-lupulo-cant')[idx].value) || 0, momento: document.querySelectorAll('.rec-lupulo-momento')[idx].value.trim() || '60 min' });
+        const cantInp = document.querySelectorAll('.rec-lupulo-cant')[idx];
+        const momInp = document.querySelectorAll('.rec-lupulo-momento')[idx];
+        if (inp.value.trim()) {
+            lupulos.push({ 
+                nombre: inp.value.trim(), 
+                cantidad: cantInp ? parseFloat(cantInp.value) || 0 : 0, 
+                momento: momInp ? momInp.value.trim() : '60 min' 
+            });
+        }
     });
 
     recetas[id] = {
         id,
         nombre,
-        lote: parseFloat(document.getElementById('rec-batch').value) || 280,
-        diTeorica: document.getElementById('rec-di').value.trim() || '1.050',
-        dfTeorica: document.getElementById('rec-df').value.trim() || '1.010',
-        abv: document.getElementById('rec-abv').value.trim() || '5.0',
-        ibu: document.getElementById('rec-ibu').value.trim() || '30',
-        srm: document.getElementById('rec-srm').value.trim() || '6.0',
-        eficiencia: document.getElementById('rec-eficiencia').value.trim() || '70',
-        levadura: document.getElementById('rec-levadura').value.trim() || 'US-05',
-        aguaIni: parseFloat(document.getElementById('rec-agua-ini').value) || 0,
-        tempAguaIni: document.getElementById('rec-temp-agua-ini').value.trim(),
-        tempMac: document.getElementById('rec-temp-mac').value.trim(),
-        aguaLav: parseFloat(document.getElementById('rec-agua-lav').value) || 0,
-        tempLav: document.getElementById('rec-temp-lav').value.trim(),
+        lote: parseFloat(document.getElementById('rec-batch')?.value) || 280,
+        diTeorica: document.getElementById('rec-di')?.value.trim() || '1.050',
+        dfTeorica: document.getElementById('rec-df')?.value.trim() || '1.010',
+        abv: document.getElementById('rec-abv')?.value.trim() || '5.0',
+        ibu: document.getElementById('rec-ibu')?.value.trim() || '30',
+        srm: document.getElementById('rec-srm')?.value.trim() || '6.0',
+        eficiencia: document.getElementById('rec-eficiencia')?.value.trim() || '70',
+        levadura: document.getElementById('rec-levadura')?.value.trim() || 'US-05',
+        aguaIni: parseFloat(document.getElementById('rec-agua-ini')?.value) || 0,
+        tempAguaIni: document.getElementById('rec-temp-agua-ini')?.value.trim() || '',
+        tempMac: document.getElementById('rec-temp-mac')?.value.trim() || '',
+        aguaLav: parseFloat(document.getElementById('rec-agua-lav')?.value) || 0,
+        tempLav: document.getElementById('rec-temp-lav')?.value.trim() || '',
         salesMac,
         salesLav,
-        densPre: document.getElementById('rec-dens-pre').value.trim(),
-        ltsPre: parseFloat(document.getElementById('rec-lts-pre').value) || 0,
-        tiempoHervor: parseFloat(document.getElementById('rec-tiempo-hervor').value) || 60,
-        evaporacion: parseFloat(document.getElementById('rec-evaporacion').value) || 6,
-        trub: parseFloat(document.getElementById('rec-trub').value) || 0,
-        tiempoEnfriado: parseFloat(document.getElementById('rec-tiempo-enfriado').value) || 30,
+        densPre: document.getElementById('rec-dens-pre')?.value.trim() || '',
+        ltsPre: parseFloat(document.getElementById('rec-lts-pre')?.value) || 0,
+        tiempoHervor: parseFloat(document.getElementById('rec-tiempo-hervor')?.value) || 60,
+        evaporacion: parseFloat(document.getElementById('rec-evaporacion')?.value) || 6,
+        trub: parseFloat(document.getElementById('rec-trub')?.value) || 0,
+        tiempoEnfriado: parseFloat(document.getElementById('rec-tiempo-enfriado')?.value) || 30,
         granos,
         lupulos
     };
 
-    guardarStorage();
-    ocultarFormularioReceta();
-    renderRecetas();
-}
-
-function eliminarReceta(clave) {
-    if (confirm("¿Eliminar receta?")) { 
-        delete recetas[clave]; 
-        guardarStorage(); 
-        renderRecetas(); 
-    }
-}
-
-function actualizarSelectRecetas() {
-    const select = document.getElementById('select-receta');
-    if (!select) return;
-    let html = '<option value="">-- Seleccionar Receta --</option>';
-    Object.keys(recetas).forEach(key => html += `<option value="${key}">${recetas[key].nombre}</option>`);
-    select.innerHTML = html;
-}
-
-function usarRecetaEnCoccion(key) {
-    if (typeof switchTab === 'function') switchTab('cocciones');
-    const select = document.getElementById('select-receta');
-    if (select) {
-        select.value = key;
-        if (typeof cargarRecetaEnCoccion === 'function') cargarRecetaEnCoccion();
-    }
+    if (typeof guardarStorage === 'function') guardarStorage();
+    if (typeof ocultarFormularioReceta === 'function') ocultarFormularioReceta();
+    if (typeof renderRecetas === 'function') renderRecetas();
+    if (typeof actualizarSelectRecetas === 'function') actualizarSelectRecetas();
 }
         // --- MÓDULO COCCIÓN ---
 function cargarRecetaEnCoccion() {
