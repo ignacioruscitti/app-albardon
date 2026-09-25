@@ -924,7 +924,7 @@ const db = firebase.firestore();
     }
 
     // 3. Navegación global entre secciones
-    function switchTab(tabId) {
+   function switchTab(tabId) {
         // Ocultar todas las secciones principales
         document.querySelectorAll('main > section, .tab-content').forEach(sec => sec.classList.add('hidden', 'oculto'));
 
@@ -955,23 +955,20 @@ const db = firebase.firestore();
             activeBtn.classList.remove('text-gray-500');
         }
 
-       // Renderizar datos del módulo activo (versión blindada)
+        // Renderizar datos del módulo activo (versión segura y limpia)
         if (tabId === 'recetas' && typeof renderRecetas === 'function') {
             renderRecetas();
         }
-        
-        // Detecta cualquier ID que contenga stock, barriles o grilla
-        if ((tabId.includes('stock') || tabId.includes('barril') || tabId === 'barriles-stock') && typeof renderBarriles === 'function') {
+        if ((tabId === 'stock' || tabId === 'barriles' || tabId === 'barriles-stock') && typeof renderBarriles === 'function') {
             renderBarriles('TODOS');
         }
-        
-        if ((tabId === 'cc' || tabId.includes('cliente')) && typeof renderClientes === 'function') {
+        if ((tabId === 'cc' || tabId === 'clientes') && typeof renderClientes === 'function') {
             renderClientes();
         }
-        if ((tabId.includes('coccion') || tabId.includes('lote')) && typeof renderCocciones === 'function') {
+        if ((tabId === 'cocciones' || tabId === 'lotes') && typeof renderCocciones === 'function') {
             renderCocciones();
         }
-
+    }
     // 4. Inicialización al cargar la aplicación
     document.addEventListener('DOMContentLoaded', () => {
         iniciarSincronización();
