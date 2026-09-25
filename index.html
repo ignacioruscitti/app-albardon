@@ -1334,7 +1334,6 @@ function inicializarBarrilesStorage() {
         window.barriles = [];
     }
     
-    // Llamamos al renderizado para que dibuje los barriles inmediatamente
     if (typeof renderBarriles === 'function') {
         renderBarriles('TODOS');
     }
@@ -1365,7 +1364,6 @@ function guardarBarril(event) {
     const lote = document.getElementById('barril-lote').value.trim();
     const ubicacion = document.getElementById('barril-ubicacion').value.trim();
 
-    // Aseguramos que window.barriles sea un array
     if (!Array.isArray(window.barriles)) window.barriles = [];
 
     const index = window.barriles.findIndex(b => b.id === id);
@@ -1460,7 +1458,6 @@ function eliminarBarril(id) {
     }
 }
 
-// Inicialización automática al cargar el DOM
 document.addEventListener('DOMContentLoaded', () => {
     inicializarBarrilesStorage();
 });
