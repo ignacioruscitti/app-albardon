@@ -1316,13 +1316,13 @@ function eliminarReceta(key) {
 if (typeof window.barriles === 'undefined') {
     window.barriles = [];
 }
-window.barriles = window.barriles || [];
+let barriles = window.barriles;
 
 function inicializarBarrilesStorage() {
     let datosGuardados = localStorage.getItem('alb_barriles') || localStorage.getItem('barriles');
     if (!datosGuardados) {
         window.barriles = [];
-        barriles = [];
+        barriles = window.barriles;
         if (typeof renderBarriles === 'function') {
             renderBarriles('TODOS');
         }
@@ -1332,11 +1332,11 @@ function inicializarBarrilesStorage() {
         let parsed = JSON.parse(datosGuardados);
         let arrayDatos = Array.isArray(parsed) ? parsed : (typeof parsed === 'object' && parsed !== null ? Object.values(parsed) : []);
         window.barriles = arrayDatos;
-        barriles = arrayDatos;
+        barriles = window.barriles;
     } catch (e) {
         console.error("Error al leer los barriles:", e);
         window.barriles = [];
-        barriles = [];
+        barriles = window.barriles;
     }
     
     // Llamamos al renderizado para que dibuje los barriles inmediatamente
@@ -1379,6 +1379,9 @@ function guardarBarril(event) {
         barriles.push(nuevoBarril);
     }
 
+    // Sincronizamos con window.barriles
+    window.barriles = barriles;
+
     localStorage.setItem('alb_barriles', JSON.stringify(barriles));
     if (typeof guardarStorage === 'function') {
         guardarStorage();
@@ -1397,6 +1400,9 @@ function renderBarriles(filtroEstado = 'TODOS') {
     const contenedor = document.getElementById('grilla-barriles');
     if (!contenedor) return;
 
+    // Aseguramos que barriles siempre apunte al estado actual de window.barriles
+    barriles = window.barriles || [];
+
     let barrilesFiltrados = barriles;
     if (filtroEstado !== 'TODOS') {
         barrilesFiltrados = barriles.filter(b => b.estado === filtroEstado);
@@ -1414,7 +1420,6 @@ function renderBarriles(filtroEstado = 'TODOS') {
         if (b.estado === 'EN_CLIENTE') badgeColor = 'bg-blue-500/10 text-blue-400 border-blue-500/30';
         if (b.estado === 'MANTENIMIENTO') badgeColor = 'bg-amber-500/10 text-amber-400 border-amber-500/30';
 
-        // Definimos el estilo de la cerveza con respaldo por si usa otro nombre de propiedad
         const estiloCerveza = b.cerveza || b.estilo || 'No especificado';
 
         html += `
@@ -1450,6 +1455,7 @@ function filtrarBarriles(estado) {
 function eliminarBarril(id) {
     if (confirm("¿Estás seguro de eliminar este barril del inventario?")) {
         barriles = barriles.filter(b => b.id !== id && b.codigo !== id);
+        window.barriles = barriles;
         if (typeof guardarStorage === 'function') {
             guardarStorage();
         } else {
@@ -1458,6 +1464,11 @@ function eliminarBarril(id) {
         renderBarriles();
     }
 }
+
+// Inicialización automática al cargar el DOM
+document.addEventListener('DOMContentLoaded', () => {
+    inicializarBarrilesStorage();
+});
 // ==========================================
 // INICIALIZACIÓN GLOBAL AL CARGAR LA PÁGINA
 // ==========================================
