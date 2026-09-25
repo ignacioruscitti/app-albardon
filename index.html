@@ -965,7 +965,7 @@ const db = firebase.firestore();
         if (typeof renderCocciones === 'function') renderCocciones();
     });
 </script>
-    // --- MÓDULO RECETAS (COMPLETO Y CORREGIDO) ---
+  <script>  // --- MÓDULO RECETAS (COMPLETO Y CORREGIDO) ---
 
 function renderRecetas() {
     const contenedor = document.getElementById('parrilla-recetas');
@@ -1243,7 +1243,7 @@ function eliminarReceta(key) {
         }
         renderRecetas();
     }
-}
+} </script>
         // --- MÓDULO COCCIÓN ---
 function cargarRecetaEnCoccion() {
     const selectReceta = document.getElementById('select-receta');
