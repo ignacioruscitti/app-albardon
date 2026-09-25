@@ -1313,7 +1313,10 @@ function eliminarReceta(key) {
 // ==========================================
 // MÓDULO 2: BARRILES (Inventario y Grilla)
 // ==========================================
-let barriles = [];
+if (typeof window.barriles === 'undefined') {
+    window.barriles = [];
+}
+let barriles = window.barriles;
 
 function inicializarBarrilesStorage() {
     let datosGuardados = localStorage.getItem('alb_barriles') || localStorage.getItem('barriles');
