@@ -1322,13 +1322,17 @@ function inicializarBarrilesStorage() {
     let datosGuardados = localStorage.getItem('alb_barriles') || localStorage.getItem('barriles');
     if (!datosGuardados) {
         window.barriles = [];
+        barriles = [];
         return;
     }
     try {
         let parsed = JSON.parse(datosGuardados);
-        barriles = Array.isArray(parsed) ? parsed : (typeof parsed === 'object' && parsed !== null ? Object.values(parsed) : []);
+        let arrayDatos = Array.isArray(parsed) ? parsed : (typeof parsed === 'object' && parsed !== null ? Object.values(parsed) : []);
+        window.barriles = arrayDatos;
+        barriles = arrayDatos;
     } catch (e) {
         console.error("Error al leer los barriles:", e);
+        window.barriles = [];
         barriles = [];
     }
 }
