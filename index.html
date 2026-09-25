@@ -966,12 +966,12 @@ const db = firebase.firestore();
     });
 </script>
   <script>  // --- MÓDULO RECETAS (COMPLETO Y CORREGIDO) ---
+// --- MÓDULO RECETAS (LIMPIO Y CORREGIDO) ---
 
 function renderRecetas() {
     const contenedor = document.getElementById('parrilla-recetas');
     if (!contenedor) return;
     
-    // Validar que recetas sea un objeto válido
     if (!window.recetas || typeof window.recetas !== 'object' || Array.isArray(window.recetas)) {
         window.recetas = {};
     }
@@ -1087,7 +1087,6 @@ function agregarFilaSal(tipo, nombre = '', cant = '') {
     if (!container) return;
 
     const div = document.createElement('div');
-    // Corregido: se asegura la clase exacta para la captura posterior
     div.className = `flex gap-2 item-sal-${tipo}`;
     div.innerHTML = `
         <input type="text" value="${nombre}" placeholder="ej. Gypsum" class="sal-nombre flex-1 bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-slate-100">
@@ -1210,7 +1209,6 @@ function guardarReceta() {
         lupulos
     };
 
-    // Guardado persistente
     if (typeof guardarStorage === 'function') {
         guardarStorage();
     } else {
@@ -1243,7 +1241,8 @@ function eliminarReceta(key) {
         }
         renderRecetas();
     }
-} </script>
+}
+</script>
         // --- MÓDULO COCCIÓN ---
 function cargarRecetaEnCoccion() {
     const selectReceta = document.getElementById('select-receta');
