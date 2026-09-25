@@ -1316,12 +1316,12 @@ function eliminarReceta(key) {
 if (typeof window.barriles === 'undefined') {
     window.barriles = [];
 }
-let barriles = window.barriles;
+window.barriles = window.barriles || [];
 
 function inicializarBarrilesStorage() {
     let datosGuardados = localStorage.getItem('alb_barriles') || localStorage.getItem('barriles');
     if (!datosGuardados) {
-        barriles = [];
+        window.barriles = [];
         return;
     }
     try {
