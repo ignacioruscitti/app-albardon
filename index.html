@@ -1413,7 +1413,7 @@ function guardarBarril(event) {
     const loteInput = document.getElementById('barril-lote');
     const ubicacionInput = document.getElementById('barril-ubicacion');
     
-    // Nuevos campos agregados
+    // Captura de los nuevos inputs
     const cervezaInput = document.getElementById('barril-cerveza');
     const fechaInput = document.getElementById('barril-fecha');
 
@@ -1425,7 +1425,6 @@ function guardarBarril(event) {
     const lote = loteInput ? loteInput.value.trim() : '';
     const ubicacion = ubicacionInput ? ubicacionInput.value.trim() : 'Fábrica';
     
-    // Lectura de los valores nuevos
     const cerveza = (cervezaInput && cervezaInput.value.trim()) ? cervezaInput.value.trim() : 'No especificado';
     const fechaEmbarrilado = (fechaInput && fechaInput.value) ? fechaInput.value : '';
 
@@ -1452,20 +1451,16 @@ function guardarBarril(event) {
         window.barriles.push(nuevoBarril);
     }
 
-    // 1. Guardado persistente inmediato en localStorage
     const datosString = JSON.stringify(window.barriles);
     localStorage.setItem('alb_barriles', datosString);
     localStorage.setItem('barriles', datosString);
 
-    // 2. Sincronización con la nube
     if (typeof db !== 'undefined' && db.collection) {
         db.collection("albardon_app").doc("barriles").set({ lista: window.barriles })
           .catch(e => console.error("Error al sincronizar barril en nube:", e));
     }
 
     cerrarModalBarril();
-    
-    // 3. Renderizado inmediato
     renderBarriles('TODOS');
 }
 
