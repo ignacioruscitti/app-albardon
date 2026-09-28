@@ -1396,9 +1396,9 @@ function intentarRenderizarBarriles(filtroEstado = 'TODOS', intentos = 0) {
 }
 
 // ==========================================
-// FUNCIÓN DE RENDERIZADO DINÁMICO DE LA GRILLA
+// FUNCIÓN DE RENDERIZADO DINÁMICO DE LA GRILLA (REEMPLAZADA)
 // ==========================================
-function renderBarriles(filtro = 'TODOS') {
+window.renderBarriles = function(filtro = 'TODOS') {
     const contenedor = document.getElementById('grilla-barriles');
     if (!contenedor) return;
 
@@ -1457,7 +1457,7 @@ function renderBarriles(filtro = 'TODOS') {
     });
 
     contenedor.innerHTML = html;
-}
+};
 
 // Función que habilita los botones de filtrado superior
 function filtrarBarriles(estadoFiltro) {
