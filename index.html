@@ -479,20 +479,21 @@
     </div>
 </section>
 
-<!-- MODAL: Alta / Edición de Barril -->
 <!-- BARRIL MODAL -->
 <div id="modal-barril" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden no-print">
-    <div class="card p-6 w-full max-w-md space-y-4 bg-slate-900 border border-slate-800 rounded-xl">
-        <h3 id="modal-barril-titulo" class="font-bold text-amber-400 text-base border-b border-slate-700 pb-2">Gestionar Barril</h3>
+    <div class="card p-6 w-full max-w-md space-y-4 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl">
+        <h3 id="modal-barril-titulo" class="font-bold text-amber-400 text-base border-b border-slate-800 pb-2 flex items-center gap-2">
+            <i class="fa-solid fa-beer-mug-empty"></i> Gestionar Barril
+        </h3>
         <div class="space-y-3 text-xs">
             <div>
                 <label class="text-slate-400 block mb-1">Código de Barril</label>
-                <input type="text" id="barril-codigo" placeholder="ej. K-01" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-sm font-mono text-amber-400">
+                <input type="text" id="barril-codigo" placeholder="ej. K-01" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-sm font-mono text-amber-400 focus:border-amber-500 focus:outline-none">
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="text-slate-400 block mb-1">Capacidad</label>
-                    <select id="barril-capacidad" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-sm text-white">
+                    <select id="barril-capacidad" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-sm text-white focus:border-amber-500 focus:outline-none">
                         <option value="50L">50 Litros</option>
                         <option value="30L">30 Litros</option>
                         <option value="20L">20 Litros</option>
@@ -500,7 +501,7 @@
                 </div>
                 <div>
                     <label class="text-slate-400 block mb-1">Tipo de Conector</label>
-                    <select id="barril-conector" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-sm text-white">
+                    <select id="barril-conector" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-sm text-white focus:border-amber-500 focus:outline-none">
                         <option value="G">Conector G</option>
                         <option value="S">Conector S</option>
                     </select>
@@ -508,7 +509,7 @@
             </div>
             <div>
                 <label class="text-slate-400 block mb-1">Estado Actual</label>
-                <select id="barril-estado" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-sm text-white">
+                <select id="barril-estado" onchange="toggleCamposEstadoBarril()" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-sm text-white focus:border-amber-500 focus:outline-none">
                     <option value="vacio_sucio">Vacío - Sucio en fábrica</option>
                     <option value="vacio_limpio">Vacío - Limpio en fábrica</option>
                     <option value="vacio_sanitizado">Vacío - Sanitizado en fábrica</option>
@@ -518,21 +519,27 @@
                 </select>
             </div>
             
-            <!-- CAMPO DE ESTILO DE CERVEZA (VISIBLE) -->
-            <div>
-                <label class="text-slate-400 block mb-1">Estilo de Cerveza / Lote</label>
-                <input type="text" id="barril-cerveza" placeholder="ej. American Pale Ale (L-280)" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-sm text-white">
+            <!-- BLOQUE CONDICIONAL (Se muestra solo si está lleno o en cliente) -->
+            <div id="bloque-datos-cerveza" class="space-y-3 p-3 bg-slate-950/50 border border-slate-800 rounded-lg hidden">
+                <div>
+                    <label class="text-slate-400 block mb-1">Estilo de Cerveza / Lote</label>
+                    <input type="text" id="barril-cerveza" placeholder="ej. American Pale Ale (L-280)" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-sm text-white focus:border-amber-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="text-slate-400 block mb-1">Fecha de Embarrilado</label>
+                    <input type="date" id="barril-fecha" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-sm text-white focus:border-amber-500 focus:outline-none">
+                </div>
             </div>
 
-            <!-- CAMPO DE FECHA DE EMBARRILADO (VISIBLE) -->
-            <div>
-                <label class="text-slate-400 block mb-1">Fecha de Embarrilado</label>
-                <input type="date" id="barril-fecha" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-sm text-white">
+            <div id="campo-barril-cliente" class="hidden">
+                <label class="text-slate-400 block mb-1">Cliente Asignado</label>
+                <select id="barril-cliente-select" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-sm text-white focus:border-amber-500 focus:outline-none">
+                </select>
             </div>
         </div>
-        <div class="flex justify-end gap-3 pt-3 border-t border-slate-700">
-            <button onclick="cerrarModalBarril()" class="bg-slate-700 text-slate-300 text-xs font-bold px-4 py-2 rounded-lg">Cancelar</button>
-            <button onclick="guardarBarril(event)" class="bg-amber-500 text-slate-950 text-xs font-bold px-4 py-2 rounded-lg">Guardar</button>
+        <div class="flex justify-end gap-3 pt-3 border-t border-slate-800">
+            <button onclick="cerrarModalBarril()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold px-4 py-2 rounded-lg transition">Cancelar</button>
+            <button onclick="guardarBarril(event)" class="bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold px-4 py-2 rounded-lg transition">Guardar</button>
         </div>
     </div>
 </div>
@@ -588,7 +595,7 @@
             </div>
             <div>
                 <label class="text-slate-400 block mb-1">Estado Actual</label>
-                <select id="barril-estado" onchange="toggleCamposEstadoBarril()" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+                <select id="barril-estado" onchange="toggleCamposEstadoBarril()" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-sm text-white focus:border-amber-500 focus:outline-none">
                     <option value="vacio_sucio">Vacío - Sucio en fábrica</option>
                     <option value="vacio_limpio">Vacío - Limpio en fábrica</option>
                     <option value="vacio_sanitizado">Vacío - Sanitizado en fábrica</option>
@@ -1392,7 +1399,11 @@ function mostrarModalBarril() {
     if (inputId) inputId.value = '';
     const titulo = document.getElementById('modal-barril-titulo');
     if (titulo) titulo.innerText = 'Registrar Nuevo Barril';
+    
     if (modal) modal.classList.remove('hidden');
+
+    // 👇 LLAMAR A ESTO AQUÍ: Asegura que al abrir el modal se ajusten los campos según el estado inicial
+    toggleCamposEstadoBarril();
 }
 
 function cerrarModalBarril() {
@@ -1580,7 +1591,43 @@ function eliminarBarril(id) {
         renderBarriles('TODOS');
     }
 }
+function toggleCamposEstadoBarril() {
+    const estadoSelect = document.getElementById('barril-estado');
+    if (!estadoSelect) return;
+    
+    const estado = estadoSelect.value;
+    const bloqueCerveza = document.getElementById('bloque-datos-cerveza');
+    const inputFecha = document.getElementById('barril-fecha');
+    const campoCliente = document.getElementById('campo-barril-cliente');
+    
+    // Estados que requieren información de cerveza y fecha de embarrilado
+    const requiereCerveza = (estado === 'lleno_fabrica' || estado === 'entregado_cliente' || estado === 'LLENO_FABRICA' || estado === 'EN_CLIENTE');
+    // Estado específico que requiere cliente asignado
+    const esCliente = (estado === 'entregado_cliente' || estado === 'EN_CLIENTE');
 
+    // Controlar visibilidad del bloque de cerveza y fecha
+    if (bloqueCerveza) {
+        if (requiereCerveza) {
+            bloqueCerveza.classList.remove('hidden');
+            // Autocompletar con la fecha de hoy si está vacía
+            if (inputFecha && !inputFecha.value) {
+                const hoy = new Date().toISOString().split('T')[0];
+                inputFecha.value = hoy;
+            }
+        } else {
+            bloqueCerveza.classList.add('hidden');
+        }
+    }
+
+    // Controlar visibilidad del selector de cliente
+    if (campoCliente) {
+        if (esCliente) {
+            campoCliente.classList.remove('hidden');
+        } else {
+            campoCliente.classList.add('hidden');
+        }
+    }
+}
 // Observador de seguridad para blindar la grilla ante cambios del DOM
 const observadorBarriles = new MutationObserver(() => {
     const contenedor = document.getElementById('grilla-barriles');
