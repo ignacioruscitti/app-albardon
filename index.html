@@ -1672,6 +1672,83 @@ document.addEventListener("DOMContentLoaded", () => {
     renderBarriles();
 });
 </script>
+    <!-- PUENTE AUTOMÁTICO DE FIREBASE (SINCRONIZACIÓN TRANSPARENTE) -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof firebase === 'undefined' || typeof db === 'undefined') return;
+
+    const DOC_ID = 'datos_completos_cerveceria';
+
+    // 1. Al abrir la app: descargar de la nube y actualizar el almacenamiento local si hay cambios
+    db.collection('cerveceria_app').doc(DOC_ID).get().then((doc) => {
+        if (doc.exists) {
+            const datosNube = doc.data();
+            let huboCambios = false;
+
+            for (const clave in datosNube) {
+                if (datosNube.hasOwnProperty(clave)) {
+                    const valorNube = JSON.stringify(datosNube[clave]);
+                    const valorLocal = localStorage.getItem(clave);
+                    
+                    if (valorNube !== valorLocal) {
+                        localStorage.setItem(clave, valorNube);
+                        huboCambios = true;
+                    }
+                }
+            }
+
+            // Si la nube actualizó algo, refrescamos las pantallas si existen
+            if (huboCambios) {
+                if (datosNube['alb_barriles'] && Array.isArray(window.barriles)) window.barriles = datosNube['alb_barriles'];
+                if (datosNube['alb_clientes'] && Array.isArray(window.clientes)) window.clientes = datosNube['alb_clientes'];
+                
+                if (typeof window.renderBarriles === 'function') window.renderBarriles('TODOS');
+                if (typeof window.renderClientes === 'function') window.renderClientes();
+            }
+        }
+    }).catch(err => {
+        console.error("Error al sincronizar desde Firebase:", err);
+    });
+
+    // 2. Mientras usas la app: interceptar el guardado local para subirlo a la nube automáticamente
+    const originalSetItem = localStorage.setItem;
+    let temporizadorSubida = null;
+
+    localStorage.setItem = function(key, value) {
+        originalSetItem.apply(this, arguments);
+
+        if (key && (key.startsWith('alb_') || key.includes('barriles') || key.includes('clientes') || key.includes('recetas'))) {
+            clearTimeout(temporizadorSubida);
+            temporizadorSubida = setTimeout(() => {
+                subirTodoALaNube();
+            }, 1000); // Sube a la nube 1 segundo después de hacer un cambio
+        }
+    };
+
+    function subirTodoALaNube() {
+        try {
+            const paqueteDatos = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && (key.startsWith('alb_') || key.includes('barriles') || key.includes('clientes') || key.includes('recetas'))) {
+                    try {
+                        paqueteDatos[key] = JSON.parse(localStorage.getItem(key));
+                    } catch (e) {
+                        paqueteDatos[key] = localStorage.getItem(key);
+                    }
+                }
+            }
+
+            db.collection('cerveceria_app').doc(DOC_ID).set(paqueteDatos, { merge: true })
+              .catch(err => {
+                  console.error("Error al subir a Firebase:", err);
+              });
+        } catch (e) {
+            console.error("Error al empaquetar datos:", e);
+        }
+    }
+});
+</script>
  <script>       // --- MÓDULO COCCIÓN ---
 function cargarRecetaEnCoccion() {
     const selectReceta = document.getElementById('select-receta');
