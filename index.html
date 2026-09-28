@@ -1672,19 +1672,31 @@ document.addEventListener("DOMContentLoaded", () => {
     renderBarriles();
 });
 </script>
-<!-- PUENTE AUTOMÁTICO DEFINITIVO (SINCRONIZACIÓN SEGURA) -->
+<!-- PUENTE AUTOMÁTICO DE FIREBASE - VERSIÓN ESTABLE -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     if (typeof firebase === 'undefined' || typeof db === 'undefined') return;
 
-    DOC_ID = 'datos_completos_cerveceria';
+    const DOC_ID = 'datos_completos_cerveceria';
 
-    // 1. AL ABRIR LA APP: Subimos lo local a la nube primero para asegurar que no se pierda lo último hecho
-    setTimeout(() => {
-        subirTodoALaNube();
-    }, 1500);
+    // 1. AL ABRIR LA APP: Descargar los datos de la nube y ponerlos en el localStorage
+    db.collection('cerveceria_app').doc(DOC_ID).get().then((doc) => {
+        if (doc.exists) {
+            const datosNube = doc.data();
+            for (const clave in datosNube) {
+                if (datosNube.hasOwnProperty(clave)) {
+                    localStorage.setItem(clave, JSON.stringify(datosNube[clave]));
+                }
+            }
+            // Refrescar las pantallas si existen para que se vean al instante
+            if (typeof window.renderBarriles === 'function') window.renderBarriles('TODOS');
+            if (typeof window.renderClientes === 'function') window.renderClientes();
+        }
+    }).catch(err => {
+        console.error("Error al sincronizar desde Firebase:", err);
+    });
 
-    // 2. Interceptar localStorage.setItem para mantener sincronización automática
+    // 2. MIENTRAS USAS LA APP: Subir automáticamente a la nube cuando guardes algo
     const originalSetItem = localStorage.setItem;
     let temporizadorSubida = null;
 
@@ -1699,7 +1711,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    window.subirTodoALaNube = function() {
+    function subirTodoALaNube() {
         try {
             const paqueteDatos = {};
             for (let i = 0; i < localStorage.length; i++) {
@@ -1720,7 +1732,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) {
             console.error("Error al empaquetar datos:", e);
         }
-    };
+    }
 });
 </script>
  <script>       // --- MÓDULO COCCIÓN ---
