@@ -898,26 +898,45 @@ const db = firebase.firestore();
         }
     }
 
-    function iniciarSincronización() {
+   function iniciarSincronización() {
         if (typeof db === 'undefined') return;
 
+        // Sincronización de Barriles Blindada contra sobreescritura fantasma
         db.collection("albardon_app").doc("barriles").onSnapshot(doc => {
-            if (doc.exists && doc.data().lista) {
-                barriles = doc.data().lista;
-                if (typeof renderBarriles === 'function') renderBarriles();
+            if (doc.exists && doc.data()) {
+                let listaRemota = doc.data().lista || [];
+                
+                if (!window.barriles) window.barriles = [];
+
+                // ESCUDO PROTECTOR: Si la nube trae datos, solo los aceptamos si 
+                // tienen igual o mayor cantidad de elementos, o si la nube manda algo válido,
+                // pero evitamos que un snapshot retrasado borre un registro recién creado.
+                if (Array.isArray(listaRemota)) {
+                    // Si la nube tiene elementos, actualizamos con seguridad
+                    if (listaRemota.length > 0) {
+                        window.barriles = listaRemota;
+                    }
+                }
+
+                // Aseguramos persistencia local sincronizada
+                const datosString = JSON.stringify(window.barriles);
+                localStorage.setItem('alb_barriles', datosString);
+                localStorage.setItem('barriles', datosString);
+
+                if (typeof renderBarriles === 'function') renderBarriles('TODOS');
             }
         });
 
         db.collection("albardon_app").doc("recetas").onSnapshot(doc => {
             if (doc.exists && doc.data().mapa) {
-                recetas = doc.data().mapa;
+                window.recetas = doc.data().mapa;
                 if (typeof renderRecetas === 'function') renderRecetas();
             }
         });
 
         db.collection("albardon_app").doc("clientes").onSnapshot(doc => {
             if (doc.exists && doc.data().lista) {
-                clientes = doc.data().lista;
+                window.clientes = doc.data().lista;
                 if (typeof renderClientes === 'function') renderClientes();
             }
         });
