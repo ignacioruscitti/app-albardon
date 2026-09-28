@@ -1495,78 +1495,65 @@ function cargarBarrilesDesdeStorageONube(datosRemotos) {
     renderBarriles('TODOS');
 }
 
-function renderBarriles(filtroEstado = 'TODOS') {
-    const contenedor = document.getElementById('grilla-barriles');
-    if (!contenedor) return;
-
-    let datosAlmacenados = localStorage.getItem('alb_barriles') || localStorage.getItem('barriles');
-    if (datosAlmacenados && (!window.barriles || window.barriles.length === 0)) {
-        try {
-            let parsed = JSON.parse(datosAlmacenados);
-            window.barriles = Array.isArray(parsed) ? parsed : (parsed.lista || Object.values(parsed));
-        } catch (e) {
-            window.barriles = [];
-        }
+function guardarBarril(event) {
+    if (event && typeof event.preventDefault === 'function') {
+        event.preventDefault();
     }
 
-    let listaBarriles = Array.isArray(window.barriles) ? window.barriles : [];
+    const idInput = document.getElementById('barril-id');
+    const codigoInput = document.getElementById('barril-codigo');
+    const capacidadInput = document.getElementById('barril-capacidad');
+    const conectorInput = document.getElementById('barril-conector');
+    const estadoInput = document.getElementById('barril-estado');
+    const cervezaInput = document.getElementById('barril-cerveza');
+    const loteInput = document.getElementById('barril-lote');
+    const fechaInput = document.getElementById('barril-fecha');
+    const ubicacionInput = document.getElementById('barril-ubicacion');
 
-    let barrilesFiltrados = listaBarriles;
-    if (filtroEstado && filtroEstado !== 'TODOS') {
-        barrilesFiltrados = listaBarriles.filter(b => b.estado === filtroEstado);
+    const id = (idInput && idInput.value) ? idInput.value : 'barril_' + Date.now();
+    const codigo = codigoInput ? codigoInput.value.trim() : 'S/N';
+    const capacidad = capacidadInput ? capacidadInput.value : '50';
+    const conector = conectorInput ? conectorInput.value : 'S';
+    const estado = estadoInput ? estadoInput.value : 'LLENO_FABRICA';
+    const cerveza = (cervezaInput && cervezaInput.value.trim()) ? cervezaInput.value.trim() : 'No especificado';
+    const lote = (loteInput && loteInput.value.trim()) ? loteInput.value.trim() : '';
+    const fechaEmbarrilado = (fechaInput && fechaInput.value) ? fechaInput.value : '';
+    const ubicacion = (ubicacionInput && ubicacionInput.value.trim()) ? ubicacionInput.value.trim() : '';
+
+    if (!Array.isArray(window.barriles)) {
+        window.barriles = [];
     }
 
-    if (barrilesFiltrados.length === 0) {
-        contenedor.innerHTML = '<div class="col-span-full text-center py-8 text-slate-400"><i class="fa-solid fa-boxes-stacked text-3xl mb-2 block"></i>No hay barriles registrados en esta categoría.</div>';
-        return;
+    const index = window.barriles.findIndex(b => b.id === id || b.codigo === codigo);
+    const nuevoBarril = { 
+        id, 
+        codigo, 
+        capacidad, 
+        conector, 
+        estado, 
+        cerveza, 
+        lote, 
+        fechaEmbarrilado, 
+        ubicacion 
+    };
+
+    if (index >= 0) {
+        window.barriles[index] = nuevoBarril;
+    } else {
+        window.barriles.push(nuevoBarril);
     }
 
-    let html = '';
-    barrilesFiltrados.forEach(b => {
-        let badgeColor = 'bg-slate-800 text-slate-300 border-slate-700';
-        if (b.estado === 'lleno_fabrica' || b.estado === 'LLENO_FABRICA') badgeColor = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
-        if (b.estado === 'entregado_cliente' || b.estado === 'EN_CLIENTE') badgeColor = 'bg-blue-500/10 text-blue-400 border-blue-500/30';
-        if (b.estado === 'mantenimiento' || b.estado === 'MANTENIMIENTO') badgeColor = 'bg-amber-500/10 text-amber-400 border-amber-500/30';
+    const datosString = JSON.stringify(window.barriles);
+    localStorage.setItem('alb_barriles', datosString);
+    localStorage.setItem('barriles', datosString);
 
-        const estiloCerveza = b.cerveza || b.estilo || 'No especificado';
-        
-        // Formatear la fecha para mostrarla correctamente (DD/MM/YYYY)
-        let fechaFormateada = '';
-        if (b.fechaEmbarrilado) {
-            let partes = b.fechaEmbarrilado.split('-');
-            if (partes.length === 3) {
-                fechaFormateada = `${partes[2]}/${partes[1]}/${partes[0]}`;
-            } else {
-                fechaFormateada = b.fechaEmbarrilado;
-            }
-        }
+    if (typeof db !== 'undefined' && db.collection) {
+        db.collection("albardon_app").doc("barriles").set({ lista: window.barriles })
+          .catch(e => console.error("Error al sincronizar en nube:", e));
+    }
 
-        html += `
-            <div class="card p-4 space-y-3 bg-slate-900 border border-slate-800 rounded-xl flex flex-col justify-between shadow-lg">
-                <div>
-                    <div class="flex justify-between items-start border-b border-slate-800 pb-2">
-                        <div>
-                            <h4 class="font-bold text-amber-400 font-mono text-base">${b.codigo || 'S/N'}</h4>
-                            <span class="text-[11px] text-slate-400">Capacidad: <strong>${b.capacidad || '50'}L</strong> | Conector: <strong>Tipo ${b.conector || 'S'}</strong></span>
-                        </div>
-                        <span class="text-[10px] font-mono border px-2 py-0.5 rounded-md font-bold ${badgeColor}">${b.estado || 'REGISTRADO'}</span>
-                    </div>
-                    <div class="mt-2 space-y-1 text-xs text-slate-300">
-                        <p>🍺 Estilo: <strong class="text-amber-200">${estiloCerveza}</strong></p>
-                        ${b.lote ? `<p>📦 Lote: <strong class="font-mono text-slate-100">${b.lote}</strong></p>` : ''}
-                        ${fechaFormateada ? `<p>📅 Embarrilado: <strong class="text-slate-200">${fechaFormateada}</strong></p>` : ''}
-                        ${b.ubicacion ? `<p>📍 Ubicación: <strong class="text-slate-100">${b.ubicacion}</strong></p>` : ''}
-                    </div>
-                </div>
-                <div class="pt-2 border-t border-slate-800 flex justify-end gap-2">
-                    <button onclick="editarBarril('${b.id || b.codigo}')" class="text-amber-400 hover:text-amber-300 text-xs p-1" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button>
-                    <button onclick="eliminarBarril('${b.id || b.codigo}')" class="text-red-400 hover:text-red-300 text-xs p-1" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
-                </div>
-            </div>
-        `;
-    });
-
-    contenedor.innerHTML = html;
+    if (typeof cerrarModalBarril === 'function') cerrarModalBarril();
+    renderBarriles('TODOS');
 }
 function filtrarBarriles(estado) {
     renderBarriles(estado);
