@@ -1327,20 +1327,17 @@ function eliminarReceta(key) {
 // MÓDULO 2: BARRILES DEFINITIVO (Inventario y Grilla)
 // ==========================================
 
-// Aseguramos el espacio global sin colisiones
 if (typeof window.barriles === 'undefined') {
     window.barriles = [];
 }
 
-// Función robusta para inicializar y cargar desde cualquier clave de almacenamiento
+// Función robusta para inicializar y cargar desde localStorage
 function inicializarBarrilesStorage() {
-    // Buscamos en todas las posibles claves que usa la app
     let datosGuardados = localStorage.getItem('alb_barriles') || localStorage.getItem('barriles');
     
     if (datosGuardados) {
         try {
             let parsed = JSON.parse(datosGuardados);
-            // Soportamos tanto si viene como array directo como si está dentro de un objeto { lista: [...] }
             if (Array.isArray(parsed)) {
                 window.barriles = parsed;
             } else if (parsed && typeof parsed === 'object') {
@@ -1356,17 +1353,14 @@ function inicializarBarrilesStorage() {
         window.barriles = [];
     }
 
-    // Forzamos el renderizado inmediato si el contenedor ya existe
     intentarRenderizarBarriles();
 }
 
-// Función auxiliar para reintentar pintar si el DOM aún está cargando las pestañas
 function intentarRenderizarBarriles(filtroEstado = 'TODOS', intentos = 0) {
     const contenedor = document.getElementById('grilla-barriles');
     if (contenedor) {
         renderBarriles(filtroEstado);
     } else if (intentos < 5) {
-        // Si la pestaña de barriles no está activa o el HTML no cargó, reintentamos en un momento
         setTimeout(() => intentarRenderizarBarriles(filtroEstado, intentos + 1), 100);
     }
 }
@@ -1421,12 +1415,12 @@ function guardarBarril(event) {
         window.barriles.push(nuevoBarril);
     }
 
-    // 1. Guardado persistente inmediato en localStorage local
+    // 1. Guardado persistente inmediato y blindado en localStorage
     const datosString = JSON.stringify(window.barriles);
     localStorage.setItem('alb_barriles', datosString);
     localStorage.setItem('barriles', datosString);
 
-    // 2. Sincronización segura con la nube (solo si Firebase está disponible)
+    // 2. Sincronización con la nube sin bloquear el renderizado local
     if (typeof db !== 'undefined' && db.collection) {
         db.collection("albardon_app").doc("barriles").set({ lista: window.barriles })
           .catch(e => console.error("Error al sincronizar barril en nube:", e));
@@ -1434,17 +1428,19 @@ function guardarBarril(event) {
 
     cerrarModalBarril();
     
-    // 3. Forzar renderizado inmediato y bloquear cualquier intento de borrado posterior
-    setTimeout(() => {
-        renderBarriles('TODOS');
-    }, 50);
+    // 3. Renderizado inmediato forzado
+    renderBarriles('TODOS');
 }
+
 function cargarBarrilesDesdeStorageONube(datosRemotos) {
-    // Si la nube o el storage devuelven datos válidos, los usamos
+    // Escudo protector: Solo acepta datos remotos si tienen elementos, 
+    // de lo contrario respeta y mantiene lo que ya está guardado localmente.
     if (Array.isArray(datosRemotos) && datosRemotos.length > 0) {
         window.barriles = datosRemotos;
+        const datosString = JSON.stringify(window.barriles);
+        localStorage.setItem('alb_barriles', datosString);
+        localStorage.setItem('barriles', datosString);
     } else {
-        // Si vienen vacíos, chequeamos si tenemos algo en localStorage antes de borrar nada
         let local = localStorage.getItem('alb_barriles') || localStorage.getItem('barriles');
         if (local) {
             try {
@@ -1457,13 +1453,14 @@ function cargarBarrilesDesdeStorageONube(datosRemotos) {
     }
     renderBarriles('TODOS');
 }
+
 function renderBarriles(filtroEstado = 'TODOS') {
     const contenedor = document.getElementById('grilla-barriles');
     if (!contenedor) return;
 
-    // Forzamos la lectura fresca desde localStorage para asegurar que los datos estén siempre disponibles
+    // Lectura directa desde memoria o localStorage para asegurar consistencia visual
     let datosAlmacenados = localStorage.getItem('alb_barriles') || localStorage.getItem('barriles');
-    if (datosAlmacenados) {
+    if (datosAlmacenados && (!window.barriles || window.barriles.length === 0)) {
         try {
             let parsed = JSON.parse(datosAlmacenados);
             window.barriles = Array.isArray(parsed) ? parsed : (parsed.lista || Object.values(parsed));
@@ -1518,6 +1515,7 @@ function renderBarriles(filtroEstado = 'TODOS') {
 
     contenedor.innerHTML = html;
 }
+
 function filtrarBarriles(estado) {
     renderBarriles(estado);
 }
@@ -1540,16 +1538,9 @@ function eliminarBarril(id) {
     }
 }
 
-// Disparador seguro al cargar el documento
-document.addEventListener('DOMContentLoaded', () => {
-    inicializarBarrilesStorage();
-});
-    // ==========================================
-// PARCHE AUTOMÁTICO DE VISIBILIDAD DE BARRILES
-// ==========================================
+// Observador de seguridad para blindar la grilla ante cambios del DOM
 const observadorBarriles = new MutationObserver(() => {
     const contenedor = document.getElementById('grilla-barriles');
-    // Si el contenedor existe, es visible y tiene datos guardados, renderiza automáticamente
     if (contenedor && contenedor.offsetParent !== null) {
         if (Array.isArray(window.barriles) && window.barriles.length > 0 && contenedor.innerHTML.includes('No hay barriles')) {
             renderBarriles('TODOS');
@@ -1557,7 +1548,7 @@ const observadorBarriles = new MutationObserver(() => {
     }
 });
 
-// Activamos el vigía apenas carga el documento
+// Inicialización única y limpia al cargar el documento
 document.addEventListener('DOMContentLoaded', () => {
     inicializarBarrilesStorage();
     const grilla = document.getElementById('grilla-barriles');
