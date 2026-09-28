@@ -1510,7 +1510,7 @@ function eliminarBarril(idx) {
 }
 
 // ==========================================
-// 2. GUARDAR BARRIL (CREAR O EDITAR SIN LÍMITES)
+// FUNCIÓN GUARDAR BARRIL DEFINITIVA
 // ==========================================
 function guardarBarril(event) {
     if (event && typeof event.preventDefault === 'function') {
@@ -1542,6 +1542,7 @@ function guardarBarril(event) {
         return;
     }
 
+    // Asegurar que window.barriles sea un array
     if (!Array.isArray(window.barriles)) {
         window.barriles = [];
     }
@@ -1557,27 +1558,33 @@ function guardarBarril(event) {
         ubicacion 
     };
 
-    // Verificamos si estamos editando o creando uno nuevo
-    if (window.barrilEditandoIdx !== null && window.barrilEditandoIdx !== undefined && window.barrilEditandoIdx >= 0) {
-        window.barriles[window.barrilEditandoIdx] = obj;
+    // Verificamos si estamos editando un índice válido
+    const idxEdicion = window.barrilEditandoIdx;
+    
+    if (idxEdicion !== null && idxEdicion !== undefined && idxEdicion !== '' && idxEdicion >= 0 && idxEdicion < window.barriles.length) {
+        // Actualizamos el existente
+        window.barriles[idxEdicion] = obj;
     } else {
+        // CORRECCIÓN CRÍTICA: Nos aseguramos de agregar siempre al final como un ítem NUEVO
         window.barriles.push(obj);
     }
 
+    // Limpiamos la variable de edición inmediatamente
     window.barrilEditandoIdx = null;
 
-    // Guardar persistente en localStorage
+    // Guardar de forma persistente en localStorage
     const datosString = JSON.stringify(window.barriles);
     localStorage.setItem('alb_barriles', datosString);
     localStorage.setItem('barriles', datosString);
 
-    // Cerrar modal y limpiar
+    // Cerrar el modal y resetear el formulario
     const modal = document.getElementById('modal-barril');
     if (modal) modal.classList.add('hidden');
+    
     const formBarril = document.getElementById('form-barril');
     if (formBarril) formBarril.reset();
     
-    // Redibujar
+    // Redibujar la grilla mostrando todos
     if (typeof renderBarriles === 'function') {
         renderBarriles('TODOS');
     }
