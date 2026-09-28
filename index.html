@@ -1443,10 +1443,21 @@ function renderBarriles(filtroEstado = 'TODOS') {
     const contenedor = document.getElementById('grilla-barriles');
     if (!contenedor) return;
 
+    // Forzamos la lectura fresca desde localStorage para asegurar que los datos estén siempre disponibles
+    let datosAlmacenados = localStorage.getItem('alb_barriles') || localStorage.getItem('barriles');
+    if (datosAlmacenados) {
+        try {
+            let parsed = JSON.parse(datosAlmacenados);
+            window.barriles = Array.isArray(parsed) ? parsed : (parsed.lista || Object.values(parsed));
+        } catch (e) {
+            window.barriles = [];
+        }
+    }
+
     let listaBarriles = Array.isArray(window.barriles) ? window.barriles : [];
 
     let barrilesFiltrados = listaBarriles;
-    if (filtroEstado !== 'TODOS') {
+    if (filtroEstado && filtroEstado !== 'TODOS') {
         barrilesFiltrados = listaBarriles.filter(b => b.estado === filtroEstado);
     }
 
@@ -1465,14 +1476,14 @@ function renderBarriles(filtroEstado = 'TODOS') {
         const estiloCerveza = b.cerveza || b.estilo || 'No especificado';
 
         html += `
-            <div class="card p-4 space-y-3 bg-slate-900 border border-slate-800 rounded-xl flex flex-col justify-between">
+            <div class="card p-4 space-y-3 bg-slate-900 border border-slate-800 rounded-xl flex flex-col justify-between shadow-lg">
                 <div>
                     <div class="flex justify-between items-start border-b border-slate-800 pb-2">
                         <div>
-                            <h4 class="font-bold text-amber-400 font-mono text-sm">${b.codigo}</h4>
-                            <span class="text-[10px] text-slate-400">Capacidad: <strong>${b.capacidad} Lts</strong> | Conector: <strong>Tipo ${b.conector}</strong></span>
+                            <h4 class="font-bold text-amber-400 font-mono text-sm">${b.codigo || 'S/N'}</h4>
+                            <span class="text-[10px] text-slate-400">Capacidad: <strong>${b.capacidad || 50} Lts</strong> | Conector: <strong>Tipo ${b.conector || 'S'}</strong></span>
                         </div>
-                        <span class="text-[10px] font-mono border px-2 py-0.5 rounded-md font-bold ${badgeColor}">${b.estado}</span>
+                        <span class="text-[10px] font-mono border px-2 py-0.5 rounded-md font-bold ${badgeColor}">${b.estado || 'REGISTRADO'}</span>
                     </div>
                     <div class="mt-2 space-y-1 text-[11px] text-slate-300">
                         <p>🍺 Estilo: <strong class="text-amber-200">${estiloCerveza}</strong></p>
@@ -1489,7 +1500,6 @@ function renderBarriles(filtroEstado = 'TODOS') {
 
     contenedor.innerHTML = html;
 }
-
 function filtrarBarriles(estado) {
     renderBarriles(estado);
 }
