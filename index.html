@@ -1396,7 +1396,7 @@ function intentarRenderizarBarriles(filtroEstado = 'TODOS', intentos = 0) {
 }
 
 // ==========================================
-// FUNCIÓN DE RENDERIZADO DEFINITIVA Y FUNCIONAL
+// 1. FUNCIONES DE GESTIÓN Y RENDERIZADO DE BARRILES
 // ==========================================
 window.renderBarriles = function(filtro = 'TODOS') {
     const contenedor = document.getElementById('grilla-barriles');
@@ -1447,6 +1447,7 @@ window.renderBarriles = function(filtro = 'TODOS') {
     });
     contenedor.innerHTML = html;
 };
+
 function filtrarBarriles(estadoFiltro) {
     renderBarriles(estadoFiltro);
 }
@@ -1498,13 +1499,15 @@ function editarBarril(idx) {
 function eliminarBarril(idx) {
     if (confirm("¿Estás seguro de que deseas eliminar este barril?")) {
         window.barriles.splice(idx, 1);
-        guardarStorageSeguro();
+        const datosString = JSON.stringify(window.barriles);
+        localStorage.setItem('alb_barriles', datosString);
+        localStorage.setItem('barriles', datosString);
         renderBarriles('TODOS');
     }
 }
 
 // ==========================================
-// GUARDAR BARRIL SIN LÍMITES
+// 2. GUARDAR BARRIL (CREAR O EDITAR SIN LÍMITES)
 // ==========================================
 function guardarBarril(event) {
     if (event && typeof event.preventDefault === 'function') {
@@ -1536,7 +1539,6 @@ function guardarBarril(event) {
         return;
     }
 
-    // Asegurarnos de que window.barriles sea un array válido
     if (!Array.isArray(window.barriles)) {
         window.barriles = [];
     }
@@ -1552,29 +1554,35 @@ function guardarBarril(event) {
         ubicacion 
     };
 
-    // Agregamos el nuevo barril al final sin recortar nada
-    window.barriles.push(obj);
+    // Verificamos si estamos editando o creando uno nuevo
+    if (window.barrilEditandoIdx !== null && window.barrilEditandoIdx !== undefined && window.barrilEditandoIdx >= 0) {
+        window.barriles[window.barrilEditandoIdx] = obj;
+    } else {
+        window.barriles.push(obj);
+    }
 
-    console.log("Total actual de barriles en memoria:", window.barriles.length);
+    window.barrilEditandoIdx = null;
 
-    // Guardar en el almacenamiento del navegador de forma persistente
+    // Guardar persistente en localStorage
     const datosString = JSON.stringify(window.barriles);
     localStorage.setItem('alb_barriles', datosString);
     localStorage.setItem('barriles', datosString);
 
-    // Cerrar el modal
+    // Cerrar modal y limpiar
     const modal = document.getElementById('modal-barril');
     if (modal) modal.classList.add('hidden');
+    const formBarril = document.getElementById('form-barril');
+    if (formBarril) formBarril.reset();
     
-    // Redibujar la grilla con todos los elementos
+    // Redibujar
     if (typeof renderBarriles === 'function') {
         renderBarriles('TODOS');
     }
 }
-    
-    console.log("Array después de guardar:", [...window.barriles]);
-}
 
+// ==========================================
+// 3. UTILIDADES Y CARGA INICIAL
+// ==========================================
 function toggleCamposEstadoBarril() {
     const estadoSelect = document.getElementById('barril-estado');
     if (!estadoSelect) return;
@@ -1603,17 +1611,13 @@ function toggleCamposEstadoBarril() {
         else campoCliente.classList.add('hidden');
     }
 }
-// ==========================================
-// CARGA INICIAL ROBUSTA DE BARRILES
-// ==========================================
+
 function cargarBarrilesDesdeStorageONube(datosRemotos) {
     if (Array.isArray(datosRemotos) && datosRemotos.length > 0) {
         window.barriles = datosRemotos;
     } else {
-        // Intentamos leer de ambas claves posibles en el navegador
         let localAlb = localStorage.getItem('alb_barriles');
         let localBar = localStorage.getItem('barriles');
-        
         let rawData = localAlb || localBar;
         
         if (rawData) {
@@ -1621,7 +1625,6 @@ function cargarBarrilesDesdeStorageONube(datosRemotos) {
                 let parsed = JSON.parse(rawData);
                 window.barriles = Array.isArray(parsed) ? parsed : (parsed.lista || []);
             } catch(e) {
-                console.error("Error al parsear el storage de barriles:", e);
                 window.barriles = [];
             }
         } else {
@@ -1629,67 +1632,18 @@ function cargarBarrilesDesdeStorageONube(datosRemotos) {
         }
     }
 
-    // Aseguramos que ambas claves queden sincronizadas con lo que realmente tenemos
     const datosString = JSON.stringify(window.barriles);
     localStorage.setItem('alb_barriles', datosString);
     localStorage.setItem('barriles', datosString);
 
-    // Redibujar la interfaz inmediatamente
     if (typeof renderBarriles === 'function') {
         renderBarriles('TODOS');
     }
 }
 
-function toggleCamposEstadoBarril() {
-    const estadoSelect = document.getElementById('barril-estado');
-    if (!estadoSelect) return;
-    
-    const estado = estadoSelect.value;
-    const bloqueCerveza = document.getElementById('bloque-datos-cerveza');
-    const inputFecha = document.getElementById('barril-fecha');
-    const campoCliente = document.getElementById('campo-barril-cliente');
-    
-    const requiereCerveza = (estado === 'lleno_fabrica' || estado === 'entregado_cliente' || estado === 'LLENO_FABRICA' || estado === 'EN_CLIENTE');
-    const esCliente = (estado === 'entregado_cliente' || estado === 'EN_CLIENTE');
-
-    if (bloqueCerveza) {
-        if (requiereCerveza) {
-            bloqueCerveza.classList.remove('hidden');
-            if (inputFecha && !inputFecha.value) {
-                const hoy = new Date().toISOString().split('T')[0];
-                inputFecha.value = hoy;
-            }
-        } else {
-            bloqueCerveza.classList.add('hidden');
-        }
-    }
-
-    if (campoCliente) {
-        if (esCliente) {
-            campoCliente.classList.remove('hidden');
-        } else {
-            campoCliente.classList.add('hidden');
-        }
-    }
-}
-
-// Observador de seguridad para blindar la grilla ante cambios del DOM
-const observadorBarriles = new MutationObserver(() => {
-    const contenedor = document.getElementById('grilla-barriles');
-    if (contenedor && contenedor.offsetParent !== null) {
-        if (Array.isArray(window.barriles) && window.barriles.length > 0 && contenedor.innerHTML.includes('No hay barriles')) {
-            renderBarriles('TODOS');
-        }
-    }
-});
-
-// Inicialización única y limpia al cargar el documento
+// Inicialización limpia al cargar la página
 document.addEventListener('DOMContentLoaded', () => {
-    inicializarBarrilesStorage();
-    const grilla = document.getElementById('grilla-barriles');
-    if (grilla) {
-        observadorBarriles.observe(document.body, { childList: true, subtree: true, attributes: true });
-    }
+    cargarBarrilesDesdeStorageONube();
 });
 // ==========================================
 // INICIALIZACIÓN GLOBAL AL CARGAR LA PÁGINA
