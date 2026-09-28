@@ -1396,13 +1396,25 @@ function intentarRenderizarBarriles(filtroEstado = 'TODOS', intentos = 0) {
 }
 
 // ==========================================
-// 1. FUNCIONES DE GESTIÓN Y RENDERIZADO DE BARRILES
+// RENDERIZADO BLINDADO DE BARRILES
 // ==========================================
 window.renderBarriles = function(filtro = 'TODOS') {
     const contenedor = document.getElementById('grilla-barriles');
     if (!contenedor) return;
 
+    // Nos aseguramos de sincronizar con localStorage antes de pintar
+    try {
+        const guardado = localStorage.getItem('alb_barriles') || localStorage.getItem('barriles');
+        if (guardado) {
+            window.barriles = JSON.parse(guardado);
+        }
+    } catch(e) {
+        console.error("Error al leer storage en render:", e);
+    }
+
     let lista = window.barriles || [];
+
+    console.log(">>> PINTANDO EN PANTALLA CÓDIGOS:", lista.map(b => b.codigo));
 
     if (filtro && filtro !== 'TODOS') {
         lista = lista.filter(b => {
@@ -1447,7 +1459,6 @@ window.renderBarriles = function(filtro = 'TODOS') {
     });
     contenedor.innerHTML = html;
 };
-
 function filtrarBarriles(estadoFiltro) {
     renderBarriles(estadoFiltro);
 }
