@@ -612,6 +612,17 @@
                 <label class="text-slate-400 block mb-1">Cerveza / Lote</label>
                 <input type="text" id="barril-cerveza" placeholder="ej. APA Pilsen 280 (L-2026-01)" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
             </div>
+            <!-- AGREGA ESTO AQUÍ ABAJO -->
+            <div id="campo-barril-fecha" class="mb-3">
+                <label class="text-slate-400 block mb-1">Fecha de Embarrilado</label>
+                <input type="date" id="barril-fecha" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white">
+            </div>
+
+            <div id="campo-barril-cliente" class="oculto">
+                <label class="text-slate-400 block mb-1">Cliente Asignado</label>
+                <select id="barril-cliente-select" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+                </select>
+            </div>
             <div id="campo-barril-cliente" class="oculto">
                 <label class="text-slate-400 block mb-1">Cliente Asignado</label>
                 <select id="barril-cliente-select" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
@@ -1412,6 +1423,10 @@ function guardarBarril(event) {
     const estadoInput = document.getElementById('barril-estado');
     const loteInput = document.getElementById('barril-lote');
     const ubicacionInput = document.getElementById('barril-ubicacion');
+    
+    // Nuevos campos
+    const cervezaInput = document.getElementById('barril-cerveza');
+    const fechaInput = document.getElementById('barril-fecha');
 
     const id = (idInput && idInput.value) ? idInput.value : 'barril_' + Date.now();
     const codigo = codigoInput ? codigoInput.value.trim() : 'S/N';
@@ -1420,13 +1435,18 @@ function guardarBarril(event) {
     const estado = estadoInput ? estadoInput.value : 'LLENO_FABRICA';
     const lote = loteInput ? loteInput.value.trim() : '';
     const ubicacion = ubicacionInput ? ubicacionInput.value.trim() : 'Fábrica';
+    
+    // Captura de estilo y fecha (con valores por defecto si están vacíos)
+    const cerveza = (cervezaInput && cervezaInput.value.trim()) ? cervezaInput.value.trim() : 'No especificado';
+    const fechaEmbarrilado = (fechaInput && fechaInput.value) ? fechaInput.value : '';
 
     if (!Array.isArray(window.barriles)) {
         window.barriles = [];
     }
 
     const index = window.barriles.findIndex(b => b.id === id);
-    const nuevoBarril = { id, codigo, capacidad, conector, estado, lote, ubicacion };
+    // Agregamos cerveza y fechaEmbarrilado al objeto
+    const nuevoBarril = { id, codigo, capacidad, conector, estado, lote, ubicacion, cerveza, fechaEmbarrilado };
 
     if (index >= 0) {
         window.barriles[index] = nuevoBarril;
@@ -1434,20 +1454,17 @@ function guardarBarril(event) {
         window.barriles.push(nuevoBarril);
     }
 
-    // 1. Guardado persistente inmediato y blindado en localStorage
+    // Guardado persistente local y en la nube
     const datosString = JSON.stringify(window.barriles);
     localStorage.setItem('alb_barriles', datosString);
     localStorage.setItem('barriles', datosString);
 
-    // 2. Sincronización con la nube sin bloquear el renderizado local
     if (typeof db !== 'undefined' && db.collection) {
         db.collection("albardon_app").doc("barriles").set({ lista: window.barriles })
           .catch(e => console.error("Error al sincronizar barril en nube:", e));
     }
 
     cerrarModalBarril();
-    
-    // 3. Renderizado inmediato forzado
     renderBarriles('TODOS');
 }
 
@@ -1503,11 +1520,22 @@ function renderBarriles(filtroEstado = 'TODOS') {
     let html = '';
     barrilesFiltrados.forEach(b => {
         let badgeColor = 'bg-slate-800 text-slate-300 border-slate-700';
-        if (b.estado === 'LLENO_FABRICA') badgeColor = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
-        if (b.estado === 'EN_CLIENTE') badgeColor = 'bg-blue-500/10 text-blue-400 border-blue-500/30';
-        if (b.estado === 'MANTENIMIENTO') badgeColor = 'bg-amber-500/10 text-amber-400 border-amber-500/30';
+        if (b.estado === 'lleno_fabrica' || b.estado === 'LLENO_FABRICA') badgeColor = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
+        if (b.estado === 'entregado_cliente' || b.estado === 'EN_CLIENTE') badgeColor = 'bg-blue-500/10 text-blue-400 border-blue-500/30';
+        if (b.estado === 'mantenimiento' || b.estado === 'MANTENIMIENTO') badgeColor = 'bg-amber-500/10 text-amber-400 border-amber-500/30';
 
         const estiloCerveza = b.cerveza || b.estilo || 'No especificado';
+        
+        // Formatear la fecha de YYYY-MM-DD a DD/MM/YYYY
+        let fechaFormateada = '';
+        if (b.fechaEmbarrilado) {
+            let partes = b.fechaEmbarrilado.split('-');
+            if (partes.length === 3) {
+                fechaFormateada = `${partes[2]}/${partes[1]}/${partes[0]}`;
+            } else {
+                fechaFormateada = b.fechaEmbarrilado;
+            }
+        }
 
         html += `
             <div class="card p-4 space-y-3 bg-slate-900 border border-slate-800 rounded-xl flex flex-col justify-between shadow-lg">
@@ -1515,12 +1543,13 @@ function renderBarriles(filtroEstado = 'TODOS') {
                     <div class="flex justify-between items-start border-b border-slate-800 pb-2">
                         <div>
                             <h4 class="font-bold text-amber-400 font-mono text-sm">${b.codigo || 'S/N'}</h4>
-                            <span class="text-[10px] text-slate-400">Capacidad: <strong>${b.capacidad || 50} Lts</strong> | Conector: <strong>Tipo ${b.conector || 'S'}</strong></span>
+                            <span class="text-[10px] text-slate-400">Capacidad: <strong>${b.capacidad || '50L'}</strong> | Conector: <strong>Tipo ${b.conector || 'S'}</strong></span>
                         </div>
                         <span class="text-[10px] font-mono border px-2 py-0.5 rounded-md font-bold ${badgeColor}">${b.estado || 'REGISTRADO'}</span>
                     </div>
                     <div class="mt-2 space-y-1 text-[11px] text-slate-300">
                         <p>🍺 Estilo: <strong class="text-amber-200">${estiloCerveza}</strong></p>
+                        ${fechaFormateada ? `<p>📅 Embarrilado: <strong class="text-slate-200">${fechaFormateada}</strong></p>` : ''}
                         <p>📦 Lote: <strong class="font-mono text-slate-100">${b.lote || 'Ninguno'}</strong></p>
                         <p>📍 Ubicación: <strong class="text-slate-100">${b.ubicacion || 'Fábrica'}</strong></p>
                     </div>
@@ -1534,7 +1563,6 @@ function renderBarriles(filtroEstado = 'TODOS') {
 
     contenedor.innerHTML = html;
 }
-
 function filtrarBarriles(estado) {
     renderBarriles(estado);
 }
