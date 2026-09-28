@@ -2385,6 +2385,179 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 });
+    // ==========================================
+// SOLUCIÓN DEFINITIVA Y ANTIPISADAS - BARRILES
+// ==========================================
+(function() {
+    // 1. Forzar carga inicial limpia y sin recortes
+    function sincronizarBarrilesDefinitivo() {
+        try {
+            const raw = localStorage.getItem('alb_barriles') || localStorage.getItem('barriles');
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed)) {
+                    window.barriles = parsed;
+                }
+            }
+        } catch(e) {
+            console.error("Error al sincronizar barriles:", e);
+        }
+        if (!Array.isArray(window.barriles)) {
+            window.barriles = [];
+        }
+    }
+
+    sincronizarBarrilesDefinitivo();
+
+    // 2. Sobrescribir guardarBarril de forma limpia y directa
+    window.guardarBarril = function(event) {
+        if (event && typeof event.preventDefault === 'function') {
+            event.preventDefault();
+        }
+
+        const codigoInput = document.getElementById('barril-codigo');
+        const capacidadInput = document.getElementById('barril-capacidad');
+        const conectorInput = document.getElementById('barril-conector');
+        const estadoInput = document.getElementById('barril-estado');
+        const cervezaInput = document.getElementById('barril-cerveza');
+        const loteInput = document.getElementById('barril-lote');
+        const fechaInput = document.getElementById('barril-fecha');
+        const ubicacionInput = document.getElementById('barril-ubicacion');
+
+        if (!codigoInput || !codigoInput.value.trim()) {
+            alert("Ingrese el código del barril.");
+            return;
+        }
+
+        sincronizarBarrilesDefinitivo();
+
+        const nuevoBarril = {
+            codigo: codigoInput.value.trim(),
+            capacidad: capacidadInput ? capacidadInput.value : '50',
+            conector: conectorInput ? conectorInput.value : 'G',
+            estado: estadoInput ? estadoInput.value : 'LLENO_FABRICA',
+            cerveza: cervezaInput ? cervezaInput.value.trim() : '',
+            lote: loteInput ? loteInput.value.trim() : '',
+            fechaEmbarrilado: fechaInput ? fechaInput.value : '',
+            ubicacion: ubicacionInput ? ubicacionInput.value.trim() : ''
+        };
+
+        // Si estamos editando un índice existente
+        if (window.barrilEditandoIdx !== null && window.barrilEditandoIdx !== undefined && window.barrilEditandoIdx >= 0 && window.barrilEditandoIdx < window.barriles.length) {
+            window.barriles[window.barrilEditandoIdx] = nuevoBarril;
+            window.barrilEditandoIdx = null;
+        } else {
+            // Agregar siempre al final sin borrar nada anterior
+            window.barriles.push(nuevoBarril);
+        }
+
+        // Persistir en localStorage de forma duplicada para evitar desincronizaciones
+        const dataStr = JSON.stringify(window.barriles);
+        localStorage.setItem('alb_barriles', dataStr);
+        localStorage.setItem('barriles', dataStr);
+
+        // Cerrar modal y resetear formulario
+        const modal = document.getElementById('modal-barril');
+        if (modal) modal.classList.add('hidden');
+        
+        const form = document.getElementById('form-barril');
+        if (form) form.reset();
+
+        // Refrescar pantalla inmediatamente
+        if (typeof window.renderBarriles === 'function') {
+            window.renderBarriles('TODOS');
+        }
+    };
+
+    // 3. Sobrescribir renderBarriles garantizando que dibuje TODOS los elementos de window.barriles
+    window.renderBarriles = function(filtro = 'TODOS') {
+        const contenedor = document.getElementById('grilla-barriles');
+        if (!contenedor) return;
+
+        sincronizarBarrilesDefinitivo();
+        let lista = window.barriles || [];
+
+        if (filtro && filtro !== 'TODOS') {
+            lista = lista.filter(b => {
+                const est = (b.estado || '').toUpperCase();
+                const f = filtro.toUpperCase();
+                if (f.includes('LLENO')) return est.includes('LLENO');
+                if (f.includes('VACIO')) return est.includes('VACIO');
+                if (f.includes('CLIENTE')) return est.includes('CLIENTE');
+                return est === f;
+            });
+        }
+
+        if (lista.length === 0) {
+            contenedor.innerHTML = `<p class="text-gray-400 col-span-full text-center py-6">No hay barriles para mostrar en esta categoría.</p>`;
+            return;
+        }
+
+        let html = '';
+        lista.forEach((b) => {
+            const realIdx = window.barriles.indexOf(b);
+            html += `
+                <div class="bg-gray-800 border border-gray-700 rounded-lg p-4 shadow-md flex flex-col justify-between mb-3">
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xl font-bold text-white">${b.codigo}</span>
+                            <span class="text-xs px-2 py-1 rounded bg-blue-900 text-blue-200 font-semibold uppercase">${b.estado}</span>
+                        </div>
+                        <div class="text-sm text-gray-300 space-y-1">
+                            <p>Capacidad: <strong>${b.capacidad || '50'} L</strong> | Conector: <strong>${b.conector || 'G'}</strong></p>
+                            ${b.cerveza ? `<p>Cerveza: <strong>${b.cerveza}</strong></p>` : ''}
+                            ${b.lote ? `<p>📦 Lote: <strong>${b.lote}</strong></p>` : ''}
+                            ${b.fechaEmbarrilado ? `<p>📅 Embarrilado: <strong>${b.fechaEmbarrilado}</strong></p>` : ''}
+                            ${b.ubicacion ? `<div class="text-sm text-gray-300 mt-1">📍 Ubicación: ${b.ubicacion}</div>` : ''}
+                        </div>
+                    </div>
+                    <div class="flex justify-between mt-4 pt-3 border-t border-gray-700">
+                        <button onclick="window.eliminarBarril(${realIdx})" class="text-xs bg-red-900 hover:bg-red-800 text-red-100 px-3 py-1.5 rounded transition">Eliminar</button>
+                        <button onclick="window.editarBarril(${realIdx})" class="text-xs bg-gray-700 hover:bg-gray-600 text-gray-200 px-3 py-1.5 rounded transition">Cambiar Estado</button>
+                    </div>
+                </div>
+            `;
+        });
+        contenedor.innerHTML = html;
+    };
+
+    // 4. Funciones de apoyo globales aseguradas
+    window.eliminarBarril = function(idx) {
+        if (confirm("¿Estás seguro de que deseas eliminar este barril?")) {
+            window.barriles.splice(idx, 1);
+            const dataStr = JSON.stringify(window.barriles);
+            localStorage.setItem('alb_barriles', dataStr);
+            localStorage.setItem('barriles', dataStr);
+            window.renderBarriles('TODOS');
+        }
+    };
+
+    window.editarBarril = function(idx) {
+        window.barrilEditandoIdx = idx;
+        const b = window.barriles[idx];
+        if (!b) return;
+
+        const setVal = (id, val) => {
+            const el = document.getElementById(id);
+            if (el) el.value = val || '';
+        };
+
+        setVal('barril-codigo', b.codigo);
+        setVal('barril-capacidad', b.capacidad);
+        setVal('barril-conector', b.conector || 'G');
+        setVal('barril-estado', b.estado);
+        setVal('barril-cerveza', b.cerveza);
+        setVal('barril-lote', b.lote);
+        setVal('barril-fecha', b.fechaEmbarrilado);
+        setVal('barril-ubicacion', b.ubicacion);
+
+        const titulo = document.getElementById('modal-barril-titulo');
+        if (titulo) titulo.innerText = 'Editar Barril';
+
+        const modal = document.getElementById('modal-barril');
+        if (modal) modal.classList.remove('hidden');
+    };
+})();
 </script>
 </body>
 </html>
