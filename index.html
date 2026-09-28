@@ -486,6 +486,7 @@
             <i class="fa-solid fa-beer-mug-empty"></i> Gestionar Barril
         </h3>
         <div class="space-y-3 text-xs">
+            <input type="hidden" id="barril-id">
             <div>
                 <label class="text-slate-400 block mb-1">Código de Barril</label>
                 <input type="text" id="barril-codigo" placeholder="ej. K-01" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-sm font-mono text-amber-400 focus:border-amber-500 focus:outline-none">
@@ -494,9 +495,9 @@
                 <div>
                     <label class="text-slate-400 block mb-1">Capacidad</label>
                     <select id="barril-capacidad" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-sm text-white focus:border-amber-500 focus:outline-none">
-                        <option value="50L">50 Litros</option>
-                        <option value="30L">30 Litros</option>
-                        <option value="20L">20 Litros</option>
+                        <option value="50">50 Litros</option>
+                        <option value="30">30 Litros</option>
+                        <option value="20">20 Litros</option>
                     </select>
                 </div>
                 <div>
@@ -509,32 +510,28 @@
             </div>
             <div>
                 <label class="text-slate-400 block mb-1">Estado Actual</label>
-                <select id="barril-estado" onchange="toggleCamposEstadoBarril()" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-sm text-white focus:border-amber-500 focus:outline-none">
+                <select id="barril-estado" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-sm text-white focus:border-amber-500 focus:outline-none">
                     <option value="vacio_sucio">Vacío - Sucio en fábrica</option>
                     <option value="vacio_limpio">Vacío - Limpio en fábrica</option>
                     <option value="vacio_sanitizado">Vacío - Sanitizado en fábrica</option>
-                    <option value="lleno_fabrica">Lleno en fábrica</option>
-                    <option value="entregado_cliente">Entregado en Cliente</option>
-                    <option value="mantenimiento">Mantenimiento / Fuera de servicio</option>
+                    <option value="LLENO_FABRICA">Lleno en fábrica</option>
+                    <option value="EN_CLIENTE">Entregado en Cliente</option>
+                    <option value="MANTENIMIENTO">Mantenimiento / Fuera de servicio</option>
                 </select>
             </div>
             
-            <!-- BLOQUE CONDICIONAL (Se muestra solo si está lleno o en cliente) -->
-            <div id="bloque-datos-cerveza" class="space-y-3 p-3 bg-slate-950/50 border border-slate-800 rounded-lg hidden">
-                <div>
-                    <label class="text-slate-400 block mb-1">Estilo de Cerveza / Lote</label>
-                    <input type="text" id="barril-cerveza" placeholder="ej. American Pale Ale (L-280)" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-sm text-white focus:border-amber-500 focus:outline-none">
-                </div>
-                <div>
-                    <label class="text-slate-400 block mb-1">Fecha de Embarrilado</label>
-                    <input type="date" id="barril-fecha" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-sm text-white focus:border-amber-500 focus:outline-none">
-                </div>
+            <!-- CAMPOS DE CERVEZA Y FECHA (SIEMPRE VISIBLES) -->
+            <div>
+                <label class="text-slate-400 block mb-1">Estilo de Cerveza / Lote</label>
+                <input type="text" id="barril-cerveza" placeholder="ej. American Pale Ale (L-280)" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-sm text-white focus:border-amber-500 focus:outline-none">
             </div>
-
-            <div id="campo-barril-cliente" class="hidden">
-                <label class="text-slate-400 block mb-1">Cliente Asignado</label>
-                <select id="barril-cliente-select" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-sm text-white focus:border-amber-500 focus:outline-none">
-                </select>
+            <div>
+                <label class="text-slate-400 block mb-1">Fecha de Embarrilado</label>
+                <input type="date" id="barril-fecha" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-sm text-white focus:border-amber-500 focus:outline-none">
+            </div>
+            <div>
+                <label class="text-slate-400 block mb-1">Ubicación / Notas</label>
+                <input type="text" id="barril-ubicacion" placeholder="ej. Fábrica" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-sm text-white focus:border-amber-500 focus:outline-none">
             </div>
         </div>
         <div class="flex justify-end gap-3 pt-3 border-t border-slate-800">
