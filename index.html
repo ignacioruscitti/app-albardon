@@ -480,71 +480,60 @@
 </section>
 
 <!-- MODAL: Alta / Edición de Barril -->
-<div id="modal-barril" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-slate-900 border border-slate-800 rounded-xl w-full max-w-md p-6 space-y-4 shadow-2xl">
-        <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-            <h3 class="text-base font-bold text-amber-400 flex items-center gap-2">
-                <i class="fa-solid fa-[#beer-mug-empty]"></i> <span id="modal-barril-titulo">Registrar Nuevo Barril</span>
-            </h3>
-            <button onclick="cerrarModalBarril()" class="text-slate-400 hover:text-slate-200 text-sm">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-
-        <form id="form-barril" onsubmit="guardarBarril(event)" class="space-y-4 text-xs">
-            <input type="hidden" id="barril-id">
-            
+<!-- BARRIL MODAL -->
+<div id="modal-barril" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden no-print">
+    <div class="card p-6 w-full max-w-md space-y-4 bg-slate-900 border border-slate-800 rounded-xl">
+        <h3 id="modal-barril-titulo" class="font-bold text-amber-400 text-base border-b border-slate-700 pb-2">Gestionar Barril</h3>
+        <div class="space-y-3 text-xs">
             <div>
-                <label class="text-slate-400 font-bold block mb-1">CÓDIGO / IDENTIFICADOR</label>
-                <input type="text" id="barril-codigo" placeholder="Ej. B-050, K-01" required class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 font-mono focus:border-amber-500 outline-none">
+                <label class="text-slate-400 block mb-1">Código de Barril</label>
+                <input type="text" id="barril-codigo" placeholder="ej. K-01" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-sm font-mono text-amber-400">
             </div>
-
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="text-slate-400 font-bold block mb-1">CAPACIDAD (LTS)</label>
-                    <select id="barril-capacidad" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 focus:border-amber-500 outline-none">
-                        <option value="50">50 Litros</option>
-                        <option value="30">30 Litros</option>
-                        <option value="20">20 Litros</option>
-                        <option value="10">10 Litros</option>
+                    <label class="text-slate-400 block mb-1">Capacidad</label>
+                    <select id="barril-capacidad" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-sm text-white">
+                        <option value="50L">50 Litros</option>
+                        <option value="30L">30 Litros</option>
+                        <option value="20L">20 Litros</option>
                     </select>
                 </div>
                 <div>
-                    <label class="text-slate-400 font-bold block mb-1">CONECTOR</label>
-                    <select id="barril-conector" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 focus:border-amber-500 outline-none">
-                        <option value="G">Tipo G (Micromatic)</option>
-                        <option value="A">Tipo A</option>
-                        <option value="S">Tipo S</option>
-                        <option value="M">Tipo M</option>
+                    <label class="text-slate-400 block mb-1">Tipo de Conector</label>
+                    <select id="barril-conector" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-sm text-white">
+                        <option value="G">Conector G</option>
+                        <option value="S">Conector S</option>
                     </select>
                 </div>
             </div>
-
             <div>
-                <label class="text-slate-400 font-bold block mb-1">ESTADO ACTUAL</label>
-                <select id="barril-estado" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 focus:border-amber-500 outline-none">
-                    <option value="VACIO">Vacío / Disponible</option>
-                    <option value="LLENO_FABRICA">Lleno en Fábrica</option>
-                    <option value="EN_CLIENTE">En Cliente / Consumo</option>
-                    <option value="MANTENIMIENTO">Mantenimiento / Service</option>
+                <label class="text-slate-400 block mb-1">Estado Actual</label>
+                <select id="barril-estado" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-sm text-white">
+                    <option value="vacio_sucio">Vacío - Sucio en fábrica</option>
+                    <option value="vacio_limpio">Vacío - Limpio en fábrica</option>
+                    <option value="vacio_sanitizado">Vacío - Sanitizado en fábrica</option>
+                    <option value="lleno_fabrica">Lleno en fábrica</option>
+                    <option value="entregado_cliente">Entregado en Cliente</option>
+                    <option value="mantenimiento">Mantenimiento / Fuera de servicio</option>
                 </select>
             </div>
-
+            
+            <!-- CAMPO DE ESTILO DE CERVEZA (VISIBLE) -->
             <div>
-                <label class="text-slate-400 font-bold block mb-1">LOTE ASIGNADO (OPCIONAL)</label>
-                <input type="text" id="barril-lote" placeholder="Ej. L-2026-01" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 font-mono focus:border-amber-500 outline-none">
+                <label class="text-slate-400 block mb-1">Estilo de Cerveza / Lote</label>
+                <input type="text" id="barril-cerveza" placeholder="ej. American Pale Ale (L-280)" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-sm text-white">
             </div>
 
+            <!-- CAMPO DE FECHA DE EMBARRILADO (VISIBLE) -->
             <div>
-                <label class="text-slate-400 font-bold block mb-1">CLIENTE / UBICACIÓN ACTUAL</label>
-                <input type="text" id="barril-ubicacion" placeholder="Ej. Depósito Central o Nombre del Cliente" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 focus:border-amber-500 outline-none">
+                <label class="text-slate-400 block mb-1">Fecha de Embarrilado</label>
+                <input type="date" id="barril-fecha" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-sm text-white">
             </div>
-
-            <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
-                <button type="button" onclick="cerrarModalBarril()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-lg">Cancelar</button>
-                <button type="submit" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-lg">Guardar Barril</button>
-            </div>
-        </form>
+        </div>
+        <div class="flex justify-end gap-3 pt-3 border-t border-slate-700">
+            <button onclick="cerrarModalBarril()" class="bg-slate-700 text-slate-300 text-xs font-bold px-4 py-2 rounded-lg">Cancelar</button>
+            <button onclick="guardarBarril(event)" class="bg-amber-500 text-slate-950 text-xs font-bold px-4 py-2 rounded-lg">Guardar</button>
+        </div>
     </div>
 </div>
 </script>
