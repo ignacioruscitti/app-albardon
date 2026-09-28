@@ -1422,23 +1422,20 @@ function guardarBarril(event) {
     const capacidadInput = document.getElementById('barril-capacidad');
     const conectorInput = document.getElementById('barril-conector');
     const estadoInput = document.getElementById('barril-estado');
-    const loteInput = document.getElementById('barril-lote');
-    const ubicacionInput = document.getElementById('barril-ubicacion');
-    
-    // Captura de los nuevos inputs
     const cervezaInput = document.getElementById('barril-cerveza');
+    const loteInput = document.getElementById('barril-lote');
     const fechaInput = document.getElementById('barril-fecha');
+    const ubicacionInput = document.getElementById('barril-ubicacion');
 
     const id = (idInput && idInput.value) ? idInput.value : 'barril_' + Date.now();
     const codigo = codigoInput ? codigoInput.value.trim() : 'S/N';
-    const capacidad = capacidadInput ? capacidadInput.value : '50L';
+    const capacidad = capacidadInput ? capacidadInput.value : '50';
     const conector = conectorInput ? conectorInput.value : 'S';
-    const estado = estadoInput ? estadoInput.value : 'lleno_fabrica';
-    const lote = loteInput ? loteInput.value.trim() : '';
-    const ubicacion = ubicacionInput ? ubicacionInput.value.trim() : 'Fábrica';
-    
+    const estado = estadoInput ? estadoInput.value : 'LLENO_FABRICA';
     const cerveza = (cervezaInput && cervezaInput.value.trim()) ? cervezaInput.value.trim() : 'No especificado';
+    const lote = (loteInput && loteInput.value.trim()) ? loteInput.value.trim() : '';
     const fechaEmbarrilado = (fechaInput && fechaInput.value) ? fechaInput.value : '';
+    const ubicacion = (ubicacionInput && ubicacionInput.value.trim()) ? ubicacionInput.value.trim() : 'Fábrica';
 
     if (!Array.isArray(window.barriles)) {
         window.barriles = [];
@@ -1451,10 +1448,10 @@ function guardarBarril(event) {
         capacidad, 
         conector, 
         estado, 
-        lote, 
-        ubicacion, 
         cerveza, 
-        fechaEmbarrilado 
+        lote, 
+        fechaEmbarrilado, 
+        ubicacion 
     };
 
     if (index >= 0) {
@@ -1529,11 +1526,10 @@ function renderBarriles(filtroEstado = 'TODOS') {
         let badgeColor = 'bg-slate-800 text-slate-300 border-slate-700';
         if (b.estado === 'lleno_fabrica' || b.estado === 'LLENO_FABRICA') badgeColor = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
         if (b.estado === 'entregado_cliente' || b.estado === 'EN_CLIENTE') badgeColor = 'bg-blue-500/10 text-blue-400 border-blue-500/30';
-        if (b.estado === 'mantenimiento' || b.estado === 'MANTENIMIENTO' || b.estado === 'mantenimiento') badgeColor = 'bg-amber-500/10 text-amber-400 border-amber-500/30';
+        if (b.estado === 'mantenimiento' || b.estado === 'MANTENIMIENTO') badgeColor = 'bg-amber-500/10 text-amber-400 border-amber-500/30';
 
         const estiloCerveza = b.cerveza || b.estilo || 'No especificado';
         
-        // Formatear la fecha de YYYY-MM-DD a DD/MM/YYYY
         let fechaFormateada = '';
         if (b.fechaEmbarrilado) {
             let partes = b.fechaEmbarrilado.split('-');
@@ -1562,7 +1558,6 @@ function renderBarriles(filtroEstado = 'TODOS') {
                     </div>
                 </div>
                 <div class="pt-2 border-t border-slate-800 flex justify-end gap-2">
-                    <button onclick="editarBarril('${b.id || b.codigo}')" class="text-amber-400 hover:text-amber-300 text-xs p-1" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button>
                     <button onclick="eliminarBarril('${b.id || b.codigo}')" class="text-red-400 hover:text-red-300 text-xs p-1" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
                 </div>
             </div>
