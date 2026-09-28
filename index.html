@@ -1504,7 +1504,7 @@ function eliminarBarril(idx) {
 }
 
 // ==========================================
-// FUNCIÓN GUARDAR BARRIL DEFINITIVA
+// FUNCIÓN GUARDAR BARRIL BLINDADA
 // ==========================================
 function guardarBarril(event) {
     if (event && typeof event.preventDefault === 'function') {
@@ -1551,15 +1551,22 @@ function guardarBarril(event) {
         ubicacion 
     };
 
-    // Si estamos editando o creando uno nuevo
-    if (window.barrilEditandoIdx !== null && window.barrilEditandoIdx >= 0) {
+    console.log("Estado antes de guardar - Índice editando:", window.barrilEditandoIdx);
+    console.log("Array actual de barriles:", [...window.barriles]);
+
+    // Verificamos estrictamente si estamos editando o creando uno nuevo
+    if (window.barrilEditandoIdx !== null && window.barrilEditandoIdx !== undefined && window.barrilEditandoIdx !== '' && window.barrilEditandoIdx >= 0) {
         window.barriles[window.barrilEditandoIdx] = obj;
-        window.barrilEditandoIdx = null;
+        console.log("-> Se editó el barril en el índice:", window.barrilEditandoIdx);
     } else {
         window.barriles.push(obj);
+        console.log("-> Se agregó un NUEVO barril al array.");
     }
 
-    // Guardar en el almacenamiento del navegador
+    // Limpiamos el índice para la próxima
+    window.barrilEditandoIdx = null;
+
+    // Guardar en localStorage de inmediato
     const datosString = JSON.stringify(window.barriles);
     localStorage.setItem('alb_barriles', datosString);
     localStorage.setItem('barriles', datosString);
@@ -1568,10 +1575,12 @@ function guardarBarril(event) {
     const modal = document.getElementById('modal-barril');
     if (modal) modal.classList.add('hidden');
     
-    // REDIBUJAR LA GRILLA AL INSTANTE
+    // Redibujar la grilla
     if (typeof renderBarriles === 'function') {
         renderBarriles('TODOS');
     }
+    
+    console.log("Array después de guardar:", [...window.barriles]);
 }
 
 function toggleCamposEstadoBarril() {
