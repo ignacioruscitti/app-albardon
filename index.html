@@ -1396,7 +1396,7 @@ function intentarRenderizarBarriles(filtroEstado = 'TODOS', intentos = 0) {
 }
 
 // ==========================================
-// FUNCIÓN DE RENDERIZADO DINÁMICO DE LA GRILLA (REEMPLAZADA)
+// FUNCIÓN DE RENDERIZADO DEFINITIVA
 // ==========================================
 window.renderBarriles = function(filtro = 'TODOS') {
     const contenedor = document.getElementById('grilla-barriles');
@@ -1404,21 +1404,16 @@ window.renderBarriles = function(filtro = 'TODOS') {
 
     let lista = window.barriles || [];
 
-    // Filtrar según el botón superior presionado
+    // Limpiamos la lista de cualquier elemento nulo o indefinido que pueda venir corrupto
+    lista = lista.filter(b => b && typeof b === 'object' && b.codigo);
+
     if (filtro && filtro !== 'TODOS') {
         lista = lista.filter(b => {
             const est = (b.estado || '').toUpperCase();
             const f = filtro.toUpperCase();
-            
-            if (f.includes('LLENO')) {
-                return est.includes('LLENO');
-            }
-            if (f.includes('VACIO')) {
-                return est.includes('VACIO');
-            }
-            if (f.includes('CLIENTE')) {
-                return est.includes('CLIENTE');
-            }
+            if (f.includes('LLENO')) return est.includes('LLENO');
+            if (f.includes('VACIO')) return est.includes('VACIO');
+            if (f.includes('CLIENTE')) return est.includes('CLIENTE');
             return est === f;
         });
     }
@@ -1430,9 +1425,7 @@ window.renderBarriles = function(filtro = 'TODOS') {
 
     let html = '';
     lista.forEach((b) => {
-        // Encontramos el índice real en el array global para editar/eliminar correctamente
         const realIdx = window.barriles.indexOf(b);
-        
         html += `
             <div class="bg-gray-800 border border-gray-700 rounded-lg p-4 shadow-md flex flex-col justify-between">
                 <div>
@@ -1455,11 +1448,9 @@ window.renderBarriles = function(filtro = 'TODOS') {
             </div>
         `;
     });
-
     contenedor.innerHTML = html;
 };
 
-// Función que habilita los botones de filtrado superior
 function filtrarBarriles(estadoFiltro) {
     renderBarriles(estadoFiltro);
 }
@@ -1469,16 +1460,10 @@ function mostrarModalBarril() {
     const modal = document.getElementById('modal-barril');
     const form = document.getElementById('form-barril');
     if (form) form.reset();
-    const inputId = document.getElementById('barril-id');
-    if (inputId) inputId.value = '';
     const titulo = document.getElementById('modal-barril-titulo');
     if (titulo) titulo.innerText = 'Registrar Nuevo Barril';
-    
     if (modal) modal.classList.remove('hidden');
-
-    if (typeof toggleCamposEstadoBarril === 'function') {
-        toggleCamposEstadoBarril();
-    }
+    if (typeof toggleCamposEstadoBarril === 'function') toggleCamposEstadoBarril();
 }
 
 function cerrarModalBarril() {
@@ -1509,15 +1494,7 @@ function editarBarril(idx) {
     const titulo = document.getElementById('modal-barril-titulo');
     if (titulo) titulo.innerText = 'Editar Barril';
 
-    if (typeof toggleCamposEstadoBarril === 'function') {
-        toggleCamposEstadoBarril();
-    }
-
-    if (b.estado === 'entregado_cliente' && b.cliente) {
-        const selectC = document.getElementById('barril-cliente-select');
-        if (selectC) selectC.value = b.cliente;
-    }
-
+    if (typeof toggleCamposEstadoBarril === 'function') toggleCamposEstadoBarril();
     const modal = document.getElementById('modal-barril');
     if (modal) modal.classList.remove('hidden');
 }
@@ -1525,63 +1502,29 @@ function editarBarril(idx) {
 function eliminarBarril(idx) {
     if (confirm("¿Estás seguro de que deseas eliminar este barril?")) {
         window.barriles.splice(idx, 1);
-        
-        if (typeof guardarStorage === 'function') {
-            guardarStorage();
-        } else {
-            const datosString = JSON.stringify(window.barriles);
-            localStorage.setItem('alb_barriles', datosString);
-            localStorage.setItem('barriles', datosString);
-        }
-        
+        guardarStorageSeguro();
         renderBarriles('TODOS');
     }
 }
 
 function guardarBarril(event) {
-    if (event && typeof event.preventDefault === 'function') {
-        event.preventDefault();
-    }
+    if (event && typeof event.preventDefault === 'function') event.preventDefault();
 
-    const codigoInput = document.getElementById('barril-codigo');
-    const capacidadInput = document.getElementById('barril-capacidad');
-    const conectorInput = document.getElementById('barril-conector');
-    const estadoInput = document.getElementById('barril-estado');
-    const cervezaInput = document.getElementById('barril-cerveza');
-    const loteInput = document.getElementById('barril-lote');
-    const fechaInput = document.getElementById('barril-fecha');
-    const ubicacionInput = document.getElementById('barril-ubicacion');
-    const selectCliente = document.getElementById('barril-cliente-select');
-
-    if (!codigoInput) return;
-
-    const codigo = codigoInput.value.trim();
-    const capacidad = capacidadInput ? capacidadInput.value : '50';
-    const conector = conectorInput ? conectorInput.value : 'G';
-    const estado = estadoInput ? estadoInput.value : 'vacio_sucio';
-    const cerveza = cervezaInput ? cervezaInput.value.trim() : '';
-    const lote = loteInput ? loteInput.value.trim() : '';
-    const fechaEmbarrilado = fechaInput ? fechaInput.value : '';
-    const ubicacion = ubicacionInput ? ubicacionInput.value.trim() : '';
-    const cliente = (estado === 'entregado_cliente' && selectCliente) ? selectCliente.value : '';
+    const codigo = document.getElementById('barril-codigo')?.value.trim();
+    const capacidad = document.getElementById('barril-capacidad')?.value || '50';
+    const conector = document.getElementById('barril-conector')?.value || 'G';
+    const estado = document.getElementById('barril-estado')?.value || 'vacio_sucio';
+    const cerveza = document.getElementById('barril-cerveza')?.value.trim() || '';
+    const lote = document.getElementById('barril-lote')?.value.trim() || '';
+    const fechaEmbarrilado = document.getElementById('barril-fecha')?.value || '';
+    const ubicacion = document.getElementById('barril-ubicacion')?.value.trim() || '';
+    const cliente = (estado === 'entregado_cliente') ? (document.getElementById('barril-cliente-select')?.value || '') : '';
 
     if (!codigo) return alert("Ingrese el código del barril.");
 
-    if (!Array.isArray(window.barriles)) {
-        window.barriles = [];
-    }
+    if (!Array.isArray(window.barriles)) window.barriles = [];
 
-    const obj = { 
-        codigo, 
-        capacidad, 
-        conector, 
-        estado, 
-        cerveza, 
-        lote, 
-        fechaEmbarrilado, 
-        ubicacion, 
-        cliente 
-    };
+    const obj = { codigo, capacidad, conector, estado, cerveza, lote, fechaEmbarrilado, ubicacion, cliente };
 
     if (window.barrilEditandoIdx !== null && window.barrilEditandoIdx >= 0) {
         window.barriles[window.barrilEditandoIdx] = obj;
@@ -1590,6 +1533,12 @@ function guardarBarril(event) {
         window.barriles.push(obj);
     }
 
+    guardarStorageSeguro();
+    cerrarModalBarril();
+    renderBarriles('TODOS');
+}
+
+function guardarStorageSeguro() {
     if (typeof guardarStorage === 'function') {
         guardarStorage();
     } else {
@@ -1597,14 +1546,56 @@ function guardarBarril(event) {
         localStorage.setItem('alb_barriles', datosString);
         localStorage.setItem('barriles', datosString);
     }
+}
 
-    if (typeof cerrarModalBarril === 'function') {
-        cerrarModalBarril();
+function cargarBarrilesDesdeStorageONube(datosRemotos) {
+    if (Array.isArray(datosRemotos) && datosRemotos.length > 0) {
+        window.barriles = datosRemotos;
+    } else {
+        let local = localStorage.getItem('alb_barriles') || localStorage.getItem('barriles');
+        if (local) {
+            try {
+                let parsed = JSON.parse(local);
+                window.barriles = Array.isArray(parsed) ? parsed : (parsed.lista || []);
+            } catch(e) {
+                window.barriles = [];
+            }
+        } else {
+            window.barriles = [];
+        }
     }
-    
+    guardarStorageSeguro();
     renderBarriles('TODOS');
 }
 
+function toggleCamposEstadoBarril() {
+    const estadoSelect = document.getElementById('barril-estado');
+    if (!estadoSelect) return;
+    
+    const estado = estadoSelect.value;
+    const bloqueCerveza = document.getElementById('bloque-datos-cerveza');
+    const inputFecha = document.getElementById('barril-fecha');
+    const campoCliente = document.getElementById('campo-barril-cliente');
+    
+    const requiereCerveza = (estado === 'lleno_fabrica' || estado === 'entregado_cliente' || estado === 'LLENO_FABRICA' || estado === 'EN_CLIENTE');
+    const esCliente = (estado === 'entregado_cliente' || estado === 'EN_CLIENTE');
+
+    if (bloqueCerveza) {
+        if (requiereCerveza) {
+            bloqueCerveza.classList.remove('hidden');
+            if (inputFecha && !inputFecha.value) {
+                inputFecha.value = new Date().toISOString().split('T')[0];
+            }
+        } else {
+            bloqueCerveza.classList.add('hidden');
+        }
+    }
+
+    if (campoCliente) {
+        if (esCliente) campoCliente.classList.remove('hidden');
+        else campoCliente.classList.add('hidden');
+    }
+}
 function cargarBarrilesDesdeStorageONube(datosRemotos) {
     if (Array.isArray(datosRemotos) && datosRemotos.length > 0) {
         window.barriles = datosRemotos;
