@@ -2356,7 +2356,7 @@ function descargarRemitoPDF(clienteId, movIdx) {
     }
 } </script>
     
-  <script>   // --- INICIALIZACIÓN Y ARRANQUE ---
+<script>   // --- INICIALIZACIÓN Y ARRANQUE ---
 document.addEventListener('DOMContentLoaded', () => {
     const cocFecha = document.getElementById('coc-fecha');
     if (cocFecha) cocFecha.valueAsDate = new Date();
@@ -2370,6 +2370,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (typeof switchTab === 'function') switchTab('recetas');
     if (typeof iniciarSincronizacion === 'function') iniciarSincronizacion();
+
+    // --- VINCULACIÓN DEL FORMULARIO DE BARRILES ---
+    const formBarril = document.getElementById('form-barril');
+    if (formBarril) {
+        formBarril.onsubmit = function(event) {
+            guardarBarril(event);
+        };
+    }
 });
 </script>
 </body>
