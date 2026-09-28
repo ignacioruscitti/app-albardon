@@ -1504,7 +1504,7 @@ function eliminarBarril(idx) {
 }
 
 // ==========================================
-// FUNCIÓN GUARDAR BARRIL BLINDADA
+// GUARDAR BARRIL SIN LÍMITES
 // ==========================================
 function guardarBarril(event) {
     if (event && typeof event.preventDefault === 'function') {
@@ -1536,6 +1536,7 @@ function guardarBarril(event) {
         return;
     }
 
+    // Asegurarnos de que window.barriles sea un array válido
     if (!Array.isArray(window.barriles)) {
         window.barriles = [];
     }
@@ -1551,22 +1552,12 @@ function guardarBarril(event) {
         ubicacion 
     };
 
-    console.log("Estado antes de guardar - Índice editando:", window.barrilEditandoIdx);
-    console.log("Array actual de barriles:", [...window.barriles]);
+    // Agregamos el nuevo barril al final sin recortar nada
+    window.barriles.push(obj);
 
-    // Verificamos estrictamente si estamos editando o creando uno nuevo
-    if (window.barrilEditandoIdx !== null && window.barrilEditandoIdx !== undefined && window.barrilEditandoIdx !== '' && window.barrilEditandoIdx >= 0) {
-        window.barriles[window.barrilEditandoIdx] = obj;
-        console.log("-> Se editó el barril en el índice:", window.barrilEditandoIdx);
-    } else {
-        window.barriles.push(obj);
-        console.log("-> Se agregó un NUEVO barril al array.");
-    }
+    console.log("Total actual de barriles en memoria:", window.barriles.length);
 
-    // Limpiamos el índice para la próxima
-    window.barrilEditandoIdx = null;
-
-    // Guardar en localStorage de inmediato
+    // Guardar en el almacenamiento del navegador de forma persistente
     const datosString = JSON.stringify(window.barriles);
     localStorage.setItem('alb_barriles', datosString);
     localStorage.setItem('barriles', datosString);
@@ -1575,10 +1566,11 @@ function guardarBarril(event) {
     const modal = document.getElementById('modal-barril');
     if (modal) modal.classList.add('hidden');
     
-    // Redibujar la grilla
+    // Redibujar la grilla con todos los elementos
     if (typeof renderBarriles === 'function') {
         renderBarriles('TODOS');
     }
+}
     
     console.log("Array después de guardar:", [...window.barriles]);
 }
