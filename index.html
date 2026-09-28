@@ -1424,19 +1424,19 @@ function guardarBarril(event) {
     const loteInput = document.getElementById('barril-lote');
     const ubicacionInput = document.getElementById('barril-ubicacion');
     
-    // Nuevos campos
+    // Nuevos campos agregados
     const cervezaInput = document.getElementById('barril-cerveza');
     const fechaInput = document.getElementById('barril-fecha');
 
     const id = (idInput && idInput.value) ? idInput.value : 'barril_' + Date.now();
     const codigo = codigoInput ? codigoInput.value.trim() : 'S/N';
-    const capacidad = capacidadInput ? (parseInt(capacidadInput.value) || 50) : 50;
+    const capacidad = capacidadInput ? capacidadInput.value : '50L';
     const conector = conectorInput ? conectorInput.value : 'S';
-    const estado = estadoInput ? estadoInput.value : 'LLENO_FABRICA';
+    const estado = estadoInput ? estadoInput.value : 'lleno_fabrica';
     const lote = loteInput ? loteInput.value.trim() : '';
     const ubicacion = ubicacionInput ? ubicacionInput.value.trim() : 'Fábrica';
     
-    // Captura de estilo y fecha (con valores por defecto si están vacíos)
+    // Lectura de los valores nuevos
     const cerveza = (cervezaInput && cervezaInput.value.trim()) ? cervezaInput.value.trim() : 'No especificado';
     const fechaEmbarrilado = (fechaInput && fechaInput.value) ? fechaInput.value : '';
 
@@ -1445,8 +1445,17 @@ function guardarBarril(event) {
     }
 
     const index = window.barriles.findIndex(b => b.id === id);
-    // Agregamos cerveza y fechaEmbarrilado al objeto
-    const nuevoBarril = { id, codigo, capacidad, conector, estado, lote, ubicacion, cerveza, fechaEmbarrilado };
+    const nuevoBarril = { 
+        id, 
+        codigo, 
+        capacidad, 
+        conector, 
+        estado, 
+        lote, 
+        ubicacion, 
+        cerveza, 
+        fechaEmbarrilado 
+    };
 
     if (index >= 0) {
         window.barriles[index] = nuevoBarril;
@@ -1454,17 +1463,20 @@ function guardarBarril(event) {
         window.barriles.push(nuevoBarril);
     }
 
-    // Guardado persistente local y en la nube
+    // 1. Guardado persistente inmediato en localStorage
     const datosString = JSON.stringify(window.barriles);
     localStorage.setItem('alb_barriles', datosString);
     localStorage.setItem('barriles', datosString);
 
+    // 2. Sincronización con la nube
     if (typeof db !== 'undefined' && db.collection) {
         db.collection("albardon_app").doc("barriles").set({ lista: window.barriles })
           .catch(e => console.error("Error al sincronizar barril en nube:", e));
     }
 
     cerrarModalBarril();
+    
+    // 3. Renderizado inmediato
     renderBarriles('TODOS');
 }
 
