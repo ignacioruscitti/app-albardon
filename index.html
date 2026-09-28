@@ -1421,24 +1421,42 @@ function guardarBarril(event) {
         window.barriles.push(nuevoBarril);
     }
 
-    // Guardado unificado y redundante para garantizar persistencia
+    // 1. Guardado persistente inmediato en localStorage local
     const datosString = JSON.stringify(window.barriles);
     localStorage.setItem('alb_barriles', datosString);
     localStorage.setItem('barriles', datosString);
 
-    if (typeof guardarStorage === 'function') {
-        guardarStorage();
-    }
-
+    // 2. Sincronización segura con la nube (solo si Firebase está disponible)
     if (typeof db !== 'undefined' && db.collection) {
         db.collection("albardon_app").doc("barriles").set({ lista: window.barriles })
           .catch(e => console.error("Error al sincronizar barril en nube:", e));
     }
 
     cerrarModalBarril();
+    
+    // 3. Forzar renderizado inmediato y bloquear cualquier intento de borrado posterior
+    setTimeout(() => {
+        renderBarriles('TODOS');
+    }, 50);
+}
+function cargarBarrilesDesdeStorageONube(datosRemotos) {
+    // Si la nube o el storage devuelven datos válidos, los usamos
+    if (Array.isArray(datosRemotos) && datosRemotos.length > 0) {
+        window.barriles = datosRemotos;
+    } else {
+        // Si vienen vacíos, chequeamos si tenemos algo en localStorage antes de borrar nada
+        let local = localStorage.getItem('alb_barriles') || localStorage.getItem('barriles');
+        if (local) {
+            try {
+                let parsed = JSON.parse(local);
+                window.barriles = Array.isArray(parsed) ? parsed : (parsed.lista || []);
+            } catch(e) {
+                if (!window.barriles) window.barriles = [];
+            }
+        }
+    }
     renderBarriles('TODOS');
 }
-
 function renderBarriles(filtroEstado = 'TODOS') {
     const contenedor = document.getElementById('grilla-barriles');
     if (!contenedor) return;
