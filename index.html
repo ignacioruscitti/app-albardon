@@ -1546,6 +1546,15 @@ function cargarBarrilesDesdeStorageONube(datosRemotos) {
     }
 }
 
+// Función que faltaba para habilitar los botones de filtrado superior
+function filtrarBarriles(estadoFiltro) {
+    if (typeof renderBarriles === 'function') {
+        renderBarriles(estadoFiltro);
+    } else {
+        console.warn("La función renderBarriles no está disponible.");
+    }
+}
+
 function toggleCamposEstadoBarril() {
     const estadoSelect = document.getElementById('barril-estado');
     if (!estadoSelect) return;
