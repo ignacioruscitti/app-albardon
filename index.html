@@ -1611,24 +1611,41 @@ function toggleCamposEstadoBarril() {
         else campoCliente.classList.add('hidden');
     }
 }
+// ==========================================
+// CARGA INICIAL ROBUSTA DE BARRILES
+// ==========================================
 function cargarBarrilesDesdeStorageONube(datosRemotos) {
     if (Array.isArray(datosRemotos) && datosRemotos.length > 0) {
         window.barriles = datosRemotos;
-        const datosString = JSON.stringify(window.barriles);
-        localStorage.setItem('alb_barriles', datosString);
-        localStorage.setItem('barriles', datosString);
     } else {
-        let local = localStorage.getItem('alb_barriles') || localStorage.getItem('barriles');
-        if (local) {
+        // Intentamos leer de ambas claves posibles en el navegador
+        let localAlb = localStorage.getItem('alb_barriles');
+        let localBar = localStorage.getItem('barriles');
+        
+        let rawData = localAlb || localBar;
+        
+        if (rawData) {
             try {
-                let parsed = JSON.parse(local);
+                let parsed = JSON.parse(rawData);
                 window.barriles = Array.isArray(parsed) ? parsed : (parsed.lista || []);
             } catch(e) {
-                if (!window.barriles) window.barriles = [];
+                console.error("Error al parsear el storage de barriles:", e);
+                window.barriles = [];
             }
+        } else {
+            window.barriles = [];
         }
     }
-    renderBarriles('TODOS');
+
+    // Aseguramos que ambas claves queden sincronizadas con lo que realmente tenemos
+    const datosString = JSON.stringify(window.barriles);
+    localStorage.setItem('alb_barriles', datosString);
+    localStorage.setItem('barriles', datosString);
+
+    // Redibujar la interfaz inmediatamente
+    if (typeof renderBarriles === 'function') {
+        renderBarriles('TODOS');
+    }
 }
 
 function toggleCamposEstadoBarril() {
@@ -2379,6 +2396,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (typeof switchTab === 'function') switchTab('recetas');
     if (typeof iniciarSincronizacion === 'function') iniciarSincronizacion();
+
+    // --- CARGA Y RENDERIZADO DE BARRILES AL INICIAR ---
+    try {
+        const localData = localStorage.getItem('alb_barriles') || localStorage.getItem('barriles');
+        if (localData) {
+            window.barriles = JSON.parse(localData);
+        } else {
+            window.barriles = [];
+        }
+    } catch(e) {
+        console.error("Error al cargar barriles del storage:", e);
+        window.barriles = [];
+    }
+
+    if (typeof renderBarriles === 'function') {
+        renderBarriles('TODOS');
+    }
 
     // --- VINCULACIÓN DEL FORMULARIO DE BARRILES ---
     const formBarril = document.getElementById('form-barril');
