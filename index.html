@@ -1357,6 +1357,8 @@ function eliminarReceta(key) {
 if (typeof window.barriles === 'undefined') {
     window.barriles = [];
 }
+// Alias global seguro para mantener compatibilidad con cualquier parte del script
+let barriles = window.barriles;
 let barrilEditandoIdx = null;
 
 // Función robusta para inicializar y cargar desde localStorage
@@ -1380,6 +1382,7 @@ function inicializarBarrilesStorage() {
     } else {
         window.barriles = [];
     }
+    barriles = window.barriles;
 
     intentarRenderizarBarriles();
 }
@@ -1394,6 +1397,7 @@ function intentarRenderizarBarriles(filtroEstado = 'TODOS', intentos = 0) {
 }
 
 function mostrarModalBarril() {
+    barrilEditandoIdx = null;
     const modal = document.getElementById('modal-barril');
     const form = document.getElementById('form-barril');
     if (form) form.reset();
@@ -1404,75 +1408,48 @@ function mostrarModalBarril() {
     
     if (modal) modal.classList.remove('hidden');
 
-    // 👇 LLAMAR A ESTO AQUÍ: Asegura que al abrir el modal se ajusten los campos según el estado inicial
     toggleCamposEstadoBarril();
 }
 
 function cerrarModalBarril() {
+    barrilEditandoIdx = null;
     const modal = document.getElementById('modal-barril');
     if (modal) modal.classList.add('hidden');
 }
 
-function guardarBarril() {
-    const codigoInput = document.getElementById('barril-codigo');
-    const capacidadInput = document.getElementById('barril-capacidad');
-    const conectorInput = document.getElementById('barril-conector');
-    const estadoInput = document.getElementById('barril-estado');
-    const cervezaInput = document.getElementById('barril-cerveza');
-    const loteInput = document.getElementById('barril-lote');
-    const fechaInput = document.getElementById('barril-fecha');
-    const selectCliente = document.getElementById('barril-cliente-select');
+function editarBarril(idx) {
+    barrilEditandoIdx = idx; 
+    const b = window.barriles[idx];
+    if (!b) return;
 
-    if (!codigoInput) return;
+    const setVal = (id, val) => { 
+        const el = document.getElementById(id); 
+        if (el) el.value = val || ''; 
+    };
 
-    const codigo = codigoInput.value.trim();
-    const capacidad = capacidadInput ? capacidadInput.value : '50';
-    const conector = conectorInput ? conectorInput.value : 'G';
-    const estado = estadoInput ? estadoInput.value : 'vacio_sucio';
-    const cerveza = cervezaInput ? cervezaInput.value.trim() : '';
-    const lote = loteInput ? loteInput.value.trim() : '';
-    const fechaEmbarrilado = fechaInput ? fechaInput.value : '';
-    const cliente = (estado === 'entregado_cliente' && selectCliente) ? selectCliente.value : '';
+    setVal('barril-codigo', b.codigo);
+    setVal('barril-capacidad', b.capacidad);
+    setVal('barril-conector', b.conector || 'G');
+    setVal('barril-estado', b.estado);
+    setVal('barril-cerveza', b.cerveza);
+    setVal('barril-lote', b.lote);
+    setVal('barril-fecha', b.fechaEmbarrilado);
+    setVal('barril-ubicacion', b.ubicacion);
+    
+    const titulo = document.getElementById('modal-barril-titulo');
+    if (titulo) titulo.innerText = 'Editar Barril';
 
-    if (!codigo) return alert("Ingrese el código del barril.");
-
-    const obj = { codigo, capacidad, conector, estado, cerveza, lote, fechaEmbarrilado, cliente };
-
-    if (barrilEditandoIdx !== null && barrilEditandoIdx >= 0) {
-        barriles[barrilEditandoIdx] = obj;
-        barrilEditandoIdx = null;
-    } else {
-        barriles.push(obj);
+    if (typeof toggleCamposEstadoBarril === 'function') {
+        toggleCamposEstadoBarril();
     }
 
-    if (typeof guardarStorage === 'function') {
-        guardarStorage();
+    if (b.estado === 'entregado_cliente' && b.cliente) {
+        const selectC = document.getElementById('barril-cliente-select');
+        if (selectC) selectC.value = b.cliente;
     }
 
-    cerrarModalBarril();
-    renderBarriles();
-}
-
-function cargarBarrilesDesdeStorageONube(datosRemotos) {
-    // Escudo protector: Solo acepta datos remotos si tienen elementos, 
-    // de lo contrario respeta y mantiene lo que ya está guardado localmente.
-    if (Array.isArray(datosRemotos) && datosRemotos.length > 0) {
-        window.barriles = datosRemotos;
-        const datosString = JSON.stringify(window.barriles);
-        localStorage.setItem('alb_barriles', datosString);
-        localStorage.setItem('barriles', datosString);
-    } else {
-        let local = localStorage.getItem('alb_barriles') || localStorage.getItem('barriles');
-        if (local) {
-            try {
-                let parsed = JSON.parse(local);
-                window.barriles = Array.isArray(parsed) ? parsed : (parsed.lista || []);
-            } catch(e) {
-                if (!window.barriles) window.barriles = [];
-            }
-        }
-    }
-    renderBarriles('TODOS');
+    const modal = document.getElementById('modal-barril');
+    if (modal) modal.classList.remove('hidden');
 }
 
 function guardarBarril(event) {
@@ -1504,7 +1481,10 @@ function guardarBarril(event) {
 
     if (!codigo) return alert("Ingrese el código del barril.");
 
-    // Objeto unificado que respeta tus variables y añade lote, fecha y ubicación
+    if (!Array.isArray(window.barriles)) {
+        window.barriles = [];
+    }
+
     const obj = { 
         codigo, 
         capacidad, 
@@ -1513,23 +1493,24 @@ function guardarBarril(event) {
         cerveza, 
         lote, 
         fechaEmbarrilado, 
-        ubicacion,
+        ubicacion, 
         cliente 
     };
 
-    if (typeof barriles === 'undefined') {
-        window.barriles = [];
-    }
-
     if (barrilEditandoIdx !== null && barrilEditandoIdx >= 0) {
-        barriles[barrilEditandoIdx] = obj;
+        window.barriles[barrilEditandoIdx] = obj;
         barrilEditandoIdx = null;
     } else {
-        barriles.push(obj);
+        window.barriles.push(obj);
     }
+    barriles = window.barriles;
 
     if (typeof guardarStorage === 'function') {
         guardarStorage();
+    } else {
+        const datosString = JSON.stringify(window.barriles);
+        localStorage.setItem('alb_barriles', datosString);
+        localStorage.setItem('barriles', datosString);
     }
 
     if (typeof cerrarModalBarril === 'function') {
@@ -1540,6 +1521,28 @@ function guardarBarril(event) {
         renderBarriles();
     }
 }
+
+function cargarBarrilesDesdeStorageONube(datosRemotos) {
+    if (Array.isArray(datosRemotos) && datosRemotos.length > 0) {
+        window.barriles = datosRemotos;
+        const datosString = JSON.stringify(window.barriles);
+        localStorage.setItem('alb_barriles', datosString);
+        localStorage.setItem('barriles', datosString);
+    } else {
+        let local = localStorage.getItem('alb_barriles') || localStorage.getItem('barriles');
+        if (local) {
+            try {
+                let parsed = JSON.parse(local);
+                window.barriles = Array.isArray(parsed) ? parsed : (parsed.lista || []);
+            } catch(e) {
+                if (!window.barriles) window.barriles = [];
+            }
+        }
+    }
+    barriles = window.barriles;
+    renderBarriles('TODOS');
+}
+
 function toggleCamposEstadoBarril() {
     const estadoSelect = document.getElementById('barril-estado');
     if (!estadoSelect) return;
@@ -1549,16 +1552,12 @@ function toggleCamposEstadoBarril() {
     const inputFecha = document.getElementById('barril-fecha');
     const campoCliente = document.getElementById('campo-barril-cliente');
     
-    // Estados que requieren información de cerveza y fecha de embarrilado
     const requiereCerveza = (estado === 'lleno_fabrica' || estado === 'entregado_cliente' || estado === 'LLENO_FABRICA' || estado === 'EN_CLIENTE');
-    // Estado específico que requiere cliente asignado
     const esCliente = (estado === 'entregado_cliente' || estado === 'EN_CLIENTE');
 
-    // Controlar visibilidad del bloque de cerveza y fecha
     if (bloqueCerveza) {
         if (requiereCerveza) {
             bloqueCerveza.classList.remove('hidden');
-            // Autocompletar con la fecha de hoy si está vacía
             if (inputFecha && !inputFecha.value) {
                 const hoy = new Date().toISOString().split('T')[0];
                 inputFecha.value = hoy;
@@ -1568,7 +1567,6 @@ function toggleCamposEstadoBarril() {
         }
     }
 
-    // Controlar visibilidad del selector de cliente
     if (campoCliente) {
         if (esCliente) {
             campoCliente.classList.remove('hidden');
@@ -1577,6 +1575,7 @@ function toggleCamposEstadoBarril() {
         }
     }
 }
+
 // Observador de seguridad para blindar la grilla ante cambios del DOM
 const observadorBarriles = new MutationObserver(() => {
     const contenedor = document.getElementById('grilla-barriles');
