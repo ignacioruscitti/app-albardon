@@ -1498,7 +1498,6 @@ function renderBarriles(filtroEstado = 'TODOS') {
     const contenedor = document.getElementById('grilla-barriles');
     if (!contenedor) return;
 
-    // Lectura directa desde memoria o localStorage para asegurar consistencia visual
     let datosAlmacenados = localStorage.getItem('alb_barriles') || localStorage.getItem('barriles');
     if (datosAlmacenados && (!window.barriles || window.barriles.length === 0)) {
         try {
@@ -1526,7 +1525,7 @@ function renderBarriles(filtroEstado = 'TODOS') {
         let badgeColor = 'bg-slate-800 text-slate-300 border-slate-700';
         if (b.estado === 'lleno_fabrica' || b.estado === 'LLENO_FABRICA') badgeColor = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
         if (b.estado === 'entregado_cliente' || b.estado === 'EN_CLIENTE') badgeColor = 'bg-blue-500/10 text-blue-400 border-blue-500/30';
-        if (b.estado === 'mantenimiento' || b.estado === 'MANTENIMIENTO') badgeColor = 'bg-amber-500/10 text-amber-400 border-amber-500/30';
+        if (b.estado === 'mantenimiento' || b.estado === 'MANTENIMIENTO' || b.estado === 'mantenimiento') badgeColor = 'bg-amber-500/10 text-amber-400 border-amber-500/30';
 
         const estiloCerveza = b.cerveza || b.estilo || 'No especificado';
         
@@ -1546,20 +1545,21 @@ function renderBarriles(filtroEstado = 'TODOS') {
                 <div>
                     <div class="flex justify-between items-start border-b border-slate-800 pb-2">
                         <div>
-                            <h4 class="font-bold text-amber-400 font-mono text-sm">${b.codigo || 'S/N'}</h4>
-                            <span class="text-[10px] text-slate-400">Capacidad: <strong>${b.capacidad || '50L'}</strong> | Conector: <strong>Tipo ${b.conector || 'S'}</strong></span>
+                            <h4 class="font-bold text-amber-400 font-mono text-base">${b.codigo || 'S/N'}</h4>
+                            <span class="text-[11px] text-slate-400">Capacidad: <strong>${b.capacidad || '50'}L</strong> | Conector: <strong>Tipo ${b.conector || 'S'}</strong></span>
                         </div>
                         <span class="text-[10px] font-mono border px-2 py-0.5 rounded-md font-bold ${badgeColor}">${b.estado || 'REGISTRADO'}</span>
                     </div>
-                    <div class="mt-2 space-y-1 text-[11px] text-slate-300">
+                    <div class="mt-2 space-y-1 text-xs text-slate-300">
                         <p>🍺 Estilo: <strong class="text-amber-200">${estiloCerveza}</strong></p>
+                        ${b.lote ? `<p>📦 Lote: <strong class="font-mono text-slate-100">${b.lote}</strong></p>` : ''}
                         ${fechaFormateada ? `<p>📅 Embarrilado: <strong class="text-slate-200">${fechaFormateada}</strong></p>` : ''}
-                        <p>📦 Lote: <strong class="font-mono text-slate-100">${b.lote || 'Ninguno'}</strong></p>
-                        <p>📍 Ubicación: <strong class="text-slate-100">${b.ubicacion || 'Fábrica'}</strong></p>
+                        ${b.ubicacion ? `<p>📍 Ubicación: <strong class="text-slate-100">${b.ubicacion}</strong></p>` : ''}
                     </div>
                 </div>
                 <div class="pt-2 border-t border-slate-800 flex justify-end gap-2">
-                    <button onclick="eliminarBarril('${b.id || b.codigo}')" class="text-red-400 hover:text-red-300 text-xs p-1"><i class="fa-solid fa-trash"></i></button>
+                    <button onclick="editarBarril('${b.id || b.codigo}')" class="text-amber-400 hover:text-amber-300 text-xs p-1" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button>
+                    <button onclick="eliminarBarril('${b.id || b.codigo}')" class="text-red-400 hover:text-red-300 text-xs p-1" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
                 </div>
             </div>
         `;
