@@ -1504,7 +1504,7 @@ function eliminarBarril(idx) {
 }
 
 // ==========================================
-// FUNCIÓN DE GUARDADO ACTUALIZADA
+// FUNCIÓN GUARDAR BARRIL DEFINITIVA
 // ==========================================
 function guardarBarril(event) {
     if (event && typeof event.preventDefault === 'function') {
@@ -1519,19 +1519,17 @@ function guardarBarril(event) {
     const loteInput = document.getElementById('barril-lote');
     const fechaInput = document.getElementById('barril-fecha');
     const ubicacionInput = document.getElementById('barril-ubicacion');
-    const selectCliente = document.getElementById('barril-cliente-select');
 
     if (!codigoInput) return;
 
     const codigo = codigoInput.value.trim();
     const capacidad = capacidadInput ? capacidadInput.value : '50';
     const conector = conectorInput ? conectorInput.value : 'G';
-    const estado = estadoInput ? estadoInput.value : 'vacio_sucio';
+    const estado = estadoInput ? estadoInput.value : 'LLENO_FABRICA';
     const cerveza = cervezaInput ? cervezaInput.value.trim() : '';
     const lote = loteInput ? loteInput.value.trim() : '';
     const fechaEmbarrilado = fechaInput ? fechaInput.value : '';
     const ubicacion = ubicacionInput ? ubicacionInput.value.trim() : '';
-    const cliente = (estado === 'entregado_cliente' && selectCliente) ? selectCliente.value : '';
 
     if (!codigo) {
         alert("Ingrese el código del barril.");
@@ -1550,8 +1548,7 @@ function guardarBarril(event) {
         cerveza, 
         lote, 
         fechaEmbarrilado, 
-        ubicacion, 
-        cliente 
+        ubicacion 
     };
 
     // Si estamos editando o creando uno nuevo
@@ -1562,21 +1559,14 @@ function guardarBarril(event) {
         window.barriles.push(obj);
     }
 
-    // Guardar en el almacenamiento del navegador de forma segura
+    // Guardar en el almacenamiento del navegador
     const datosString = JSON.stringify(window.barriles);
     localStorage.setItem('alb_barriles', datosString);
     localStorage.setItem('barriles', datosString);
-    if (typeof guardarStorage === 'function') {
-        try { guardarStorage(); } catch(e) {}
-    }
 
-    // Cerrar el modal si la función existe
-    if (typeof cerrarModalBarril === 'function') {
-        cerrarModalBarril();
-    } else {
-        const modal = document.getElementById('modal-barril');
-        if (modal) modal.classList.add('hidden');
-    }
+    // Cerrar el modal
+    const modal = document.getElementById('modal-barril');
+    if (modal) modal.classList.add('hidden');
     
     // REDIBUJAR LA GRILLA AL INSTANTE
     if (typeof renderBarriles === 'function') {
