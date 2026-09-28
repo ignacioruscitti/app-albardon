@@ -1409,7 +1409,9 @@ function mostrarModalBarril() {
     
     if (modal) modal.classList.remove('hidden');
 
-    toggleCamposEstadoBarril();
+    if (typeof toggleCamposEstadoBarril === 'function') {
+        toggleCamposEstadoBarril();
+    }
 }
 
 function cerrarModalBarril() {
