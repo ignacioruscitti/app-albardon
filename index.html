@@ -1510,7 +1510,7 @@ function eliminarBarril(idx) {
 }
 
 // ==========================================
-// FUNCIÓN GUARDAR BARRIL DEFINITIVA
+// GUARDAR BARRIL CON AUDITORÍA TOTAL
 // ==========================================
 function guardarBarril(event) {
     if (event && typeof event.preventDefault === 'function') {
@@ -1542,10 +1542,14 @@ function guardarBarril(event) {
         return;
     }
 
-    // Asegurar que window.barriles sea un array
+    // Asegurar array global
     if (!Array.isArray(window.barriles)) {
         window.barriles = [];
     }
+
+    console.log("--- ANTES DE GUARDAR ---");
+    console.log("Total en memoria antes:", window.barriles.length);
+    console.log("Códigos actuales:", window.barriles.map(b => b.codigo));
 
     const obj = { 
         codigo, 
@@ -1558,38 +1562,30 @@ function guardarBarril(event) {
         ubicacion 
     };
 
-    // Verificamos si estamos editando un índice válido
-    const idxEdicion = window.barrilEditandoIdx;
-    
-    if (idxEdicion !== null && idxEdicion !== undefined && idxEdicion !== '' && idxEdicion >= 0 && idxEdicion < window.barriles.length) {
-        // Actualizamos el existente
-        window.barriles[idxEdicion] = obj;
-    } else {
-        // CORRECCIÓN CRÍTICA: Nos aseguramos de agregar siempre al final como un ítem NUEVO
-        window.barriles.push(obj);
-    }
+    // Forzamos la entrada al final sin importar nada
+    window.barriles.push(obj);
 
-    // Limpiamos la variable de edición inmediatamente
-    window.barrilEditandoIdx = null;
+    console.log("--- DESPUÉS DEL PUSH ---");
+    console.log("Total en memoria después:", window.barriles.length);
+    console.log("Códigos después:", window.barriles.map(b => b.codigo));
 
-    // Guardar de forma persistente en localStorage
+    // Guardar en localStorage de forma estricta
     const datosString = JSON.stringify(window.barriles);
     localStorage.setItem('alb_barriles', datosString);
     localStorage.setItem('barriles', datosString);
 
-    // Cerrar el modal y resetear el formulario
+    // Cerrar modal y limpiar
     const modal = document.getElementById('modal-barril');
     if (modal) modal.classList.add('hidden');
     
     const formBarril = document.getElementById('form-barril');
     if (formBarril) formBarril.reset();
     
-    // Redibujar la grilla mostrando todos
+    // Redibujar
     if (typeof renderBarriles === 'function') {
         renderBarriles('TODOS');
     }
 }
-
 // ==========================================
 // 3. UTILIDADES Y CARGA INICIAL
 // ==========================================
