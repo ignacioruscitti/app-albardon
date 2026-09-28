@@ -1453,16 +1453,19 @@ function filtrarBarriles(estadoFiltro) {
 }
 
 function mostrarModalBarril() {
+    // Forzamos a que SIEMPRE sea un registro nuevo limpiando cualquier índice previo
     window.barrilEditandoIdx = null;
+    
     const modal = document.getElementById('modal-barril');
     const form = document.getElementById('form-barril');
     if (form) form.reset();
+    
     const titulo = document.getElementById('modal-barril-titulo');
     if (titulo) titulo.innerText = 'Registrar Nuevo Barril';
+    
     if (modal) modal.classList.remove('hidden');
     if (typeof toggleCamposEstadoBarril === 'function') toggleCamposEstadoBarril();
 }
-
 function cerrarModalBarril() {
     window.barrilEditandoIdx = null;
     const modal = document.getElementById('modal-barril');
