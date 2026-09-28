@@ -1357,9 +1357,9 @@ function eliminarReceta(key) {
 if (typeof window.barriles === 'undefined') {
     window.barriles = [];
 }
-// Alias global seguro para mantener compatibilidad con cualquier parte del script
-let barriles = window.barriles;
-let barrilEditandoIdx = null;
+if (typeof window.barrilEditandoIdx === 'undefined') {
+    window.barrilEditandoIdx = null;
+}
 
 // Función robusta para inicializar y cargar desde localStorage
 function inicializarBarrilesStorage() {
@@ -1382,7 +1382,6 @@ function inicializarBarrilesStorage() {
     } else {
         window.barriles = [];
     }
-    barriles = window.barriles;
 
     intentarRenderizarBarriles();
 }
@@ -1390,14 +1389,16 @@ function inicializarBarrilesStorage() {
 function intentarRenderizarBarriles(filtroEstado = 'TODOS', intentos = 0) {
     const contenedor = document.getElementById('grilla-barriles');
     if (contenedor) {
-        renderBarriles(filtroEstado);
+        if (typeof renderBarriles === 'function') {
+            renderBarriles(filtroEstado);
+        }
     } else if (intentos < 5) {
         setTimeout(() => intentarRenderizarBarriles(filtroEstado, intentos + 1), 100);
     }
 }
 
 function mostrarModalBarril() {
-    barrilEditandoIdx = null;
+    window.barrilEditandoIdx = null;
     const modal = document.getElementById('modal-barril');
     const form = document.getElementById('form-barril');
     if (form) form.reset();
@@ -1412,13 +1413,13 @@ function mostrarModalBarril() {
 }
 
 function cerrarModalBarril() {
-    barrilEditandoIdx = null;
+    window.barrilEditandoIdx = null;
     const modal = document.getElementById('modal-barril');
     if (modal) modal.classList.add('hidden');
 }
 
 function editarBarril(idx) {
-    barrilEditandoIdx = idx; 
+    window.barrilEditandoIdx = idx; 
     const b = window.barriles[idx];
     if (!b) return;
 
@@ -1497,13 +1498,12 @@ function guardarBarril(event) {
         cliente 
     };
 
-    if (barrilEditandoIdx !== null && barrilEditandoIdx >= 0) {
-        window.barriles[barrilEditandoIdx] = obj;
-        barrilEditandoIdx = null;
+    if (window.barrilEditandoIdx !== null && window.barrilEditandoIdx >= 0) {
+        window.barriles[window.barrilEditandoIdx] = obj;
+        window.barrilEditandoIdx = null;
     } else {
         window.barriles.push(obj);
     }
-    barriles = window.barriles;
 
     if (typeof guardarStorage === 'function') {
         guardarStorage();
@@ -1539,8 +1539,9 @@ function cargarBarrilesDesdeStorageONube(datosRemotos) {
             }
         }
     }
-    barriles = window.barriles;
-    renderBarriles('TODOS');
+    if (typeof renderBarriles === 'function') {
+        renderBarriles('TODOS');
+    }
 }
 
 function toggleCamposEstadoBarril() {
@@ -1581,7 +1582,9 @@ const observadorBarriles = new MutationObserver(() => {
     const contenedor = document.getElementById('grilla-barriles');
     if (contenedor && contenedor.offsetParent !== null) {
         if (Array.isArray(window.barriles) && window.barriles.length > 0 && contenedor.innerHTML.includes('No hay barriles')) {
-            renderBarriles('TODOS');
+            if (typeof renderBarriles === 'function') {
+                renderBarriles('TODOS');
+            }
         }
     }
 });
