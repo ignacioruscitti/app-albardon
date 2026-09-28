@@ -1435,7 +1435,7 @@ function guardarBarril(event) {
     const cerveza = (cervezaInput && cervezaInput.value.trim()) ? cervezaInput.value.trim() : 'No especificado';
     const lote = (loteInput && loteInput.value.trim()) ? loteInput.value.trim() : '';
     const fechaEmbarrilado = (fechaInput && fechaInput.value) ? fechaInput.value : '';
-    const ubicacion = (ubicacionInput && ubicacionInput.value.trim()) ? ubicacionInput.value.trim() : 'Fábrica';
+    const ubicacion = (ubicacionInput && ubicacionInput.value.trim()) ? ubicacionInput.value.trim() : '';
 
     if (!Array.isArray(window.barriles)) {
         window.barriles = [];
