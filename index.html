@@ -1672,59 +1672,26 @@ document.addEventListener("DOMContentLoaded", () => {
     renderBarriles();
 });
 </script>
- <!-- PUENTE AUTOMÁTICO DE FIREBASE CON DIAGNÓSTICO -->
+<!-- PUENTE AUTOMÁTICO DEFINITIVO (SINCRONIZACIÓN SEGURA) -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    if (typeof firebase === 'undefined' || typeof db === 'undefined') {
-        console.warn("⚠️ Firebase no está disponible.");
-        return;
-    }
+    if (typeof firebase === 'undefined' || typeof db === 'undefined') return;
 
-    const DOC_ID = 'datos_completos_cerveceria';
-    console.log("🟢 Puente de Firebase iniciado correctamente.");
+    DOC_ID = 'datos_completos_cerveceria';
 
-    // 1. Al abrir la app: intentar leer de la nube
-    db.collection('cerveceria_app').doc(DOC_ID).get().then((doc) => {
-        if (doc.exists) {
-            console.log("☁️ Datos encontrados en Firebase:", doc.data());
-            const datosNube = doc.data();
-            let huboCambios = false;
+    // 1. AL ABRIR LA APP: Subimos lo local a la nube primero para asegurar que no se pierda lo último hecho
+    setTimeout(() => {
+        subirTodoALaNube();
+    }, 1500);
 
-            for (const clave in datosNube) {
-                if (datosNube.hasOwnProperty(clave)) {
-                    const valorNube = JSON.stringify(datosNube[clave]);
-                    const valorLocal = localStorage.getItem(clave);
-                    
-                    if (valorNube !== valorLocal) {
-                        localStorage.setItem(clave, valorNube);
-                        huboCambios = true;
-                    }
-                }
-            }
-
-            if (huboCambios) {
-                console.log("🔄 Se actualizaron datos locales desde la nube.");
-                if (typeof window.renderBarriles === 'function') window.renderBarriles('TODOS');
-                if (typeof window.renderClientes === 'function') window.renderClientes();
-            }
-        } else {
-            console.log("⚠️ El documento en Firebase todavía está vacío. Se creará al guardar algo.");
-        }
-    }).catch(err => {
-        console.error("❌ Error al leer de Firebase:", err);
-    });
-
-    // 2. Interceptar localStorage.setItem
+    // 2. Interceptar localStorage.setItem para mantener sincronización automática
     const originalSetItem = localStorage.setItem;
     let temporizadorSubida = null;
 
     localStorage.setItem = function(key, value) {
         originalSetItem.apply(this, arguments);
 
-        // Si se guarda algo relacionado a barriles, clientes o recetas
         if (key && (key.startsWith('alb_') || key.includes('barriles') || key.includes('clientes') || key.includes('recetas'))) {
-            console.log(`💾 Detectado cambio local en la llave: "${key}". Preparando subida...`);
-            
             clearTimeout(temporizadorSubida);
             temporizadorSubida = setTimeout(() => {
                 subirTodoALaNube();
@@ -1732,7 +1699,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    function subirTodoALaNube() {
+    window.subirTodoALaNube = function() {
         try {
             const paqueteDatos = {};
             for (let i = 0; i < localStorage.length; i++) {
@@ -1746,19 +1713,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            console.log("🚀 Subiendo paquete de datos a Firebase...", paqueteDatos);
-
             db.collection('cerveceria_app').doc(DOC_ID).set(paqueteDatos, { merge: true })
-              .then(() => {
-                  console.log("✅ ¡Datos subidos y sincronizados con Firebase con éxito!");
-              })
               .catch(err => {
-                  console.error("❌ Error al intentar subir a Firebase:", err);
+                  console.error("Error al subir a Firebase:", err);
               });
         } catch (e) {
-            console.error("❌ Error al empaquetar los datos:", e);
+            console.error("Error al empaquetar datos:", e);
         }
-    }
+    };
 });
 </script>
  <script>       // --- MÓDULO COCCIÓN ---
