@@ -1507,25 +1507,58 @@ function eliminarBarril(idx) {
     }
 }
 
+// ==========================================
+// FUNCIÓN DE GUARDADO ACTUALIZADA
+// ==========================================
 function guardarBarril(event) {
-    if (event && typeof event.preventDefault === 'function') event.preventDefault();
+    if (event && typeof event.preventDefault === 'function') {
+        event.preventDefault();
+    }
 
-    const codigo = document.getElementById('barril-codigo')?.value.trim();
-    const capacidad = document.getElementById('barril-capacidad')?.value || '50';
-    const conector = document.getElementById('barril-conector')?.value || 'G';
-    const estado = document.getElementById('barril-estado')?.value || 'vacio_sucio';
-    const cerveza = document.getElementById('barril-cerveza')?.value.trim() || '';
-    const lote = document.getElementById('barril-lote')?.value.trim() || '';
-    const fechaEmbarrilado = document.getElementById('barril-fecha')?.value || '';
-    const ubicacion = document.getElementById('barril-ubicacion')?.value.trim() || '';
-    const cliente = (estado === 'entregado_cliente') ? (document.getElementById('barril-cliente-select')?.value || '') : '';
+    const codigoInput = document.getElementById('barril-codigo');
+    const capacidadInput = document.getElementById('barril-capacidad');
+    const conectorInput = document.getElementById('barril-conector');
+    const estadoInput = document.getElementById('barril-estado');
+    const cervezaInput = document.getElementById('barril-cerveza');
+    const loteInput = document.getElementById('barril-lote');
+    const fechaInput = document.getElementById('barril-fecha');
+    const ubicacionInput = document.getElementById('barril-ubicacion');
+    const selectCliente = document.getElementById('barril-cliente-select');
 
-    if (!codigo) return alert("Ingrese el código del barril.");
+    if (!codigoInput) return;
 
-    if (!Array.isArray(window.barriles)) window.barriles = [];
+    const codigo = codigoInput.value.trim();
+    const capacidad = capacidadInput ? capacidadInput.value : '50';
+    const conector = conectorInput ? conectorInput.value : 'G';
+    const estado = estadoInput ? estadoInput.value : 'vacio_sucio';
+    const cerveza = cervezaInput ? cervezaInput.value.trim() : '';
+    const lote = loteInput ? loteInput.value.trim() : '';
+    const fechaEmbarrilado = fechaInput ? fechaInput.value : '';
+    const ubicacion = ubicacionInput ? ubicacionInput.value.trim() : '';
+    const cliente = (estado === 'entregado_cliente' && selectCliente) ? selectCliente.value : '';
 
-    const obj = { codigo, capacidad, conector, estado, cerveza, lote, fechaEmbarrilado, ubicacion, cliente };
+    if (!codigo) {
+        alert("Ingrese el código del barril.");
+        return;
+    }
 
+    if (!Array.isArray(window.barriles)) {
+        window.barriles = [];
+    }
+
+    const obj = { 
+        codigo, 
+        capacidad, 
+        conector, 
+        estado, 
+        cerveza, 
+        lote, 
+        fechaEmbarrilado, 
+        ubicacion, 
+        cliente 
+    };
+
+    // Si estamos editando o creando uno nuevo
     if (window.barrilEditandoIdx !== null && window.barrilEditandoIdx >= 0) {
         window.barriles[window.barrilEditandoIdx] = obj;
         window.barrilEditandoIdx = null;
@@ -1533,39 +1566,26 @@ function guardarBarril(event) {
         window.barriles.push(obj);
     }
 
-    guardarStorageSeguro();
-    cerrarModalBarril();
-    renderBarriles('TODOS');
-}
-
-function guardarStorageSeguro() {
+    // Guardar en el almacenamiento del navegador de forma segura
+    const datosString = JSON.stringify(window.barriles);
+    localStorage.setItem('alb_barriles', datosString);
+    localStorage.setItem('barriles', datosString);
     if (typeof guardarStorage === 'function') {
-        guardarStorage();
-    } else {
-        const datosString = JSON.stringify(window.barriles);
-        localStorage.setItem('alb_barriles', datosString);
-        localStorage.setItem('barriles', datosString);
+        try { guardarStorage(); } catch(e) {}
     }
-}
 
-function cargarBarrilesDesdeStorageONube(datosRemotos) {
-    if (Array.isArray(datosRemotos) && datosRemotos.length > 0) {
-        window.barriles = datosRemotos;
+    // Cerrar el modal si la función existe
+    if (typeof cerrarModalBarril === 'function') {
+        cerrarModalBarril();
     } else {
-        let local = localStorage.getItem('alb_barriles') || localStorage.getItem('barriles');
-        if (local) {
-            try {
-                let parsed = JSON.parse(local);
-                window.barriles = Array.isArray(parsed) ? parsed : (parsed.lista || []);
-            } catch(e) {
-                window.barriles = [];
-            }
-        } else {
-            window.barriles = [];
-        }
+        const modal = document.getElementById('modal-barril');
+        if (modal) modal.classList.add('hidden');
     }
-    guardarStorageSeguro();
-    renderBarriles('TODOS');
+    
+    // REDIBUJAR LA GRILLA AL INSTANTE
+    if (typeof renderBarriles === 'function') {
+        renderBarriles('TODOS');
+    }
 }
 
 function toggleCamposEstadoBarril() {
