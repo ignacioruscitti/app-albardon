@@ -2133,7 +2133,6 @@ function guardarCliente() {
     const inputTelefono = document.getElementById('cli-telefono');
     const inputDireccion = document.getElementById('cli-direccion');
 
-    // Validación defensiva por si algún elemento no está en el DOM
     if (!inputNombre) {
         alert("Error: No se encuentra el campo del nombre del cliente en el HTML.");
         return;
@@ -2193,12 +2192,19 @@ function mostrarModalMovimiento() {
     if (select && typeof clientes !== 'undefined') {
         select.innerHTML = clientes.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
     }
-// AGREGA ESTO AQUÍ:
+    
+    // Autocompletar fecha de hoy
     const inputFecha = document.getElementById('mov-fecha');
     if (inputFecha) {
         inputFecha.value = new Date().toISOString().split('T')[0];
     }
-}
+
+    // Limpiar observaciones al abrir
+    const inputObs = document.getElementById('mov-observaciones');
+    if (inputObs) {
+        inputObs.value = '';
+    }
+
     const contenedorFilas = document.getElementById('contenedor-filas-remito');
     if (contenedorFilas) contenedorFilas.innerHTML = '';
     
@@ -2207,7 +2213,7 @@ function mostrarModalMovimiento() {
     
     const modal = document.getElementById('modal-movimiento');
     if (modal) modal.classList.remove('hidden');
-
+}
 
 function cerrarModalMovimiento() { 
     const modal = document.getElementById('modal-movimiento');
@@ -2278,9 +2284,9 @@ function guardarMovimiento() {
     const clienteSelect = document.getElementById('mov-cliente-select');
     const movTipo = document.getElementById('mov-tipo');
     if (!clienteSelect || !movTipo) return;
-// 1. CAPTURAR LA FECHA EDITABLE Y LAS OBSERVACIONES
+
     const fechaMovimiento = document.getElementById('mov-fecha').value || new Date().toISOString().split('T')[0];
-    const observacionesMovimiento = document.getElementById('mov-observaciones').value.trim();
+    const observacionesMovimiento = document.getElementById('mov-observaciones') ? document.getElementById('mov-observaciones').value.trim() : '';
 
     const clienteId = clienteSelect.value;
     const tipo = movTipo.value;
@@ -2322,63 +2328,12 @@ function guardarMovimiento() {
     cli.saldo += montoTotal;
     if (!cli.movimientos) cli.movimientos = [];
     
-    // 2. GUARDAR LOS NUEVOS DATOS EN EL MOVIMIENTO
     cli.movimientos.unshift({
-        fecha: fechaMovimiento,             // Usa la fecha seleccionada en el input
+        fecha: fechaMovimiento,
         concepto: conceptoText,
         monto: montoTotal,
         items: itemsArray,
-        observaciones: observacionesMovimiento // Guarda el texto de observaciones
-    });
-
-    if (typeof guardarStorage === 'function') guardarStorage();
-    cerrarModalMovimiento();
-    renderClientes();
-}
-    const clienteId = clienteSelect.value;
-    const tipo = movTipo.value;
-    const cli = clientes.find(c => c.id === clienteId);
-    if (!cli) return;
-
-    let conceptoText = '';
-    let itemsArray = [];
-    let montoTotal = 0;
-
-    if (tipo === 'entrega') {
-        document.querySelectorAll('.fila-remito-item').forEach(fila => {
-            const pres = fila.querySelector('.item-presentacion').value;
-            const estilo = fila.querySelector('.item-estilo').value.trim() || 'Varios';
-            const cant = parseFloat(fila.querySelector('.item-cant').value) || 0;
-            const precio = parseFloat(fila.querySelector('.item-precio').value) || 0;
-            const sub = cant * precio;
-
-            if (cant > 0) {
-                itemsArray.push({ presentacion: pres, estilo, cantidad: cant, precioUnitario: precio, subtotal: sub });
-                montoTotal += sub;
-            }
-        });
-
-        if (itemsArray.length === 0) return alert("Agregue al menos un ítem al remito.");
-        conceptoText = `Entrega de Cerveza (${itemsArray.length} descrip.)`;
-        montoTotal = -Math.abs(montoTotal);
-    } else {
-        const conceptoCobro = document.getElementById('mov-concepto-cobro');
-        const montoCobro = document.getElementById('mov-monto-cobro');
-
-        conceptoText = conceptoCobro ? (conceptoCobro.value.trim() || 'Cobro / Pago recibido') : 'Cobro / Pago recibido';
-        montoTotal = montoCobro ? (parseFloat(montoCobro.value) || 0) : 0;
-        
-        if (montoTotal <= 0) return alert("Ingrese un monto de cobro válido.");
-        montoTotal = Math.abs(montoTotal);
-    }
-
-    cli.saldo += montoTotal;
-    if (!cli.movimientos) cli.movimientos = [];
-    cli.movimientos.unshift({
-        fecha: new Date().toISOString().split('T')[0],
-        concepto: conceptoText,
-        monto: montoTotal,
-        items: itemsArray
+        observaciones: observacionesMovimiento
     });
 
     if (typeof guardarStorage === 'function') guardarStorage();
@@ -2395,6 +2350,11 @@ function enviarWhatsapp(clienteId) {
     let texto = `*REMITO DE ENTREGA - CERVECERÍA ALBARDÓN*\n`;
     texto += `*Cliente:* ${c.nombre}\n`;
     texto += `*Fecha:* ${ultMov.fecha || new Date().toISOString().split('T')[0]}\n`;
+    
+    if (ultMov.observaciones) {
+        texto += `*Observaciones:* ${ultMov.observaciones}\n`;
+    }
+    
     texto += `----------------------------------------------\n`;
 
     if (ultMov.items && ultMov.items.length > 0) {
@@ -2422,7 +2382,6 @@ function descargarRemitoPDF(clienteId, movIdx) {
     const elemento = document.getElementById('plantilla-pdf-remito');
     if (!elemento) return;
 
-    // Cargar datos
     const setInnerText = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
     setInnerText('pdf-fecha', `Fecha: ${m.fecha}`);
     setInnerText('pdf-cliente', c.nombre);
@@ -2447,8 +2406,6 @@ function descargarRemitoPDF(clienteId, movIdx) {
         });
     }
 
-    setInnerText('pdf-items-body', bodyHTML); // Nota: innerHTML se asigna mejor directo abajo si se prefiere, o usar una variable auxiliar.
-
     const bodyContainer = document.getElementById('pdf-items-body');
     if (bodyContainer) bodyContainer.innerHTML = bodyHTML;
 
@@ -2460,7 +2417,6 @@ function descargarRemitoPDF(clienteId, movIdx) {
     setInnerText('pdf-saldo-anterior', `$ ${saldoAnterior.toLocaleString()}`);
     setInnerText('pdf-saldo-total', `$ ${saldoTotalAcumulado.toLocaleString()}`);
 
-    // Usar la función de impresión nativa del navegador
     const contenido = elemento.innerHTML;
     const ventana = window.open('', '', 'height=700,width=900');
 
@@ -2478,7 +2434,7 @@ function descargarRemitoPDF(clienteId, movIdx) {
             ventana.close();
         }, 500);
     }
-} </script>
+}
     
 <script>   // --- INICIALIZACIÓN Y ARRANQUE ---
 document.addEventListener('DOMContentLoaded', () => {
