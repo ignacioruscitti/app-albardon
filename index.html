@@ -787,6 +787,7 @@
         <p><strong>CLIENTE:</strong> <span id="pdf-cliente">--</span></p>
         <p><strong>DIRECCIÓN:</strong> <span id="pdf-direccion">--</span></p>
         <p><strong>TELÉFONO:</strong> <span id="pdf-telefono">--</span></p>
+   <p id="pdf-observaciones" class="mt-2 text-xs text-gray-800 font-medium"></p>
     </div>
 
     <table class="w-full text-left border-collapse my-4 text-xs text-black">
@@ -2480,6 +2481,12 @@ function descargarRemitoPDF(clienteId, movIdx) {
     setInnerText('pdf-cliente', c.nombre);
     setInnerText('pdf-direccion', c.direccion || 'N / A');
     setInnerText('pdf-telefono', c.telefono || 'N / A');
+
+    // Inyectar la observación en el PDF si existe
+    const elObs = document.getElementById('pdf-observaciones');
+    if (elObs) {
+        elObs.innerText = m.observaciones ? `Observaciones: ${m.observaciones}` : '';
+    }
 
     let bodyHTML = '';
     let totalEntrega = 0;
