@@ -2535,11 +2535,31 @@ function descargarRemitoPDF(clienteId, movIdx) {
         }, 500);
     }
 }
-    // Puente para asegurar que HTML y JS se comuniquen sin errores
+  // Puente para asegurar que HTML y JS se comuniquen sin errores
 function toggleFormularioRemito() {
     if (typeof alternarFormularioRemito === 'function') {
         alternarFormularioRemito();
     }
+}
+
+// Función para eliminar un movimiento y corregir automáticamente el saldo
+function eliminarMovimiento(clienteId, movIdx) {
+    if (!confirm("¿Estás seguro de que deseas eliminar este movimiento? Se ajustará automáticamente el saldo de la cuenta corriente.")) return;
+
+    const c = clientes.find(item => item.id === clienteId);
+    if (!c || !c.movimientos || !c.movimientos[movIdx]) return;
+
+    const m = c.movimientos[movIdx];
+
+    // Revertir el impacto que tuvo este movimiento en el saldo del cliente
+    c.saldo -= m.monto;
+
+    // Eliminar el movimiento del array
+    c.movimientos.splice(movIdx, 1);
+
+    // Guardar y actualizar vista
+    if (typeof guardarStorage === 'function') guardarStorage();
+    if (typeof renderClientes === 'function') renderClientes();
 }
   // --- INICIALIZACIÓN Y ARRANQUE ---
 document.addEventListener('DOMContentLoaded', () => {
