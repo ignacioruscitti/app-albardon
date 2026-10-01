@@ -2187,19 +2187,113 @@ const opcionesPresentaciones = [
     'Barril 50L', 'Barril 30L', 'Barril 20L'
 ];
 
+function mostrarModalCliente() {
+    const titulo = document.getElementById('modal-cliente-titulo');
+    if (titulo) titulo.innerText = 'Nuevo Cliente';
+    
+    const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+    setVal('cli-id-editar', '');
+    setVal('cli-nombre', '');
+    setVal('cli-telefono', '');
+    setVal('cli-direccion', '');
+
+    const modal = document.getElementById('modal-cliente');
+    if (modal) modal.classList.remove('hidden');
+}
+
+function cerrarModalCliente() { 
+    const modal = document.getElementById('modal-cliente');
+    if (modal) modal.classList.add('hidden'); 
+}
+
+function editarCliente(id) {
+    const cli = clientes.find(c => c.id === id);
+    if (!cli) return;
+
+    const titulo = document.getElementById('modal-cliente-titulo');
+    if (titulo) titulo.innerText = 'Editar Cliente';
+
+    const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+    setVal('cli-id-editar', cli.id);
+    setVal('cli-nombre', cli.nombre);
+    setVal('cli-telefono', cli.telefono);
+    setVal('cli-direccion', cli.direccion);
+
+    const modal = document.getElementById('modal-cliente');
+    if (modal) modal.classList.remove('hidden');
+}
+
+function guardarCliente() {
+    const inputEditId = document.getElementById('cli-id-editar');
+    const inputNombre = document.getElementById('cli-nombre');
+    const inputTelefono = document.getElementById('cli-telefono');
+    const inputDireccion = document.getElementById('cli-direccion');
+
+    if (!inputNombre) {
+        alert("Error: No se encuentra el campo del nombre del cliente en el HTML.");
+        return;
+    }
+
+    const editId = inputEditId ? inputEditId.value : '';
+    const nombre = inputNombre.value.trim();
+    const telefono = inputTelefono ? inputTelefono.value.trim() : '';
+    const direccion = inputDireccion ? inputDireccion.value.trim() : '';
+
+    if (!nombre) {
+        alert("Ingrese el nombre del cliente.");
+        return;
+    }
+
+    if (editId) {
+        const idx = clientes.findIndex(c => c.id === editId);
+        if (idx >= 0) {
+            clientes[idx].nombre = nombre;
+            clientes[idx].telefono = telefono;
+            clientes[idx].direccion = direccion;
+        }
+    } else {
+        clientes.push({ 
+            id: 'c_' + Date.now(), 
+            nombre, 
+            telefono, 
+            direccion, 
+            saldo: 0, 
+            movimientos: [] 
+        });
+    }
+
+    if (typeof guardarStorage === 'function') guardarStorage();
+    cerrarModalCliente();
+    renderClientes();
+}
+
+function eliminarCliente(id) {
+    const cli = clientes.find(c => c.id === id);
+    if (!cli) return;
+
+    if (confirm(`¿Estás seguro de dar de baja al cliente "${cli.nombre}"?`)) {
+        clientes = clientes.filter(c => c.id !== id);
+        if (typeof guardarStorage === 'function') guardarStorage();
+        renderClientes();
+    }
+}
+
+const opcionesPresentaciones = [
+    'Botella 355 cc', 'Botella 500 cc', 'Botella 1000 cc',
+    'Barril 50L', 'Barril 30L', 'Barril 20L'
+];
+
 function mostrarModalMovimiento() {
     const select = document.getElementById('mov-cliente-select');
     if (select && typeof clientes !== 'undefined') {
         select.innerHTML = clientes.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
     }
     
-    // Autocompletar fecha de hoy
     const inputFecha = document.getElementById('mov-fecha');
     if (inputFecha) {
         inputFecha.value = new Date().toISOString().split('T')[0];
     }
 
-    // Limpiar observaciones al abrir
     const inputObs = document.getElementById('mov-observaciones');
     if (inputObs) {
         inputObs.value = '';
