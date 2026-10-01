@@ -2535,7 +2535,12 @@ function descargarRemitoPDF(clienteId, movIdx) {
         }, 500);
     }
 }
-    
+    // Puente para asegurar que HTML y JS se comuniquen sin errores
+function toggleFormularioRemito() {
+    if (typeof alternarFormularioRemito === 'function') {
+        alternarFormularioRemito();
+    }
+}
   // --- INICIALIZACIÓN Y ARRANQUE ---
 document.addEventListener('DOMContentLoaded', () => {
     const cocFecha = document.getElementById('coc-fecha');
