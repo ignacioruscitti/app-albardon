@@ -2529,7 +2529,7 @@ function descargarRemitoPDF(clienteId, movIdx) {
     }
 }
     
-<script>   // --- INICIALIZACIÓN Y ARRANQUE ---
+  // --- INICIALIZACIÓN Y ARRANQUE ---
 document.addEventListener('DOMContentLoaded', () => {
     const cocFecha = document.getElementById('coc-fecha');
     if (cocFecha) cocFecha.valueAsDate = new Date();
@@ -2543,7 +2543,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (typeof switchTab === 'function') switchTab('recetas');
     if (typeof iniciarSincronizacion === 'function') iniciarSincronizacion();
-
+});
     // --- CARGA Y RENDERIZADO DE BARRILES AL INICIAR ---
     try {
         const localData = localStorage.getItem('alb_barriles') || localStorage.getItem('barriles');
