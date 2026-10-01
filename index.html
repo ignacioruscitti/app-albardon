@@ -2032,7 +2032,7 @@ function eliminarBarril(idx) {
     }
 } </script>
     
-  <script> // --- MÓDULO CLIENTES & CUENTAS CORRIENTES ---
+<script> // --- MÓDULO CLIENTES & CUENTAS CORRIENTES ---
 function renderClientes() {
     const container = document.getElementById('grilla-clientes');
     if (!container) return;
@@ -2077,6 +2077,11 @@ function renderClientes() {
                                         <i class="fa-solid fa-file-pdf"></i> Generar PDF
                                     </button>
                                 ` : ''}
+
+                                <!-- NUEVO: Botón para eliminar este movimiento específico -->
+                                <button onclick="eliminarMovimiento('${c.id}',${mIdx})" title="Eliminar movimiento" class="bg-red-500/20 hover:bg-red-500/40 text-red-400 text-[10px] px-2 py-1 rounded font-bold no-print">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
                             </div>
                         </div>
                     `).join('') : '<p class="text-slate-500 italic">Sin movimientos registrados.</p>'}
@@ -2091,7 +2096,6 @@ function renderClientes() {
     });
     container.innerHTML = html;
 }
-
 function mostrarModalCliente() {
     const titulo = document.getElementById('modal-cliente-titulo');
     if (titulo) titulo.innerText = 'Nuevo Cliente';
