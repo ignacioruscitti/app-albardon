@@ -2182,10 +2182,12 @@ function eliminarCliente(id) {
     }
 }
 
-const opcionesPresentaciones = [
-    'Botella 355 cc', 'Botella 500 cc', 'Botella 1000 cc',
-    'Barril 50L', 'Barril 30L', 'Barril 20L'
-];
+if (typeof opcionesPresentaciones === 'undefined') {
+    var opcionesPresentaciones = [
+        'Botella 355 cc', 'Botella 500 cc', 'Botella 1000 cc',
+        'Barril 50L', 'Barril 30L', 'Barril 20L'
+    ];
+}
 
 function mostrarModalCliente() {
     const titulo = document.getElementById('modal-cliente-titulo');
