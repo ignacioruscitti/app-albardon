@@ -567,33 +567,37 @@
 
     <div id="grilla-clientes" class="space-y-4"></div>
 </section>
-<!-- MÓDULO BIBLIOTECA -->
+<!-- MÓDULO BIBLIOTECA GENERAL -->
 <section id="vista-biblioteca" class="space-y-6 hidden">
-    <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-700 pb-3 gap-4">
         <div>
-            <h2 class="text-xl font-bold text-slate-100"><i class="fa-solid fa-book-bookmark text-amber-400"></i> Biblioteca de Lotes</h2>
-            <p class="text-xs text-slate-400">Historial completo de planillas de cocción registradas.</p>
+            <h2 class="text-xl font-bold text-slate-100"><i class="fa-solid fa-book-bookmark text-amber-400"></i> Biblioteca General de Lotes</h2>
+            <p class="text-xs text-slate-400">Historial completo de planillas de cocción y fermentación registradas.</p>
+        </div>
+        
+        <!-- Pestañas internas para alternar entre Cocción y Fermentación -->
+        <div class="flex bg-slate-900 border border-slate-700 rounded-xl p-1 gap-1">
+            <button onclick="cambiarSubTabBiblioteca('coccion')" id="subtab-btn-coccion" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-amber-500 text-slate-950">
+                Cocciones
+            </button>
+            <button onclick="cambiarSubTabBiblioteca('fermentacion')" id="subtab-btn-fermentacion" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white">
+                Fermentaciones
+            </button>
         </div>
     </div>
 
-    <!-- Contenedor donde se listarán los lotes guardados -->
-    <div id="grilla-biblioteca-coccion" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <!-- Aquí se dibujarán los lotes automáticamente -->
-    </div>
-</section>
-</main>
-<!-- MÓDULO BIBLIOTECA DE FERMENTACIÓN -->
-<section id="vista-biblioteca-fermentacion" class="space-y-6 hidden">
-    <div class="flex justify-between items-center border-b border-slate-700 pb-3">
-        <div>
-            <h2 class="text-xl font-bold text-slate-100"><i class="fa-solid fa-beer-mug-empty text-amber-400"></i> Biblioteca de Fermentación</h2>
-            <p class="text-xs text-slate-400">Historial completo de planillas y seguimientos de fermentación registrados.</p>
+    <!-- Contenedor de Cocciones -->
+    <div id="subvista-biblioteca-coccion" class="space-y-4">
+        <div id="grilla-biblioteca-coccion" class="grid grid-cols-1 gap-4">
+            <!-- Tabla de cocciones -->
         </div>
     </div>
 
-    <!-- Contenedor donde se listarán las fermentaciones guardadas -->
-    <div id="grilla-biblioteca-fermentacion" class="grid grid-cols-1 gap-4">
-        <!-- Aquí se dibujarán los registros automáticamente -->
+    <!-- Contenedor de Fermentaciones (Oculto por defecto) -->
+    <div id="subvista-biblioteca-fermentacion" class="space-y-4 hidden">
+        <div id="grilla-biblioteca-fermentacion" class="grid grid-cols-1 gap-4">
+            <!-- Tabla de fermentaciones -->
+        </div>
     </div>
 </section>
 <!-- MODALES DE INTERACCIÓN -->
@@ -1048,8 +1052,13 @@ const db = firebase.firestore();
         }
         if (tabId.includes('biblioteca-ferm') && typeof renderBibliotecaFermentacion === 'function') {
             renderBibliotecaFermentacion();
-        } else if (tabId.includes('biblioteca') && typeof renderBiblioteca === 'function') {
-            renderBiblioteca();
+        }else if (tabId.includes('biblioteca')) {
+            if (typeof cambiarSubTabBiblioteca === 'function') {
+                cambiarSubTabBiblioteca('coccion');
+            } else if (typeof renderBiblioteca === 'function') {
+                renderBiblioteca();
+            }
+        }
         }
     }
     // 4. Inicialización al cargar la aplicación
@@ -1600,7 +1609,26 @@ function intentarRenderizarBarriles(filtroEstado = 'TODOS', intentos = 0) {
         setTimeout(() => intentarRenderizarBarriles(filtroEstado, intentos + 1), 100);
     }
 }
+function cambiarSubTabBiblioteca(tipo) {
+    const btnCoccion = document.getElementById('subtab-btn-coccion');
+    const btnFermentacion = document.getElementById('subtab-btn-fermentacion');
+    const vistaCoccion = document.getElementById('subvista-biblioteca-coccion');
+    const vistaFermentacion = document.getElementById('subvista-biblioteca-fermentacion');
 
+    if (tipo === 'coccion') {
+        if (btnCoccion) btnCoccion.className = "px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-amber-500 text-slate-950";
+        if (btnFermentacion) btnFermentacion.className = "px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white";
+        if (vistaCoccion) vistaCoccion.classList.remove('hidden');
+        if (vistaFermentacion) vistaFermentacion.classList.add('hidden');
+        if (typeof renderBiblioteca === 'function') renderBiblioteca();
+    } else {
+        if (btnFermentacion) btnFermentacion.className = "px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-amber-500 text-slate-950";
+        if (btnCoccion) btnCoccion.className = "px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white";
+        if (vistaFermentacion) vistaFermentacion.classList.remove('hidden');
+        if (vistaCoccion) vistaCoccion.classList.add('hidden');
+        if (typeof renderBibliotecaFermentacion === 'function') renderBibliotecaFermentacion();
+    }
+}
 // ==========================================
 // RENDERIZADO BLINDADO DE BARRILES
 // ==========================================
