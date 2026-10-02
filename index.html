@@ -1393,25 +1393,55 @@ function renderBiblioteca() {
         return;
     }
 
-    let html = '';
-    lotes.forEach(lote => {
+    // Dibujar en formato de listado/tabla moderna adaptada al diseño oscuro
+    let html = `
+        <div class="overflow-x-auto bg-slate-900 border border-slate-700 rounded-xl shadow-lg">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-slate-700 text-xs text-slate-400 uppercase bg-slate-800/50">
+                        <th class="p-3">Fecha</th>
+                        <th class="p-3">Nº Lote</th>
+                        <th class="p-3">Estilo</th>
+                        <th class="p-3">Densidad Inicial (DI)</th>
+                        <th class="p-3 text-right">Acción</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800 text-sm">
+    `;
+
+    lotes.forEach((lote, index) => {
         html += `
-            <div class="card p-4 space-y-2 border border-slate-700 rounded-xl bg-slate-900/50">
-                <div class="flex justify-between items-center">
-                    <span class="text-xs font-semibold text-amber-400">${lote.fecha}</span>
-                    <span class="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">Lote: ${lote.numeroLote}</span>
-                </div>
-                <h3 class="font-bold text-base text-slate-100">${lote.estilo}</h3>
-                <p class="text-xs text-slate-400">Densidad Inicial (DI): <span class="text-white font-mono">${lote.densidadInicial}</span></p>
-                
-                <div class="pt-2 flex justify-end">
-                    <span class="text-[10px] text-slate-500 italic">Registrado en sistema</span>
-                </div>
-            </div>
+            <tr class="hover:bg-slate-800/40 transition-colors">
+                <td class="p-3 text-slate-300">${lote.fecha}</td>
+                <td class="p-3 font-mono text-amber-400 font-bold">${lote.numeroLote}</td>
+                <td class="p-3 text-slate-100 font-semibold">${lote.estilo}</td>
+                <td class="p-3 font-mono text-slate-300">${lote.densidadInicial || '-'}</td>
+                <td class="p-3 text-right">
+                    <button onclick="verDetalleCoccion(${index})" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs transition-colors flex items-center gap-1.5 ml-auto">
+                        <i class="fa-solid fa-eye"></i> Ver Planilla
+                    </button>
+                </td>
+            </tr>
         `;
     });
 
+    html += `
+                </tbody>
+            </table>
+        </div>
+    `;
+
     container.innerHTML = html;
+}
+
+// Función auxiliar para ver el detalle completo de la planilla al hacer clic
+function verDetalleCoccion(index) {
+    const lotes = JSON.parse(localStorage.getItem('albardon_lotes_coccion')) || [];
+    const lote = lotes[index];
+    if (!lote) return;
+
+    // Mostramos un reporte limpio con los datos de esa planilla
+    alert(`PLANILLA DE COCCIÓN\n\nFecha: ${lote.fecha}\nLote: ${lote.numeroLote}\nEstilo: ${lote.estilo}\nDensidad Inicial (DI): ${lote.densidadInicial || '-'}\n\n(Pronto sumaremos más parámetros técnicos específicos de esta vista).`);
 }
 
 // ==========================================
