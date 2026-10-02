@@ -1840,7 +1840,30 @@ function guardarCoccion() {
     if (cocLote && fermLote) {
         fermLote.value = cocLote.value;
     }
+// --- 2. NUEVO: GUARDAR EN LA BIBLIOTECA EN SEGUNDO PLANO ---
+    try {
+        if (typeof window.lotesCoccion === 'undefined') {
+            window.lotesCoccion = JSON.parse(localStorage.getItem('albardon_lotes_coccion')) || [];
+        }
 
+        const loteData = {
+            id: 'coc_' + Date.now(),
+            fecha: new Date().toLocaleDateString(),
+            numeroLote: cocLote ? cocLote.value : 'Sin número',
+            estilo: cocEstilo ? cocEstilo.value : 'Sin estilo',
+            densidadInicial: diRealInput ? diRealInput.value : '-'
+        };
+
+        window.lotesCoccion.unshift(loteData);
+        localStorage.setItem('albardon_lotes_coccion', JSON.stringify(window.lotesCoccion));
+
+        // Si la app tiene un sistema general de guardado/sync, lo actualizamos también
+        if (typeof guardarStorage === 'function') {
+            guardarStorage();
+        }
+    } catch (error) {
+        console.error("No afectó al flujo principal:", error);
+    }
     alert("Cocción guardada. Datos transferidos a Fermentación.");
     if (typeof switchTab === 'function') {
         switchTab('fermentacion');
