@@ -1440,14 +1440,20 @@ function verDetalleCoccion(index) {
     const lote = lotes[index];
     if (!lote) return;
 
-    // Buscamos la sección original de cocción en la página para clonar su diseño exacto
-    const originalCoccion = document.getElementById('coccion') || document.getElementById('vista-coccion');
+    // Buscamos la sección original probando todos los nombres posibles de ID
+    const originalCoccion = document.getElementById('coccion') || 
+                            document.getElementById('cocciones') || 
+                            document.getElementById('vista-coccion') || 
+                            document.getElementById('lotes') || 
+                            document.getElementById('tab-cocciones') || 
+                            document.getElementById('tab-coccion');
+
     if (!originalCoccion) {
-        alert("No se encontró la estructura de la planilla.");
+        alert("No se encontró la estructura de la planilla en la página.");
         return;
     }
 
-    // Creamos o reutilizamos una ventana flotante (Modal) en pantalla
+    // Creamos o reutilizamos la ventana flotante (Modal)
     let modal = document.getElementById('modal-detalle-coccion');
     if (!modal) {
         modal = document.createElement('div');
@@ -1456,26 +1462,25 @@ function verDetalleCoccion(index) {
         document.body.appendChild(modal);
     }
 
-    // Clonamos el HTML de la planilla de cocción
+    // Clonamos el diseño exacto de la planilla
     const contenidoClonado = originalCoccion.cloneNode(true);
     contenidoClonado.id = 'planilla-historica-clonada';
     contenidoClonado.classList.remove('hidden', 'oculto');
 
-    // Rellenamos los inputs clonados con los valores históricos guardados
+    // Rellenamos los campos clonados con los valores guardados de ese lote
     if (lote.valoresCampos) {
         for (const [idCampo, valorCampo] of Object.entries(lote.valoresCampos)) {
             const el = contenidoClonado.querySelector(`#${idCampo}`);
             if (el) {
                 if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT') {
                     el.value = valorCampo;
-                    // Deshabilitamos los campos para que sea de solo lectura histórica
-                    el.disabled = true;
+                    el.disabled = true; // Bloqueado en modo lectura histórica
                 }
             }
         }
     }
 
-    // Estructura visual de la ventana modal con un botón de cerrar
+    // Estructura visual de la ventana modal
     modal.innerHTML = `
         <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-5xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
             <div class="flex justify-between items-center bg-slate-800 px-6 py-4 border-b border-slate-700">
@@ -1490,7 +1495,6 @@ function verDetalleCoccion(index) {
                 </button>
             </div>
             <div class="p-6 overflow-y-auto space-y-6">
-                <!-- Aquí se inyecta la planilla visual idéntica -->
                 <div id="contenedor-planilla-inyectada"></div>
             </div>
         </div>
