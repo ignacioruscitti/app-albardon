@@ -998,8 +998,11 @@ const db = firebase.firestore();
 
   // 3. Navegación global entre secciones
  function switchTab(tabId) {
+    try {
         // Ocultar todas las secciones principales
-        document.querySelectorAll('main > section, .tab-content').forEach(sec => sec.classList.add('hidden', 'oculto'));
+        document.querySelectorAll('main > section, .tab-content').forEach(sec => {
+            sec.classList.add('hidden', 'oculto');
+        });
 
         // Desmarcar botones activos
         document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -1008,19 +1011,19 @@ const db = firebase.firestore();
         });
 
         // Buscar la sección a mostrar de forma flexible
-        let activeSection = document.getElementById(tabId) || document.getElementById('tab-' + tabId) || document.getElementById('vista-' + tabId);
+        let activeSection = document.getElementById(tabId) || 
+                            document.getElementById('tab-' + tabId) || 
+                            document.getElementById('vista-' + tabId);
 
         if (!activeSection) {
             if (tabId.includes('stock') || tabId.includes('barril')) {
-                activeSection = document.getElementById('barriles') || document.getElementById('stock') || document.getElementById('tab-barriles') || document.getElementById('tab-stock');
+                activeSection = document.getElementById('barriles') || document.getElementById('stock') || document.getElementById('tab-barriles');
             } else if (tabId.includes('cliente') || tabId === 'cc') {
-                activeSection = document.getElementById('clientes') || document.getElementById('cc') || document.getElementById('tab-clientes') || document.getElementById('tab-cc');
+                activeSection = document.getElementById('clientes') || document.getElementById('cc') || document.getElementById('tab-clientes');
             } else if (tabId.includes('receta')) {
                 activeSection = document.getElementById('recetas') || document.getElementById('tab-recetas');
             } else if (tabId.includes('coccion') || tabId.includes('lote')) {
                 activeSection = document.getElementById('cocciones') || document.getElementById('lotes') || document.getElementById('tab-cocciones');
-            } else if (tabId.includes('biblioteca-ferm')) {
-                activeSection = document.getElementById('vista-biblioteca-fermentacion') || document.getElementById('biblioteca-fermentacion');
             } else if (tabId.includes('biblioteca')) {
                 activeSection = document.getElementById('vista-biblioteca') || document.getElementById('biblioteca');
             }
@@ -1037,30 +1040,26 @@ const db = firebase.firestore();
             activeBtn.classList.remove('text-gray-500');
         }
 
-        // Renderizar datos del módulo activo según el identificador
-        if ((tabId.includes('receta')) && typeof renderRecetas === 'function') {
+        // Renderizar datos según el módulo activo
+        if (tabId.includes('receta') && typeof renderRecetas === 'function') {
             renderRecetas();
-        }
-        if ((tabId.includes('stock') || tabId.includes('barril')) && typeof renderBarriles === 'function') {
+        } else if ((tabId.includes('stock') || tabId.includes('barril')) && typeof renderBarriles === 'function') {
             renderBarriles('TODOS');
-        }
-        if ((tabId === 'cc' || tabId.includes('cliente')) && typeof renderClientes === 'function') {
+        } else if ((tabId === 'cc' || tabId.includes('cliente')) && typeof renderClientes === 'function') {
             renderClientes();
-        }
-        if ((tabId.includes('coccion') || tabId.includes('lote')) && typeof renderCocciones === 'function') {
+        } else if ((tabId.includes('coccion') || tabId.includes('lote')) && typeof renderCocciones === 'function') {
             renderCocciones();
-        }
-        if (tabId.includes('biblioteca-ferm') && typeof renderBibliotecaFermentacion === 'function') {
-            renderBibliotecaFermentacion();
-        }else if (tabId.includes('biblioteca')) {
+        } else if (tabId.includes('biblioteca')) {
             if (typeof cambiarSubTabBiblioteca === 'function') {
                 cambiarSubTabBiblioteca('coccion');
             } else if (typeof renderBiblioteca === 'function') {
                 renderBiblioteca();
             }
         }
-        }
+    } catch (e) {
+        console.error("Error en switchTab:", e);
     }
+}
     // 4. Inicialización al cargar la aplicación
     document.addEventListener('DOMContentLoaded', () => {
         if (typeof iniciarSincronización === 'function') iniciarSincronización();
