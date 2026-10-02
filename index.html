@@ -1403,7 +1403,7 @@ function renderBiblioteca() {
                         <th class="p-3">Nº Lote</th>
                         <th class="p-3">Estilo</th>
                         <th class="p-3">Densidad Inicial (DI)</th>
-                        <th class="p-3 text-right">Acción</th>
+                        <th class="p-3 text-right">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-800 text-sm">
@@ -1416,9 +1416,12 @@ function renderBiblioteca() {
                 <td class="p-3 font-mono text-amber-400 font-bold">${lote.numeroLote}</td>
                 <td class="p-3 text-slate-100 font-semibold">${lote.estilo}</td>
                 <td class="p-3 font-mono text-slate-300">${lote.densidadInicial || '-'}</td>
-                <td class="p-3 text-right">
-                    <button onclick="verDetalleCoccion(${index})" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs transition-colors flex items-center gap-1.5 ml-auto">
+                <td class="p-3 text-right space-x-2">
+                    <button onclick="verDetalleCoccion(${index})" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs transition-colors inline-flex items-center gap-1.5">
                         <i class="fa-solid fa-eye"></i> Ver Planilla
+                    </button>
+                    <button onclick="eliminarCoccion(${index})" class="bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white border border-red-500/30 px-2.5 py-1.5 rounded-lg text-xs transition-colors inline-flex items-center gap-1" title="Eliminar registro">
+                        <i class="fa-solid fa-trash-can"></i>
                     </button>
                 </td>
             </tr>
@@ -1433,7 +1436,31 @@ function renderBiblioteca() {
 
     container.innerHTML = html;
 }
+    function eliminarCoccion(index) {
+    let lotes = JSON.parse(localStorage.getItem('albardon_lotes_coccion')) || [];
+    const loteSeleccionado = lotes[index];
 
+    if (!loteSeleccionado) return;
+
+    // Pedir confirmación antes de borrar para evitar accidentes
+    const confirmar = confirm(`¿Estás seguro de que deseas eliminar el registro del Lote: ${loteSeleccionado.numeroLote} (${loteSeleccionado.estilo})?`);
+    
+    if (!confirmar) return;
+
+    // Eliminar el elemento del arreglo
+    lotes.splice(index, 1);
+
+    // Guardar el nuevo listado en localStorage
+    localStorage.setItem('albardon_lotes_coccion', JSON.stringify(lotes));
+
+    // Si tu app sincroniza con Firebase u otro almacenamiento externo, actualizamos también
+    if (typeof guardarStorage === 'function') {
+        guardarStorage();
+    }
+
+    // Refrescar la vista de la biblioteca inmediatamente
+    renderBiblioteca();
+}
 // Función auxiliar para ver el detalle completo de la planilla al hacer clic
 function verDetalleCoccion(index) {
     const lotes = JSON.parse(localStorage.getItem('albardon_lotes_coccion')) || [];
