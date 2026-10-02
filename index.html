@@ -582,7 +582,20 @@
     </div>
 </section>
 </main>
+<!-- MÓDULO BIBLIOTECA DE FERMENTACIÓN -->
+<section id="vista-biblioteca-fermentacion" class="space-y-6 hidden">
+    <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+        <div>
+            <h2 class="text-xl font-bold text-slate-100"><i class="fa-solid fa-beer-mug-empty text-amber-400"></i> Biblioteca de Fermentación</h2>
+            <p class="text-xs text-slate-400">Historial completo de planillas y seguimientos de fermentación registrados.</p>
+        </div>
+    </div>
 
+    <!-- Contenedor donde se listarán las fermentaciones guardadas -->
+    <div id="grilla-biblioteca-fermentacion" class="grid grid-cols-1 gap-4">
+        <!-- Aquí se dibujarán los registros automáticamente -->
+    </div>
+</section>
 <!-- MODALES DE INTERACCIÓN -->
 
 <!-- BARRIL MODAL -->
@@ -980,7 +993,7 @@ const db = firebase.firestore();
     }
 
   // 3. Navegación global entre secciones
-  function switchTab(tabId) {
+ function switchTab(tabId) {
         // Ocultar todas las secciones principales
         document.querySelectorAll('main > section, .tab-content').forEach(sec => sec.classList.add('hidden', 'oculto'));
 
@@ -1002,6 +1015,8 @@ const db = firebase.firestore();
                 activeSection = document.getElementById('recetas') || document.getElementById('tab-recetas');
             } else if (tabId.includes('coccion') || tabId.includes('lote')) {
                 activeSection = document.getElementById('cocciones') || document.getElementById('lotes') || document.getElementById('tab-cocciones');
+            } else if (tabId.includes('biblioteca-ferm')) {
+                activeSection = document.getElementById('vista-biblioteca-fermentacion') || document.getElementById('biblioteca-fermentacion');
             } else if (tabId.includes('biblioteca')) {
                 activeSection = document.getElementById('vista-biblioteca') || document.getElementById('biblioteca');
             }
@@ -1031,7 +1046,9 @@ const db = firebase.firestore();
         if ((tabId.includes('coccion') || tabId.includes('lote')) && typeof renderCocciones === 'function') {
             renderCocciones();
         }
-        if (tabId.includes('biblioteca') && typeof renderBiblioteca === 'function') {
+        if (tabId.includes('biblioteca-ferm') && typeof renderBibliotecaFermentacion === 'function') {
+            renderBibliotecaFermentacion();
+        } else if (tabId.includes('biblioteca') && typeof renderBiblioteca === 'function') {
             renderBiblioteca();
         }
     }
