@@ -1440,7 +1440,7 @@ function verDetalleCoccion(index) {
     const lote = lotes[index];
     if (!lote) return;
 
-    // Buscamos la sección original probando todos los nombres posibles de ID
+    // Buscamos la sección original de cocción en la página
     const originalCoccion = document.getElementById('coccion') || 
                             document.getElementById('cocciones') || 
                             document.getElementById('vista-coccion') || 
@@ -1467,15 +1467,18 @@ function verDetalleCoccion(index) {
     contenidoClonado.id = 'planilla-historica-clonada';
     contenidoClonado.classList.remove('hidden', 'oculto');
 
-    // Rellenamos los campos clonados con los valores guardados de ese lote
+    // Rellenamos los campos utilizando estrictamente los datos guardados de ESTE lote específico
     if (lote.valoresCampos) {
         for (const [idCampo, valorCampo] of Object.entries(lote.valoresCampos)) {
-            const el = contenidoClonado.querySelector(`#${idCampo}`);
+            // Buscamos el campo dentro del clon usando el atributo ID exacto
+            const el = contenidoClonado.querySelector(`[id="${idCampo}"]`);
             if (el) {
                 if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT') {
                     el.value = valorCampo;
                     el.disabled = true; // Bloqueado en modo lectura histórica
                 }
+                // Quitamos el ID del clon para evitar conflictos de duplicados en el DOM
+                el.removeAttribute('id');
             }
         }
     }
@@ -1486,9 +1489,9 @@ function verDetalleCoccion(index) {
             <div class="flex justify-between items-center bg-slate-800 px-6 py-4 border-b border-slate-700">
                 <div>
                     <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-clipboard-list text-amber-400"></i> Planilla Histórica: ${lote.estilo} (Lote: ${lote.numeroLote})
+                        <i class="fa-solid fa-clipboard-list text-amber-400"></i> Planilla Histórica: ${lote.estilo || 'Sin estilo'} (Lote: ${lote.numeroLote || 'Sin número'})
                     </h3>
-                    <p class="text-xs text-slate-400">Registrada el: ${lote.fecha}</p>
+                    <p class="text-xs text-slate-400">Registrada el: ${lote.fecha || '-'}</p>
                 </div>
                 <button onclick="cerrarModalDetalleCoccion()" class="text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-sm font-bold transition-colors">
                     ✕ Cerrar
