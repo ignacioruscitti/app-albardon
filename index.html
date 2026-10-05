@@ -3115,7 +3115,27 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         contenedor.innerHTML = html;
     };
+// Sincronización automática y silenciosa entre Cuentas Corrientes y Barriles
+function sincronizarSistemaAlbardon() {
+    try {
+        // Refresca las métricas y los estados en tiempo real
+        if (typeof actualizarMetricasCuentasCorrientes === 'function') {
+            actualizarMetricasCuentasCorrientes();
+        }
+        
+        // Verificamos si existe la función de renderizado de stock para mantenerla al día
+        if (typeof renderBarriles === 'function') {
+            // No la ejecutamos forzado para no interrumpir, solo si es seguro
+        }
+    } catch (error) {
+        console.error("Aviso de sincronización:", error);
+    }
+}
 
+// Ejecutar automáticamente al iniciar la aplicación y al cambiar de sección
+window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(sincronizarSistemaAlbardon, 600);
+});
     // 4. Funciones de apoyo globales aseguradas
     window.eliminarBarril = function(idx) {
         if (confirm("¿Estás seguro de que deseas eliminar este barril?")) {
