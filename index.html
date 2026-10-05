@@ -2864,22 +2864,29 @@ function eliminarMovimiento(clienteId, movIdx) {
 // Función limpia para actualizar las métricas de cuentas corrientes
 function actualizarMetricasCuentasCorrientes() {
     try {
-        let clientes = [];
-        const posiblesClaves = ['albardon_clientes', 'clientes', 'albardon_cuentas_corrientes', 'cuentas_corrientes', 'cc'];
+        let listaClientes = [];
         
-        for (let clave of posiblesClaves) {
-            const data = localStorage.getItem(clave);
-            if (data) {
-                try {
-                    const parsed = JSON.parse(data);
-                    if (Array.isArray(parsed) && parsed.length > 0) {
-                        clientes = parsed;
-                        break;
-                    }
-                } catch (e) {}
+        // 1. Usamos directamente la variable global 'clientes' de tu app si existe
+        if (typeof clientes !== 'undefined' && Array.isArray(clientes)) {
+            listaClientes = clientes;
+        } else {
+            // 2. Si no, buscamos en localStorage por si acaso
+            const posiblesClaves = ['albardon_clientes', 'clientes', 'albardon_cuentas_corrientes', 'cuentas_corrientes', 'cc'];
+            for (let clave of posiblesClaves) {
+                const data = localStorage.getItem(clave);
+                if (data) {
+                    try {
+                        const parsed = JSON.parse(data);
+                        if (Array.isArray(parsed)) {
+                            listaClientes = parsed;
+                            break;
+                        }
+                    } catch (e) {}
+                }
             }
         }
 
+        // Buscamos los barriles
         let barriles = [];
         const posiblesClavesBarriles = ['albardon_barriles', 'barriles', 'stock_barriles'];
         for (let clave of posiblesClavesBarriles) {
@@ -2898,18 +2905,20 @@ function actualizarMetricasCuentasCorrientes() {
         let saldoTotal = 0;
         let clientesConDeuda = 0;
 
-        if (Array.isArray(clientes)) {
-            clientes.forEach(c => {
+        if (Array.isArray(listaClientes)) {
+            listaClientes.forEach(c => {
+                // Leemos el saldo del cliente
                 let saldo = parseFloat(c.saldo !== undefined ? c.saldo : (c.deuda !== undefined ? c.deuda : 0));
+                
+                // Si tiene saldo distinto de 0 (ej: -265000), lo sumamos y contamos
                 if (saldo !== 0) {
                     saldoTotal += Math.abs(saldo);
-                    if (saldo !== 0) {
-                        clientesConDeuda++;
-                    }
+                    clientesConDeuda++;
                 }
             });
         }
 
+        // Contar barriles prestados
         let barrilesPrestados = 0;
         if (Array.isArray(barriles)) {
             barrilesPrestados = barriles.filter(b => {
@@ -2918,6 +2927,7 @@ function actualizarMetricasCuentasCorrientes() {
             }).length;
         }
 
+        // Inyectar en pantalla
         const elSaldo = document.getElementById('metric-saldo-total');
         const elDeuda = document.getElementById('metric-clientes-deuda');
         const elBarriles = document.getElementById('metric-barriles-calle');
