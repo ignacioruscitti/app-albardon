@@ -2380,8 +2380,11 @@ function renderClientes() {
                 </div>
 
               <div class="flex flex-wrap justify-end gap-2 pt-2 no-print">
-                    <button onclick="enviarEstadoCuentaWhatsApp('${c.id}')" class="bg-sky-600 hover:bg-sky-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1">
-                        <i class="fa-brands fa-whatsapp"></i> Enviar Estado de Cuenta
+                    <button onclick="descargarEstadoCuentaPDF('${c.id}')" class="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1">
+                        <i class="fa-solid fa-file-pdf"></i> Generar PDF
+                    </button>
+                    <button onclick="enviarEstadoCuentaWhatsApp('${c.id}')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1">
+                        <i class="fa-brands fa-whatsapp"></i> Enviar WhatsApp
                     </button>
                     <button onclick="enviarWhatsapp('${c.id}')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1">
                         <i class="fa-brands fa-whatsapp"></i> Enviar Remito WhatsApp
@@ -2393,6 +2396,7 @@ function renderClientes() {
     if (typeof actualizarMetricasCuentasCorrientes === 'function') {
         actualizarMetricasCuentasCorrientes();
     }
+}
 }
 function mostrarModalCliente() {
     const titulo = document.getElementById('modal-cliente-titulo');
@@ -3245,6 +3249,98 @@ function enviarEstadoCuentaWhatsApp(clienteId) {
 
     const url = `https://api.whatsapp.com/send?phone=${telefono}&text=${mensaje}`;
     window.open(url, '_blank');
+}
+    // Función para generar el PDF del Estado de Cuenta del cliente
+function descargarEstadoCuentaPDF(clienteId) {
+    const c = (typeof clientes !== 'undefined' ? clientes : []).find(item => item.id === clienteId);
+    if (!c) {
+        alert("No se encontró al cliente.");
+        return;
+    }
+
+    // Verificamos si la librería jsPDF está disponible en la app
+    if (typeof jspdf === 'undefined' && typeof window.jspdf === 'undefined') {
+        alert("La librería de PDF no está cargada en esta vista.");
+        return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Encabezado
+    doc.setFillColor(15, 23, 42); // Fondo oscuro estilo app (slate-900)
+    doc.rect(0, 0, 210, 40, "F");
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20);
+    doc.text("CERVECERÍA ALBARDÓN", 14, 20);
+    
+    doc.setFontSize(11);
+    doc.setTextColor(203, 213, 225);
+    doc.text("ESTADO DE CUENTA CORRIENTE", 14, 28);
+
+    // Datos del cliente
+    doc.setTextColor(15, 23, 42);
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text(`Cliente: ${c.nombre || c.razonSocial || 'Cliente'}`, 14, 52);
+    
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Teléfono: ${c.telefono || '-'} | Dirección: ${c.direccion || '-'}`, 14, 59);
+
+    // Saldo actual destacado
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    const saldoTexto = `Saldo Actual: $ ${parseFloat(c.saldo || 0).toLocaleString()}`;
+    doc.text(saldoTexto, 14, 68);
+
+    // Línea divisoria
+    doc.setDrawColor(200, 200, 200);
+    doc.line(14, 75, 196, 75);
+
+    // Tabla de movimientos
+    doc.setFontSize(11);
+    doc.text("Historial de Movimientos:", 14, 84);
+
+    let y = 92;
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "bold");
+    doc.text("Fecha", 14, y);
+    doc.text("Concepto / Descripción", 45, y);
+    doc.text("Monto", 175, y, { align: "right" });
+
+    y += 6;
+    doc.setDrawColor(220, 220, 220);
+    doc.line(14, y, 196, y);
+    y += 8;
+
+    doc.setFont("helvetica", "normal");
+
+    if (c.movimientos && c.movimientos.length > 0) {
+        c.movimientos.forEach(m => {
+            if (y > 270) { // Salto de página si es muy largo
+                doc.addPage();
+                y = 20;
+            }
+            doc.text(String(m.fecha || '-'), 14, y);
+            doc.text(String(m.concepto || m.descripcion || 'Movimiento'), 45, y);
+            
+            const montoStr = `$ ${parseFloat(m.monto || 0).toLocaleString()}`;
+            doc.text(montoStr, 175, y, { align: "right" });
+
+            y += 8;
+            doc.setDrawColor(240, 240, 240);
+            doc.line(14, y, 196, y);
+            y += 4;
+        });
+    } else {
+        doc.text("No hay movimientos registrados.", 14, y);
+    }
+
+    // Guardar PDF descargable
+    doc.save(`Estado_Cuenta_${(c.nombre || 'Cliente').replace(/\s+/g, '_')}.pdf`);
 }
 </script>
 </body>
