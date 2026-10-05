@@ -3251,7 +3251,7 @@ function enviarEstadoCuentaWhatsApp(clienteId) {
     window.open(url, '_blank');
 }
     // Función para generar el PDF del Estado de Cuenta del cliente
-// Función para descargar el Estado de Cuenta utilizando la misma estructura de impresión de la app
+// Función para descargar el Estado de Cuenta de forma limpia
 function descargarEstadoCuentaPDF(clienteId) {
     const c = (typeof clientes !== 'undefined' ? clientes : []).find(item => item.id === clienteId);
     if (!c) {
@@ -3259,8 +3259,6 @@ function descargarEstadoCuentaPDF(clienteId) {
         return;
     }
 
-    // Si tu aplicación ya tiene una función estándar para imprimir o generar PDF, la invocamos aquí.
-    // Si no, abrimos una ventana limpia de impresión con el reporte formateado:
     let ventanaImpresion = window.open('', '_blank');
     if (!ventanaImpresion) {
         alert("Por favor, permite las ventanas emergentes para generar el PDF.");
@@ -3270,7 +3268,7 @@ function descargarEstadoCuentaPDF(clienteId) {
     let htmlContenido = `
         <html>
         <head>
-            <title>Estado de Cuenta - ${c.nombre}</title>
+            <title>Estado de Cuenta - ${c.nombre || 'Cliente'}</title>
             <style>
                 body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
                 h1 { color: #0f172a; margin-bottom: 5px; font-size: 22px; }
@@ -3288,7 +3286,7 @@ function descargarEstadoCuentaPDF(clienteId) {
             <div class="subtitle">Estado de Cuenta Corriente</div>
             
             <div class="box">
-                <strong>Cliente:</strong> ${c.nombre}<br>
+                <strong>Cliente:</strong> ${c.nombre || '-'}<br>
                 <strong>Teléfono:</strong> ${c.telefono || '-'} | <strong>Dirección:</strong> ${c.direccion || '-'}<br>
                 <div class="total">Saldo Actual: $ ${parseFloat(c.saldo || 0).toLocaleString()}</div>
             </div>
