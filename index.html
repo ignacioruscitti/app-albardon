@@ -2860,9 +2860,10 @@ function eliminarMovimiento(clienteId, movIdx) {
     if (typeof guardarStorage === 'function') guardarStorage();
     if (typeof renderClientes === 'function') renderClientes();
 }
-    function actualizarMetricasCuentasCorrientes() {
+
+// Función limpia para actualizar las métricas de cuentas corrientes
+function actualizarMetricasCuentasCorrientes() {
     try {
-        // Buscamos en todas las posibles claves que usa tu app
         let clientes = [];
         const posiblesClaves = ['albardon_clientes', 'clientes', 'albardon_cuentas_corrientes', 'cuentas_corrientes', 'cc'];
         
@@ -2879,7 +2880,6 @@ function eliminarMovimiento(clienteId, movIdx) {
             }
         }
 
-        // Buscamos también los barriles
         let barriles = [];
         const posiblesClavesBarriles = ['albardon_barriles', 'barriles', 'stock_barriles'];
         for (let clave of posiblesClavesBarriles) {
@@ -2900,21 +2900,16 @@ function eliminarMovimiento(clienteId, movIdx) {
 
         if (Array.isArray(clientes)) {
             clientes.forEach(c => {
-                // Revisamos las distintas formas en que tu objeto puede guardar el saldo/deuda
                 let saldo = parseFloat(c.saldo !== undefined ? c.saldo : (c.deuda !== undefined ? c.deuda : 0));
-                
-                // Si el saldo se guarda negativo o positivo según tu lógica (ej: -265000 significa que debe)
-                // Tomamos el valor absoluto o directo según corresponda. Aquí sumaremos los que representen deuda:
                 if (saldo !== 0) {
-                    saldoTotal += Math.abs(saldo); // Suma el valor en positivo para el total a cobrar
-                    if (saldo < 0 || saldo > 0) {
+                    saldoTotal += Math.abs(saldo);
+                    if (saldo !== 0) {
                         clientesConDeuda++;
                     }
                 }
             });
         }
 
-        // Contar barriles prestados
         let barrilesPrestados = 0;
         if (Array.isArray(barriles)) {
             barrilesPrestados = barriles.filter(b => {
@@ -2923,7 +2918,6 @@ function eliminarMovimiento(clienteId, movIdx) {
             }).length;
         }
 
-        // Inyectar en pantalla
         const elSaldo = document.getElementById('metric-saldo-total');
         const elDeuda = document.getElementById('metric-clientes-deuda');
         const elBarriles = document.getElementById('metric-barriles-calle');
@@ -2933,28 +2927,6 @@ function eliminarMovimiento(clienteId, movIdx) {
         if (elBarriles) elBarriles.textContent = barrilesPrestados;
 
     } catch (error) {
-        console.error("Error al calcular métricas de cuentas corrientes:", error);
-    }
-}
-
-        // Contar barriles prestados o en la calle
-        let barrilesPrestados = 0;
-        if (Array.isArray(barriles)) {
-            barrilesPrestados = barriles.filter(b => 
-                b.estado === 'PRESTADO' || b.estado === 'CLIENTE' || b.enPoderdeCliente === true
-            ).length;
-        }
-
-        // Inyectar en pantalla de forma segura
-        const elSaldo = document.getElementById('metric-saldo-total');
-        const elDeuda = document.getElementById('metric-clientes-deuda');
-        const elBarriles = document.getElementById('metric-barriles-calle');
-
-        if (elSaldo) elSaldo.textContent = `$${saldoTotal.toLocaleString()}`;
-        if (elDeuda) elDeuda.textContent = clientesConDeuda;
-        if (elBarriles) elBarriles.textContent = barrilesPrestados;
-
-     catch (error) {
         console.error("Error al calcular métricas de cuentas corrientes:", error);
     }
 }
