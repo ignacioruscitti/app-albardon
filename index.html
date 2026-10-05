@@ -2379,7 +2379,10 @@ function renderClientes() {
                     `).join('') : '<p class="text-slate-500 italic">Sin movimientos registrados.</p>'}
                 </div>
 
-                <div class="flex justify-end gap-2 pt-2 no-print">
+              <div class="flex flex-wrap justify-end gap-2 pt-2 no-print">
+                    <button onclick="enviarEstadoCuentaWhatsApp('${c.id}')" class="bg-sky-600 hover:bg-sky-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1">
+                        <i class="fa-brands fa-whatsapp"></i> Enviar Estado de Cuenta
+                    </button>
                     <button onclick="enviarWhatsapp('${c.id}')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1">
                         <i class="fa-brands fa-whatsapp"></i> Enviar Remito WhatsApp
                     </button>
@@ -3131,7 +3134,44 @@ function sincronizarSistemaAlbardon() {
         console.error("Aviso de sincronización:", error);
     }
 }
+// Función para generar y enviar el Estado de Cuenta detallado por WhatsApp
+function enviarEstadoCuentaWhatsApp(clienteId) {
+    // Buscamos al cliente en la lista global
+    const c = (typeof clientes !== 'undefined' ? clientes : []).find(item => item.id === clienteId);
+    if (!c) {
+        alert("No se encontró al cliente.");
+        return;
+    }
 
+    // Armamos el mensaje formateado con emojis y diseño profesional
+    let mensaje = `*ESTADO DE CUENTA - CERVECERÍA ALBARDÓN*%0A`;
+    mensaje += `-----------------------------------%0A`;
+    mensaje += `👤 *Cliente:* ${c.nombre || c.razonSocial || 'Cliente'}%0A`;
+    mensaje += `💰 *Saldo Actual:* $${parseFloat(c.saldo || 0).toLocaleString()}%0A`;
+    mensaje += `-----------------------------------%0A`;
+    mensaje += `*Últimos Movimientos:*%0A`;
+
+    if (c.movimientos && c.movimientos.length > 0) {
+        // Tomamos los movimientos registrados
+        c.movimientos.forEach(m => {
+            const signo = m.monto > 0 ? '+' : '';
+            mensaje += `▪️ ${m.fecha || ''} - ${m.descripcion || m.concepto || 'Movimiento'}: ${signo}$ ${parseFloat(m.monto || 0).toLocaleString()}%0A`;
+        });
+    } else {
+        mensaje += `No hay movimientos registrados.%0A`;
+    }
+
+    mensaje += `-----------------------------------%0A`;
+    mensaje += `¡Gracias por elegirnos! 🍻`;
+
+    // Limpiamos el teléfono del cliente si lo tiene cargado
+    let telefono = c.telefono || c.celular || '';
+    telefono = telefono.replace(/\D/g, ''); 
+
+    // Abrimos WhatsApp con el mensaje listo
+    const url = `https://api.whatsapp.com/send?phone=${telefono}&text=${mensaje}`;
+    window.open(url, '_blank');
+}
 // Ejecutar automáticamente al iniciar la aplicación y al cambiar de sección
 window.addEventListener('DOMContentLoaded', () => {
     setTimeout(sincronizarSistemaAlbardon, 600);
