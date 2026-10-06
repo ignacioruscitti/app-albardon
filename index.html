@@ -3074,16 +3074,14 @@ window.descargarEstadoCuentaPDF = function(clienteId) {
             ultimosMovimientos.forEach(function(m) {
                 var fecha = m.fecha || m.date || '-';
                 var monto = parseFloat(m.monto || m.importe || 0).toLocaleString();
-                
-                // Tomar el concepto principal o la descripción básica
                 var textoDetalle = m.concepto || m.descripcion || 'Movimiento';
                 
-                // Si tiene items (remito), los desglosamos
+                // Desglose correcto usando 'estilo' y 'cantidad'
                 var itemsRemito = m.items;
                 if (Array.isArray(itemsRemito) && itemsRemito.length > 0) {
                     var listaItems = itemsRemito.map(function(it) {
-                        var cantidad = it.cantidad || it.qty || 1;
-                        var nombreItem = it.nombre || it.producto || it.descripcion || it.nombreProducto || 'Artículo';
+                        var cantidad = it.cantidad || 1;
+                        var nombreItem = it.estilo || it.nombre || it.producto || 'Artículo';
                         return cantidad + "x " + nombreItem;
                     }).join(", ");
                     textoDetalle = textoDetalle + ": " + listaItems;
