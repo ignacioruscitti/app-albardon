@@ -3355,81 +3355,46 @@ window.enviarEstadoCuentaWhatsApp = function(clienteId) {
     window.open(url, '_blank');
 };
 
-// Función para descargar el Estado de Cuenta en PDF
+window.enviarEstadoCuentaWhatsApp = function(clienteId) {
+    var c = (typeof clientes !== 'undefined' ? clientes : []).find(function(item) { return item.id === clienteId; });
+    if (!c) {
+        alert("No se encontró al cliente.");
+        return;
+    }
+    var nombreCliente = c.nombre || c.razonSocial || 'Cliente';
+    var saldoCliente = parseFloat(c.saldo || 0).toLocaleString();
+    var telefono = (c.telefono || c.celular || '').replace(/\D/g, '');
+    
+    var mensaje = "*ESTADO DE CUENTA - CERVECERÍA ALBARDÓN*\n" +
+                  "-----------------------------------\n" +
+                  "Cliente: " + nombreCliente + "\n" +
+                  "Saldo Actual: $" + saldoCliente + "\n" +
+                  "-----------------------------------\n" +
+                  "¡Gracias por elegirnos!";
+    
+    var url = "https://api.whatsapp.com/send?phone=" + telefono + "&text=" + encodeURIComponent(mensaje);
+    window.open(url, '_blank');
+};
+
 window.descargarEstadoCuentaPDF = function(clienteId) {
-    const c = (typeof clientes !== 'undefined' ? clientes : []).find(item => item.id === clienteId);
+    var c = (typeof clientes !== 'undefined' ? clientes : []).find(function(item) { return item.id === clienteId; });
     if (!c) {
         alert("No se encontró al cliente.");
         return;
     }
 
-    let ventanaImpresion = window.open('', '_blank');
+    var ventanaImpresion = window.open('', '_blank');
     if (!ventanaImpresion) {
-        alert("Por favor, permite las ventanas emergentes para generar el PDF.");
+        alert("Por favor, permite las ventanas emergentes.");
         return;
     }
 
-    let htmlContenido = `
-        <html>
-        <head>
-            <title>Estado de Cuenta - ${c.nombre || 'Cliente'}</title>
-            <style>
-                body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
-                h1 { color: #0f172a; margin-bottom: 5px; font-size: 22px; }
-                .subtitle { color: #64748b; font-size: 14px; margin-bottom: 20px; }
-                .box { background: #f8fafc; border: 1px solid #cbd5e1; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-                table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-                th, td { border-bottom: 1px solid #e2e8f0; padding: 10px; text-align: left; font-size: 13px; }
-                th { background: #0f172a; color: white; }
-                .text-right { text-align: right; }
-                .total { font-size: 16px; font-weight: bold; margin-top: 15px; }
-            </style>
-        </head>
-        <body>
-            <h1>Cervecería Albardón</h1>
-            <div class="subtitle">Estado de Cuenta Corriente</div>
-            
-            <div class="box">
-                <strong>Cliente:</strong> ${c.nombre || '-'}<br>
-                <strong>Teléfono:</strong> ${c.telefono || '-'} | <strong>Dirección:</strong> ${c.direccion || '-'}<br>
-                <div class="total">Saldo Actual: $ ${parseFloat(c.saldo || 0).toLocaleString()}</div>
-            </div>
-
-            <h3>Historial de Movimientos</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Concepto / Descripción</th>
-                        <th class="text-right">Monto</th>
-                    </tr>
-                </thead>
-                <tbody>
-    `;
-
-    if (c.movimientos && c.movimientos.length > 0) {
-        c.movimientos.forEach(m => {
-            htmlContenido += `
-                <tr>
-                    <td>${m.fecha || '-'}</td>
-                    <td>${m.concepto || m.descripcion || 'Movimiento'}</td>
-                    <td class="text-right">$ ${parseFloat(m.monto || 0).toLocaleString()}</td>
-                </tr>
-            `;
-        });
-    } else {
-        htmlContenido += `<tr><td colspan="3" style="text-align:center; color:#64748b;">No hay movimientos registrados.</td></tr>`;
-    }
-
-    htmlContenido += `
-                </tbody>
-            </table>
-            <script>
-                window.onload = function() { window.print(); }
-            </script>
-        </body>
-        </html>
-    `;
+    var htmlContenido = "<html><head><title>Estado de Cuenta</title><style>body { font-family: Arial, sans-serif; padding: 20px; }</style></head><body>" +
+        "<h1>Cervecería Albardón</h1>" +
+        "<h3>Estado de Cuenta: " + (c.nombre || 'Cliente') + "</h3>" +
+        "<p><strong>Saldo Actual:</strong> $" + parseFloat(c.saldo || 0).toLocaleString() + "</p>" +
+        "<script>window.onload = function() { window.print(); }</script>" +
+        "</body></html>";
 
     ventanaImpresion.document.write(htmlContenido);
     ventanaImpresion.document.close();
