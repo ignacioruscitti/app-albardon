@@ -3217,7 +3217,7 @@ window.addEventListener('DOMContentLoaded', () => {
         if (modal) modal.classList.remove('hidden');
     };
 })();
-    // Función para generar y enviar el Estado de Cuenta detallado por WhatsApp
+// Función para generar y enviar el Estado de Cuenta detallado por WhatsApp
 function enviarEstadoCuentaWhatsApp(clienteId) {
     const c = (typeof clientes !== 'undefined' ? clientes : []).find(item => item.id === clienteId);
     if (!c) {
@@ -3250,7 +3250,7 @@ function enviarEstadoCuentaWhatsApp(clienteId) {
     const url = `https://api.whatsapp.com/send?phone=${telefono}&text=${mensaje}`;
     window.open(url, '_blank');
 }
-    // Función para generar el PDF del Estado de Cuenta del cliente
+
 // Función para descargar el Estado de Cuenta de forma limpia
 function descargarEstadoCuentaPDF(clienteId) {
     const c = (typeof clientes !== 'undefined' ? clientes : []).find(item => item.id === clienteId);
