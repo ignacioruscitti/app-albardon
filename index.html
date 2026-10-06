@@ -3067,7 +3067,7 @@ window.descargarEstadoCuentaPDF = function(clienteId) {
                 '<table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px;">' +
                 '<tr style="background-color: #f2f2f2; border-bottom: 1px solid #ddd;">' +
                 '<th style="padding: 8px; text-align: left;">Fecha</th>' +
-                '<th style="padding: 8px; text-align: left;">Descripción / Detalle del Remito</th>' +
+                '<th style="padding: 8px; text-align: left;">Concepto / Detalle del Remito</th>' +
                 '<th style="padding: 8px; text-align: right;">Monto</th>' +
                 '</tr>';
             
@@ -3075,20 +3075,19 @@ window.descargarEstadoCuentaPDF = function(clienteId) {
                 var fecha = m.fecha || m.date || '-';
                 var monto = parseFloat(m.monto || m.importe || 0).toLocaleString();
                 
-                // Extraer el detalle enriquecido de los ítems o productos del remito
-                var textoDetalle = m.descripcion || m.concepto || 'Movimiento';
+                // Tomar el concepto principal o la descripción básica
+                var textoDetalle = m.concepto || m.descripcion || 'Movimiento';
                 
-                var itemsRemito = m.items || m.productos || m.detalleRemito || m.detalle;
+                // Si tiene items (remito), los desglosamos
+                var itemsRemito = m.items;
                 if (Array.isArray(itemsRemito) && itemsRemito.length > 0) {
-                    var listaItems = itemsRemito.map(function(item) {
-                        var cantidad = item.cantidad || item.qty || 1;
-                        var nombreItem = item.nombre || item.producto || item.descripcion || item.cerveza || 'Artículo';
+                    var listaItems = itemsRemito.map(function(it) {
+                        var cantidad = it.cantidad || it.qty || 1;
+                        var nombreItem = it.nombre || it.producto || it.descripcion || it.nombreProducto || 'Artículo';
                         return cantidad + "x " + nombreItem;
                     }).join(", ");
-                    textoDetalle = "Remito: " + listaItems;
-                } else if (typeof itemsRemito === 'string' && itemsRemito.trim() !== '') {
-                    textoDetalle = itemsRemito;
-                } else if (m.observaciones) {
+                    textoDetalle = textoDetalle + ": " + listaItems;
+                } else if (m.observaciones && m.observaciones.trim() !== '') {
                     textoDetalle += " (" + m.observaciones + ")";
                 }
 
