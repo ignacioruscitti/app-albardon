@@ -2987,11 +2987,11 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    // ==========================================
-// SOLUCIÓN DEFINITIVA Y ANTIPISADAS - BARRILES
+// ==========================================
+// MÓDULO UNIFICADO DE BARRILES Y CUENTAS CORRIENTES
 // ==========================================
 (function() {
-    // 1. Forzar carga inicial limpia y sin recortes
+    // 1. Sincronización y Carga de Barriles
     function sincronizarBarrilesDefinitivo() {
         try {
             const raw = localStorage.getItem('alb_barriles') || localStorage.getItem('barriles');
@@ -3011,7 +3011,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     sincronizarBarrilesDefinitivo();
 
-    // 2. Sobrescribir guardarBarril de forma limpia y directa
+    // 2. Guardar Barril
     window.guardarBarril = function(event) {
         if (event && typeof event.preventDefault === 'function') {
             event.preventDefault();
@@ -3044,34 +3044,29 @@ document.addEventListener('DOMContentLoaded', () => {
             ubicacion: ubicacionInput ? ubicacionInput.value.trim() : ''
         };
 
-        // Si estamos editando un índice existente
         if (window.barrilEditandoIdx !== null && window.barrilEditandoIdx !== undefined && window.barrilEditandoIdx >= 0 && window.barrilEditandoIdx < window.barriles.length) {
             window.barriles[window.barrilEditandoIdx] = nuevoBarril;
             window.barrilEditandoIdx = null;
         } else {
-            // Agregar siempre al final sin borrar nada anterior
             window.barriles.push(nuevoBarril);
         }
 
-        // Persistir en localStorage de forma duplicada para evitar desincronizaciones
         const dataStr = JSON.stringify(window.barriles);
         localStorage.setItem('alb_barriles', dataStr);
         localStorage.setItem('barriles', dataStr);
 
-        // Cerrar modal y resetear formulario
         const modal = document.getElementById('modal-barril');
         if (modal) modal.classList.add('hidden');
         
         const form = document.getElementById('form-barril');
         if (form) form.reset();
 
-        // Refrescar pantalla inmediatamente
         if (typeof window.renderBarriles === 'function') {
             window.renderBarriles('TODOS');
         }
     };
 
-    // 3. Sobrescribir renderBarriles garantizando que dibuje TODOS los elementos de window.barriles
+    // 3. Renderizar Barriles
     window.renderBarriles = function(filtro = 'TODOS') {
         const contenedor = document.getElementById('grilla-barriles');
         if (!contenedor) return;
@@ -3122,65 +3117,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         contenedor.innerHTML = html;
     };
-// Sincronización automática y silenciosa entre Cuentas Corrientes y Barriles
-function sincronizarSistemaAlbardon() {
-    try {
-        // Refresca las métricas y los estados en tiempo real
-        if (typeof actualizarMetricasCuentasCorrientes === 'function') {
-            actualizarMetricasCuentasCorrientes();
-        }
-        
-        // Verificamos si existe la función de renderizado de stock para mantenerla al día
-        if (typeof renderBarriles === 'function') {
-            // No la ejecutamos forzado para no interrumpir, solo si es seguro
-        }
-    } catch (error) {
-        console.error("Aviso de sincronización:", error);
-    }
-}
-// Función para generar y enviar el Estado de Cuenta detallado por WhatsApp
-function enviarEstadoCuentaWhatsApp(clienteId) {
-    // Buscamos al cliente en la lista global
-    const c = (typeof clientes !== 'undefined' ? clientes : []).find(item => item.id === clienteId);
-    if (!c) {
-        alert("No se encontró al cliente.");
-        return;
-    }
 
-    // Armamos el mensaje formateado con emojis y diseño profesional
-    let mensaje = `*ESTADO DE CUENTA - CERVECERÍA ALBARDÓN*%0A`;
-    mensaje += `-----------------------------------%0A`;
-    mensaje += `👤 *Cliente:* ${c.nombre || c.razonSocial || 'Cliente'}%0A`;
-    mensaje += `💰 *Saldo Actual:* $${parseFloat(c.saldo || 0).toLocaleString()}%0A`;
-    mensaje += `-----------------------------------%0A`;
-    mensaje += `*Últimos Movimientos:*%0A`;
-
-    if (c.movimientos && c.movimientos.length > 0) {
-        // Tomamos los movimientos registrados
-        c.movimientos.forEach(m => {
-            const signo = m.monto > 0 ? '+' : '';
-            mensaje += `▪️ ${m.fecha || ''} - ${m.descripcion || m.concepto || 'Movimiento'}: ${signo}$ ${parseFloat(m.monto || 0).toLocaleString()}%0A`;
-        });
-    } else {
-        mensaje += `No hay movimientos registrados.%0A`;
-    }
-
-    mensaje += `-----------------------------------%0A`;
-    mensaje += `¡Gracias por elegirnos! 🍻`;
-
-    // Limpiamos el teléfono del cliente si lo tiene cargado
-    let telefono = c.telefono || c.celular || '';
-    telefono = telefono.replace(/\D/g, ''); 
-
-    // Abrimos WhatsApp con el mensaje listo
-    const url = `https://api.whatsapp.com/send?phone=${telefono}&text=${mensaje}`;
-    window.open(url, '_blank');
-}
-// Ejecutar automáticamente al iniciar la aplicación y al cambiar de sección
-window.addEventListener('DOMContentLoaded', () => {
-    setTimeout(sincronizarSistemaAlbardon, 600);
-});
-    // 4. Funciones de apoyo globales aseguradas
+    // 4. Funciones Auxiliares de Barriles
     window.eliminarBarril = function(idx) {
         if (confirm("¿Estás seguro de que deseas eliminar este barril?")) {
             window.barriles.splice(idx, 1);
@@ -3216,186 +3154,59 @@ window.addEventListener('DOMContentLoaded', () => {
         const modal = document.getElementById('modal-barril');
         if (modal) modal.classList.remove('hidden');
     };
-})();
-// Función para generar y enviar el Estado de Cuenta detallado por WhatsApp
-function enviarEstadoCuentaWhatsApp(clienteId) {
-    const c = (typeof clientes !== 'undefined' ? clientes : []).find(item => item.id === clienteId);
-    if (!c) {
-        alert("No se encontró al cliente.");
-        return;
-    }
 
-    let mensaje = `*ESTADO DE CUENTA - CERVECERÍA ALBARDÓN*%0A`;
-    mensaje += `-----------------------------------%0A`;
-    mensaje += `👤 *Cliente:* ${c.nombre || c.razonSocial || 'Cliente'}%0A`;
-    mensaje += `💰 *Saldo Actual:* $${parseFloat(c.saldo || 0).toLocaleString()}%0A`;
-    mensaje += `-----------------------------------%0A`;
-    mensaje += `*Últimos Movimientos:*%0A`;
-
-    if (c.movimientos && c.movimientos.length > 0) {
-        c.movimientos.forEach(m => {
-            const signo = m.monto > 0 ? '+' : '';
-            mensaje += `▪️ ${m.fecha || ''} - ${m.concepto || m.descripcion || 'Movimiento'}: ${signo}$ ${parseFloat(m.monto || 0).toLocaleString()}%0A`;
-        });
-    } else {
-        mensaje += `No hay movimientos registrados.%0A`;
-    }
-
-    mensaje += `-----------------------------------%0A`;
-    mensaje += `¡Gracias por elegirnos! 🍻`;
-
-    let telefono = c.telefono || c.celular || '';
-    telefono = telefono.replace(/\D/g, ''); 
-
-    const url = `https://api.whatsapp.com/send?phone=${telefono}&text=${mensaje}`;
-    window.open(url, '_blank');
-}
-
-(function() {
-    // Función segura para enviar Estado de Cuenta por WhatsApp
+    // 5. Funciones de Cuentas Corrientes (WhatsApp y PDF) de forma limpia
     window.enviarEstadoCuentaWhatsApp = function(clienteId) {
-        const listaClientes = typeof clientes !== 'undefined' ? clientes : [];
-        const c = listaClientes.find(item => item.id === clienteId);
+        var c = (typeof clientes !== 'undefined' ? clientes : []).find(function(item) { return item.id === clienteId; });
+        if (!c) {
+            alert("No se encontró al cliente.");
+            return;
+        }
+        var nombreCliente = c.nombre || c.razonSocial || 'Cliente';
+        var saldoCliente = parseFloat(c.saldo || 0).toLocaleString();
+        var telefono = (c.telefono || c.celular || '').replace(/\D/g, '');
+        
+        var mensaje = "*ESTADO DE CUENTA - CERVECERÍA ALBARDÓN*\n" +
+                      "-----------------------------------\n" +
+                      "Cliente: " + nombreCliente + "\n" +
+                      "Saldo Actual: $" + saldoCliente + "\n" +
+                      "-----------------------------------\n" +
+                      "¡Gracias por elegirnos!";
+        
+        var url = "https://api.whatsapp.com/send?phone=" + telefono + "&text=" + encodeURIComponent(mensaje);
+        window.open(url, '_blank');
+    };
+
+    window.descargarEstadoCuentaPDF = function(clienteId) {
+        var c = (typeof clientes !== 'undefined' ? clientes : []).find(function(item) { return item.id === clienteId; });
         if (!c) {
             alert("No se encontró al cliente.");
             return;
         }
 
-        let mensaje = "*ESTADO DE CUENTA - CERVECERÍA ALBARDÓN*%0A";
-        mensaje += "-----------------------------------%0A";
-        mensaje += `👤 *Cliente:* ${c.nombre || c.razonSocial || 'Cliente'}%0A`;
-        mensaje += `💰 *Saldo Actual:* $${parseFloat(c.saldo || 0).toLocaleString()}%0A`;
-        mensaje += "-----------------------------------%0A";
-        mensaje += "*Últimos Movimientos:*%0A";
-
-        if (c.movimientos && c.movimientos.length > 0) {
-            c.movimientos.forEach(m => {
-                const signo = m.monto > 0 ? '+' : '';
-                mensaje += `▪️ ${m.fecha || ''} - ${m.concepto || m.descripcion || 'Movimiento'}: ${signo}$ ${parseFloat(m.monto || 0).toLocaleString()}%0A`;
-            });
-        } else {
-            mensaje += "No hay movimientos registrados.%0A";
+        var ventanaImpresion = window.open('', '_blank');
+        if (!ventanaImpresion) {
+            alert("Por favor, permite las ventanas emergentes.");
+            return;
         }
 
-        mensaje += "-----------------------------------%0A";
-        mensaje += "¡Gracias por elegirnos! 🍻";
+        var htmlContenido = "<html><head><title>Estado de Cuenta</title><style>body { font-family: Arial, sans-serif; padding: 20px; }</style></head><body>" +
+            "<h1>Cervecería Albardón</h1>" +
+            "<h3>Estado de Cuenta: " + (c.nombre || 'Cliente') + "</h3>" +
+            "<p><strong>Saldo Actual:</strong> $" + parseFloat(c.saldo || 0).toLocaleString() + "</p>" +
+            "<script>window.onload = function() { window.print(); }</script>" +
+            "</body></html>";
 
-        let telefono = c.telefono || c.celular || '';
-        telefono = telefono.replace(/\D/g, ''); 
-
-        const url = `https://api.whatsapp.com/send?phone=${telefono}&text=${mensaje}`;
-        window.open(url, '_blank');
+        ventanaImpresion.document.write(htmlContenido);
+        ventanaImpresion.document.close();
     };
 
- // Función para enviar Estado de Cuenta por WhatsApp
-window.enviarEstadoCuentaWhatsApp = function(clienteId) {
-    const c = (typeof clientes !== 'undefined' ? clientes : []).find(item => item.id === clienteId);
-    if (!c) {
-        alert("No se encontró al cliente.");
-        return;
-    }
-
-    let mensaje = `*ESTADO DE CUENTA - CERVECERÍA ALBARDÓN*%0A`;
-    mensaje += `-----------------------------------%0A`;
-    mensaje += `👤 *Cliente:* ${c.nombre || c.razonSocial || 'Cliente'}%0A`;
-    mensaje += `💰 *Saldo Actual:* $${parseFloat(c.saldo || 0).toLocaleString()}%0A`;
-    mensaje += `-----------------------------------%0A`;
-    mensaje += `*Últimos Movimientos:*%0A`;
-
-    if (c.movimientos && c.movimientos.length > 0) {
-        c.movimientos.forEach(m => {
-            const signo = m.monto > 0 ? '+' : '';
-            mensaje += `▪️ ${m.fecha || ''} - ${m.concepto || m.descripcion || 'Movimiento'}: ${signo}$ ${parseFloat(m.monto || 0).toLocaleString()}%0A`;
-        });
-    } else {
-        mensaje += `No hay movimientos registrados.%0A`;
-    }
-
-    mensaje += `-----------------------------------%0A`;
-    mensaje += `¡Gracias por elegirnos! 🍻`;
-
-    let telefono = c.telefono || c.celular || '';
-    telefono = telefono.replace(/\D/g, ''); 
-
-    const url = `https://api.whatsapp.com/send?phone=${telefono}&text=${mensaje}`;
-    window.open(url, '_blank');
-};
-
-// Función para enviar Estado de Cuenta por WhatsApp
-window.enviarEstadoCuentaWhatsApp = function(clienteId) {
-    const c = (typeof clientes !== 'undefined' ? clientes : []).find(item => item.id === clienteId);
-    if (!c) {
-        alert("No se encontró al cliente.");
-        return;
-    }
-
-    let mensaje = `*ESTADO DE CUENTA - CERVECERÍA ALBARDÓN*%0A`;
-    mensaje += `-----------------------------------%0A`;
-    mensaje += `👤 *Cliente:* ${c.nombre || c.razonSocial || 'Cliente'}%0A`;
-    mensaje += `💰 *Saldo Actual:* $${parseFloat(c.saldo || 0).toLocaleString()}%0A`;
-    mensaje += `-----------------------------------%0A`;
-    mensaje += `*Últimos Movimientos:*%0A`;
-
-    if (c.movimientos && c.movimientos.length > 0) {
-        c.movimientos.forEach(m => {
-            const signo = m.monto > 0 ? '+' : '';
-            mensaje += `▪️ ${m.fecha || ''} - ${m.concepto || m.descripcion || 'Movimiento'}: ${signo}$ ${parseFloat(m.monto || 0).toLocaleString()}%0A`;
-        });
-    } else {
-        mensaje += `No hay movimientos registrados.%0A`;
-    }
-
-    mensaje += `-----------------------------------%0A`;
-    mensaje += `¡Gracias por elegirnos! 🍻`;
-
-    let telefono = c.telefono || c.celular || '';
-    telefono = telefono.replace(/\D/g, ''); 
-
-    const url = `https://api.whatsapp.com/send?phone=${telefono}&text=${mensaje}`;
-    window.open(url, '_blank');
-};
-
-window.enviarEstadoCuentaWhatsApp = function(clienteId) {
-    var c = (typeof clientes !== 'undefined' ? clientes : []).find(function(item) { return item.id === clienteId; });
-    if (!c) {
-        alert("No se encontró al cliente.");
-        return;
-    }
-    var nombreCliente = c.nombre || c.razonSocial || 'Cliente';
-    var saldoCliente = parseFloat(c.saldo || 0).toLocaleString();
-    var telefono = (c.telefono || c.celular || '').replace(/\D/g, '');
-    
-    var mensaje = "*ESTADO DE CUENTA - CERVECERÍA ALBARDÓN*\n" +
-                  "-----------------------------------\n" +
-                  "Cliente: " + nombreCliente + "\n" +
-                  "Saldo Actual: $" + saldoCliente + "\n" +
-                  "-----------------------------------\n" +
-                  "¡Gracias por elegirnos!";
-    
-    var url = "https://api.whatsapp.com/send?phone=" + telefono + "&text=" + encodeURIComponent(mensaje);
-    window.open(url, '_blank');
-};
-
-window.descargarEstadoCuentaPDF = function(clienteId) {
-    var c = (typeof clientes !== 'undefined' ? clientes : []).find(function(item) { return item.id === clienteId; });
-    if (!c) {
-        alert("No se encontró al cliente.");
-        return;
-    }
-
-    var ventanaImpresion = window.open('', '_blank');
-    if (!ventanaImpresion) {
-        alert("Por favor, permite las ventanas emergentes.");
-        return;
-    }
-
-    var htmlContenido = "<html><head><title>Estado de Cuenta</title><style>body { font-family: Arial, sans-serif; padding: 20px; }</style></head><body>" +
-        "<h1>Cervecería Albardón</h1>" +
-        "<h3>Estado de Cuenta: " + (c.nombre || 'Cliente') + "</h3>" +
-        "<p><strong>Saldo Actual:</strong> $" + parseFloat(c.saldo || 0).toLocaleString() + "</p>" +
-        "<script>window.onload = function() { window.print(); }</script>" +
-        "</body></html>";
-
-    ventanaImpresion.document.write(htmlContenido);
-    ventanaImpresion.document.close();
-};
+    // Sincronización automática inicial
+    window.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+            if (typeof actualizarMetricasCuentasCorrientes === 'function') {
+                actualizarMetricasCuentasCorrientes();
+            }
+        }, 600);
+    });
+})();
