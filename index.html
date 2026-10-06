@@ -2324,7 +2324,8 @@ function eliminarBarril(idx) {
     }
 } </script>
     
-<script> // --- MÓDULO CLIENTES & CUENTAS CORRIENTES ---
+<script> 
+// --- MÓDULO CLIENTES & CUENTAS CORRIENTES ---
 function renderClientes() {
     const container = document.getElementById('grilla-clientes');
     if (!container) return;
@@ -2370,7 +2371,6 @@ function renderClientes() {
                                     </button>
                                 ` : ''}
 
-                                <!-- NUEVO: Botón para eliminar este movimiento específico -->
                                 <button onclick="eliminarMovimiento('${c.id}',${mIdx})" title="Eliminar movimiento" class="bg-red-500/20 hover:bg-red-500/40 text-red-400 text-[10px] px-2 py-1 rounded font-bold no-print">
                                     <i class="fa-solid fa-xmark"></i>
                                 </button>
@@ -2379,7 +2379,7 @@ function renderClientes() {
                     `).join('') : '<p class="text-slate-500 italic">Sin movimientos registrados.</p>'}
                 </div>
 
-              <div class="flex flex-wrap justify-end gap-2 pt-2 no-print">
+                <div class="flex flex-wrap justify-end gap-2 pt-2 no-print">
                     <button onclick="descargarEstadoCuentaPDF('${c.id}')" class="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1">
                         <i class="fa-solid fa-file-pdf"></i> Generar PDF
                     </button>
@@ -2495,99 +2495,6 @@ if (typeof opcionesPresentaciones === 'undefined') {
         'Barril 50L', 'Barril 30L', 'Barril 20L'
     ];
 }
-
-function mostrarModalCliente() {
-    const titulo = document.getElementById('modal-cliente-titulo');
-    if (titulo) titulo.innerText = 'Nuevo Cliente';
-    
-    const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
-    setVal('cli-id-editar', '');
-    setVal('cli-nombre', '');
-    setVal('cli-telefono', '');
-    setVal('cli-direccion', '');
-
-    const modal = document.getElementById('modal-cliente');
-    if (modal) modal.classList.remove('hidden');
-}
-
-function cerrarModalCliente() { 
-    const modal = document.getElementById('modal-cliente');
-    if (modal) modal.classList.add('hidden'); 
-}
-
-function editarCliente(id) {
-    const cli = clientes.find(c => c.id === id);
-    if (!cli) return;
-
-    const titulo = document.getElementById('modal-cliente-titulo');
-    if (titulo) titulo.innerText = 'Editar Cliente';
-
-    const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
-    setVal('cli-id-editar', cli.id);
-    setVal('cli-nombre', cli.nombre);
-    setVal('cli-telefono', cli.telefono);
-    setVal('cli-direccion', cli.direccion);
-
-    const modal = document.getElementById('modal-cliente');
-    if (modal) modal.classList.remove('hidden');
-}
-
-function guardarCliente() {
-    const inputEditId = document.getElementById('cli-id-editar');
-    const inputNombre = document.getElementById('cli-nombre');
-    const inputTelefono = document.getElementById('cli-telefono');
-    const inputDireccion = document.getElementById('cli-direccion');
-
-    if (!inputNombre) {
-        alert("Error: No se encuentra el campo del nombre del cliente en el HTML.");
-        return;
-    }
-
-    const editId = inputEditId ? inputEditId.value : '';
-    const nombre = inputNombre.value.trim();
-    const telefono = inputTelefono ? inputTelefono.value.trim() : '';
-    const direccion = inputDireccion ? inputDireccion.value.trim() : '';
-
-    if (!nombre) {
-        alert("Ingrese el nombre del cliente.");
-        return;
-    }
-
-    if (editId) {
-        const idx = clientes.findIndex(c => c.id === editId);
-        if (idx >= 0) {
-            clientes[idx].nombre = nombre;
-            clientes[idx].telefono = telefono;
-            clientes[idx].direccion = direccion;
-        }
-    } else {
-        clientes.push({ 
-            id: 'c_' + Date.now(), 
-            nombre, 
-            telefono, 
-            direccion, 
-            saldo: 0, 
-            movimientos: [] 
-        });
-    }
-
-    if (typeof guardarStorage === 'function') guardarStorage();
-    cerrarModalCliente();
-    renderClientes();
-}
-
-function eliminarCliente(id) {
-    const cli = clientes.find(c => c.id === id);
-    if (!cli) return;
-
-    if (confirm(`¿Estás seguro de dar de baja al cliente "${cli.nombre}"?`)) {
-        clientes = clientes.filter(c => c.id !== id);
-        if (typeof guardarStorage === 'function') guardarStorage();
-        renderClientes();
-    }
-}
-
-
 
 function mostrarModalMovimiento() {
     const select = document.getElementById('mov-cliente-select');
@@ -2788,7 +2695,6 @@ function descargarRemitoPDF(clienteId, movIdx) {
     setInnerText('pdf-direccion', c.direccion || 'N / A');
     setInnerText('pdf-telefono', c.telefono || 'N / A');
 
-    // Inyectar la observación en el PDF si existe
     const elObs = document.getElementById('pdf-observaciones');
     if (elObs) {
         elObs.innerText = m.observaciones ? `Observaciones: ${m.observaciones}` : '';
@@ -2841,14 +2747,13 @@ function descargarRemitoPDF(clienteId, movIdx) {
         }, 500);
     }
 }
-  // Puente para asegurar que HTML y JS se comuniquen sin errores
+
 function toggleFormularioRemito() {
     if (typeof alternarFormularioRemito === 'function') {
         alternarFormularioRemito();
     }
 }
 
-// Función para eliminar un movimiento y corregir automáticamente el saldo
 function eliminarMovimiento(clienteId, movIdx) {
     if (!confirm("¿Estás seguro de que deseas eliminar este movimiento? Se ajustará automáticamente el saldo de la cuenta corriente.")) return;
 
@@ -2856,28 +2761,19 @@ function eliminarMovimiento(clienteId, movIdx) {
     if (!c || !c.movimientos || !c.movimientos[movIdx]) return;
 
     const m = c.movimientos[movIdx];
-
-    // Revertir el impacto que tuvo este movimiento en el saldo del cliente
     c.saldo -= m.monto;
-
-    // Eliminar el movimiento del array
     c.movimientos.splice(movIdx, 1);
 
-    // Guardar y actualizar vista
     if (typeof guardarStorage === 'function') guardarStorage();
     if (typeof renderClientes === 'function') renderClientes();
 }
 
-// Función limpia para actualizar las métricas de cuentas corrientes
 function actualizarMetricasCuentasCorrientes() {
     try {
         let listaClientes = [];
-        
-        // 1. Usamos directamente la variable global 'clientes' de tu app si existe
         if (typeof clientes !== 'undefined' && Array.isArray(clientes)) {
             listaClientes = clientes;
         } else {
-            // 2. Si no, buscamos en localStorage por si acaso
             const posiblesClaves = ['albardon_clientes', 'clientes', 'albardon_cuentas_corrientes', 'cuentas_corrientes', 'cc'];
             for (let clave of posiblesClaves) {
                 const data = localStorage.getItem(clave);
@@ -2893,7 +2789,6 @@ function actualizarMetricasCuentasCorrientes() {
             }
         }
 
-        // Buscamos los barriles
         let barriles = [];
         const posiblesClavesBarriles = ['albardon_barriles', 'barriles', 'stock_barriles'];
         for (let clave of posiblesClavesBarriles) {
@@ -2914,10 +2809,7 @@ function actualizarMetricasCuentasCorrientes() {
 
         if (Array.isArray(listaClientes)) {
             listaClientes.forEach(c => {
-                // Leemos el saldo del cliente
                 let saldo = parseFloat(c.saldo !== undefined ? c.saldo : (c.deuda !== undefined ? c.deuda : 0));
-                
-                // Si tiene saldo distinto de 0 (ej: -265000), lo sumamos y contamos
                 if (saldo !== 0) {
                     saldoTotal += Math.abs(saldo);
                     clientesConDeuda++;
@@ -2925,7 +2817,6 @@ function actualizarMetricasCuentasCorrientes() {
             });
         }
 
-        // Contar barriles prestados
         let barrilesPrestados = 0;
         if (Array.isArray(barriles)) {
             barrilesPrestados = barriles.filter(b => {
@@ -2934,7 +2825,6 @@ function actualizarMetricasCuentasCorrientes() {
             }).length;
         }
 
-        // Inyectar en pantalla
         const elSaldo = document.getElementById('metric-saldo-total');
         const elDeuda = document.getElementById('metric-clientes-deuda');
         const elBarriles = document.getElementById('metric-barriles-calle');
@@ -2947,7 +2837,8 @@ function actualizarMetricasCuentasCorrientes() {
         console.error("Error al calcular métricas de cuentas corrientes:", error);
     }
 }
-  // --- INICIALIZACIÓN Y ARRANQUE ---
+
+// --- INICIALIZACIÓN Y ARRANQUE ---
 document.addEventListener('DOMContentLoaded', () => {
     const cocFecha = document.getElementById('coc-fecha');
     if (cocFecha) cocFecha.valueAsDate = new Date();
@@ -2962,31 +2853,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof switchTab === 'function') switchTab('recetas');
     if (typeof iniciarSincronizacion === 'function') iniciarSincronizacion();
 });
-    // --- CARGA Y RENDERIZADO DE BARRILES AL INICIAR ---
-    try {
-        const localData = localStorage.getItem('alb_barriles') || localStorage.getItem('barriles');
-        if (localData) {
-            window.barriles = JSON.parse(localData);
-        } else {
-            window.barriles = [];
-        }
-    } catch(e) {
-        console.error("Error al cargar barriles del storage:", e);
-        window.barriles = [];
-    }
-
-    if (typeof renderBarriles === 'function') {
-        renderBarriles('TODOS');
-    }
-
-    // --- VINCULACIÓN DEL FORMULARIO DE BARRILES ---
-    const formBarril = document.getElementById('form-barril');
-    if (formBarril) {
-        formBarril.onsubmit = function(event) {
-            guardarBarril(event);
-        };
-    }
-
+</script>
 // ==========================================
 // MÓDULO UNIFICADO DE BARRILES Y CUENTAS CORRIENTES
 // ==========================================
