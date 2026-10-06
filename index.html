@@ -3287,79 +3287,116 @@ function enviarEstadoCuentaWhatsApp(clienteId) {
         window.open(url, '_blank');
     };
 
-    // Función segura para generar PDF del Estado de Cuenta
-    window.descargarEstadoCuentaPDF = function(clienteId) {
-        const listaClientes = typeof clientes !== 'undefined' ? clientes : [];
-        const c = listaClientes.find(item => item.id === clienteId);
-        if (!c) {
-            alert("No se encontró al cliente.");
-            return;
-        }
+ // Función para enviar Estado de Cuenta por WhatsApp
+window.enviarEstadoCuentaWhatsApp = function(clienteId) {
+    const c = (typeof clientes !== 'undefined' ? clientes : []).find(item => item.id === clienteId);
+    if (!c) {
+        alert("No se encontró al cliente.");
+        return;
+    }
 
-        let ventanaImpresion = window.open('', '_blank');
-        if (!ventanaImpresion) {
-            alert("Por favor, permite las ventanas emergentes para generar el PDF.");
-            return;
-        }
+    let mensaje = `*ESTADO DE CUENTA - CERVECERÍA ALBARDÓN*%0A`;
+    mensaje += `-----------------------------------%0A`;
+    mensaje += `👤 *Cliente:* ${c.nombre || c.razonSocial || 'Cliente'}%0A`;
+    mensaje += `💰 *Saldo Actual:* $${parseFloat(c.saldo || 0).toLocaleString()}%0A`;
+    mensaje += `-----------------------------------%0A`;
+    mensaje += `*Últimos Movimientos:*%0A`;
 
-        let htmlContenido = `
-            <html>
-            <head>
-                <title>Estado de Cuenta - ${c.nombre || 'Cliente'}</title>
-                <style>
-                    body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
-                    h1 { color: #0f172a; margin-bottom: 5px; font-size: 22px; }
-                    .subtitle { color: #64748b; font-size: 14px; margin-bottom: 20px; }
-                    .box { background: #f8fafc; border: 1px solid #cbd5e1; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-                    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-                    th, td { border-bottom: 1px solid #e2e8f0; padding: 10px; text-align: left; font-size: 13px; }
-                    th { background: #0f172a; color: white; }
-                    .text-right { text-align: right; }
-                    .total { font-size: 16px; font-weight: bold; margin-top: 15px; }
-                </style>
-            </head>
-            <body>
-                <h1>Cervecería Albardón</h1>
-                <div class="subtitle">Estado de Cuenta Corriente</div>
-                
-                <div class="box">
-                    <strong>Cliente:</strong> ${c.nombre || '-'}<br>
-                    <strong>Teléfono:</strong> ${c.telefono || '-'} | <strong>Dirección:</strong> ${c.direccion || '-'}<br>
-                    <div class="total">Saldo Actual: $ ${parseFloat(c.saldo || 0).toLocaleString()}</div>
-                </div>
+    if (c.movimientos && c.movimientos.length > 0) {
+        c.movimientos.forEach(m => {
+            const signo = m.monto > 0 ? '+' : '';
+            mensaje += `▪️ ${m.fecha || ''} - ${m.concepto || m.descripcion || 'Movimiento'}: ${signo}$ ${parseFloat(m.monto || 0).toLocaleString()}%0A`;
+        });
+    } else {
+        mensaje += `No hay movimientos registrados.%0A`;
+    }
 
-                <h3>Historial de Movimientos</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Concepto / Descripción</th>
-                            <th class="text-right">Monto</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        `;
+    mensaje += `-----------------------------------%0A`;
+    mensaje += `¡Gracias por elegirnos! 🍻`;
 
-        if (c.movimientos && c.movimientos.length > 0) {
-            c.movimientos.forEach(m => {
-                htmlContenido += `
+    let telefono = c.telefono || c.celular || '';
+    telefono = telefono.replace(/\D/g, ''); 
+
+    const url = `https://api.whatsapp.com/send?phone=${telefono}&text=${mensaje}`;
+    window.open(url, '_blank');
+};
+
+// Función para descargar el Estado de Cuenta en PDF
+window.descargarEstadoCuentaPDF = function(clienteId) {
+    const c = (typeof clientes !== 'undefined' ? clientes : []).find(item => item.id === clienteId);
+    if (!c) {
+        alert("No se encontró al cliente.");
+        return;
+    }
+
+    let ventanaImpresion = window.open('', '_blank');
+    if (!ventanaImpresion) {
+        alert("Por favor, permite las ventanas emergentes para generar el PDF.");
+        return;
+    }
+
+    let htmlContenido = `
+        <html>
+        <head>
+            <title>Estado de Cuenta - ${c.nombre || 'Cliente'}</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
+                h1 { color: #0f172a; margin-bottom: 5px; font-size: 22px; }
+                .subtitle { color: #64748b; font-size: 14px; margin-bottom: 20px; }
+                .box { background: #f8fafc; border: 1px solid #cbd5e1; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+                table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+                th, td { border-bottom: 1px solid #e2e8f0; padding: 10px; text-align: left; font-size: 13px; }
+                th { background: #0f172a; color: white; }
+                .text-right { text-align: right; }
+                .total { font-size: 16px; font-weight: bold; margin-top: 15px; }
+            </style>
+        </head>
+        <body>
+            <h1>Cervecería Albardón</h1>
+            <div class="subtitle">Estado de Cuenta Corriente</div>
+            
+            <div class="box">
+                <strong>Cliente:</strong> ${c.nombre || '-'}<br>
+                <strong>Teléfono:</strong> ${c.telefono || '-'} | <strong>Dirección:</strong> ${c.direccion || '-'}<br>
+                <div class="total">Saldo Actual: $ ${parseFloat(c.saldo || 0).toLocaleString()}</div>
+            </div>
+
+            <h3>Historial de Movimientos</h3>
+            <table>
+                <thead>
                     <tr>
-                        <td>${m.fecha || '-'}</td>
-                        <td>${m.concepto || m.descripcion || 'Movimiento'}</td>
-                        <td class="text-right">$ ${parseFloat(m.monto || 0).toLocaleString()}</td>
+                        <th>Fecha</th>
+                        <th>Concepto / Descripción</th>
+                        <th class="text-right">Monto</th>
                     </tr>
-                `;
-            });
-        } else {
-            htmlContenido += `<tr><td colspan="3" style="text-align:center; color:#64748b;">No hay movimientos registrados.</td></tr>`;
-        }
+                </thead>
+                <tbody>
+    `;
 
-        htmlContenido += `
-                    </tbody>
-                </table>
-                <script>
-                    window.onload = function() { window.print(); }
-                </script>
-            </body>
-            </html>
-       
+    if (c.movimientos && c.movimientos.length > 0) {
+        c.movimientos.forEach(m => {
+            htmlContenido += `
+                <tr>
+                    <td>${m.fecha || '-'}</td>
+                    <td>${m.concepto || m.descripcion || 'Movimiento'}</td>
+                    <td class="text-right">$ ${parseFloat(m.monto || 0).toLocaleString()}</td>
+                </tr>
+            `;
+        });
+    } else {
+        htmlContenido += `<tr><td colspan="3" style="text-align:center; color:#64748b;">No hay movimientos registrados.</td></tr>`;
+    }
+
+    htmlContenido += `
+                </tbody>
+            </table>
+            <script>
+                window.onload = function() { window.print(); }
+            </script>
+        </body>
+        </html>
+    `;
+
+    ventanaImpresion.document.write(htmlContenido);
+    ventanaImpresion.document.close();
+};
