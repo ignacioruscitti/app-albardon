@@ -3058,12 +3058,12 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        var htmlContenido = "<html><head><title>Estado de Cuenta</title><style>body { font-family: Arial, sans-serif; padding: 20px; }</style></head><body>" +
-            "<h1>Cervecería Albardón</h1>" +
-            "<h3>Estado de Cuenta: " + (c.nombre || 'Cliente') + "</h3>" +
-            "<p><strong>Saldo Actual:</strong> $" + parseFloat(c.saldo || 0).toLocaleString() + "</p>" +
-            "<script>window.onload = function() { window.print(); }</script>" +
-            "</body></html>";
+       var htmlContenido = "<html><head><title>Estado de Cuenta</title><style>body { font-family: Arial, sans-serif; padding: 20px; }</style></head><body>" +
+    "<h1>Cervecería Albardón</h1>" +
+    "<h3>Estado de Cuenta: " + (c.nombre || 'Cliente') + "</h3>" +
+    "<p><strong>Saldo Actual:</strong> $" + parseFloat(c.saldo || 0).toLocaleString() + "</p>" +
+    "<script>window.onload = function() { window.print(); }" + "<\/script>" +
+    "</body></html>";
 
         ventanaImpresion.document.write(htmlContenido);
         ventanaImpresion.document.close();
