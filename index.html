@@ -3045,7 +3045,7 @@ document.addEventListener('DOMContentLoaded', () => {
         window.open(url, '_blank');
     };
 
-   window.descargarEstadoCuentaPDF = function(clienteId) {
+window.descargarEstadoCuentaPDF = function(clienteId) {
         var c = (typeof clientes !== 'undefined' ? clientes : []).find(function(item) { return item.id === clienteId; });
         if (!c) {
             alert("No se encontró al cliente.");
@@ -3058,7 +3058,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Obtener los movimientos del cliente (según la propiedad que uses)
         var movimientos = c.movimientos || c.historial || c.transacciones || [];
         var ultimosMovimientos = movimientos.slice(-5); // Toma los últimos 5
 
@@ -3068,17 +3067,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 '<table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px;">' +
                 '<tr style="background-color: #f2f2f2; border-bottom: 1px solid #ddd;">' +
                 '<th style="padding: 8px; text-align: left;">Fecha</th>' +
-                '<th style="padding: 8px; text-align: left;">Descripción</th>' +
+                '<th style="padding: 8px; text-align: left;">Descripción / Detalle del Remito</th>' +
                 '<th style="padding: 8px; text-align: right;">Monto</th>' +
                 '</tr>';
             
             ultimosMovimientos.forEach(function(m) {
                 var fecha = m.fecha || m.date || '-';
-                var desc = m.descripcion || m.detalle || m.concepto || 'Movimiento';
                 var monto = parseFloat(m.monto || m.importe || 0).toLocaleString();
-                htmlMovimientos += '<tr style="border-bottom: 1px solid #eee;">' +
+                
+                // Extraer el detalle enriquecido de los ítems o productos del remito
+                var textoDetalle = m.descripcion || m.concepto || 'Movimiento';
+                
+                var itemsRemito = m.items || m.productos || m.detalleRemito || m.detalle;
+                if (Array.isArray(itemsRemito) && itemsRemito.length > 0) {
+                    var listaItems = itemsRemito.map(function(item) {
+                        var cantidad = item.cantidad || item.qty || 1;
+                        var nombreItem = item.nombre || item.producto || item.descripcion || item.cerveza || 'Artículo';
+                        return cantidad + "x " + nombreItem;
+                    }).join(", ");
+                    textoDetalle = "Remito: " + listaItems;
+                } else if (typeof itemsRemito === 'string' && itemsRemito.trim() !== '') {
+                    textoDetalle = itemsRemito;
+                } else if (m.observaciones) {
+                    textoDetalle += " (" + m.observaciones + ")";
+                }
+
+                htmlMovimientos += '<tr style="border-bottom: 1px solid #eee; vertical-align: top;">' +
                     '<td style="padding: 8px;">' + fecha + '</td>' +
-                    '<td style="padding: 8px;">' + desc + '</td>' +
+                    '<td style="padding: 8px;">' + textoDetalle + '</td>' +
                     '<td style="padding: 8px; text-align: right; font-weight: bold;">$' + monto + '</td>' +
                     '</tr>';
             });
