@@ -3067,7 +3067,7 @@ window.descargarEstadoCuentaPDF = function(clienteId) {
                 '<table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px;">' +
                 '<tr style="background-color: #f2f2f2; border-bottom: 1px solid #ddd;">' +
                 '<th style="padding: 8px; text-align: left;">Fecha</th>' +
-                '<th style="padding: 8px; text-align: left;">Concepto / Detalle del Remito</th>' +
+                '<th style="padding: 8px; text-align: left;">Detalle del Remito / Movimiento</th>' +
                 '<th style="padding: 8px; text-align: right;">Monto</th>' +
                 '</tr>';
             
@@ -3076,15 +3076,22 @@ window.descargarEstadoCuentaPDF = function(clienteId) {
                 var monto = parseFloat(m.monto || m.importe || 0).toLocaleString();
                 var textoDetalle = m.concepto || m.descripcion || 'Movimiento';
                 
-                // Desglose correcto usando 'estilo' y 'cantidad'
+                // Desglose profesional usando cantidad, presentacion y estilo
                 var itemsRemito = m.items;
                 if (Array.isArray(itemsRemito) && itemsRemito.length > 0) {
                     var listaItems = itemsRemito.map(function(it) {
                         var cantidad = it.cantidad || 1;
-                        var nombreItem = it.estilo || it.nombre || it.producto || 'Artículo';
-                        return cantidad + "x " + nombreItem;
+                        var presentacion = it.presentacion || '';
+                        var estilo = it.estilo || '';
+                        
+                        if (presentacion && estilo) {
+                            return cantidad + " " + presentacion + " de " + estilo;
+                        }
+                        return cantidad + "x " + (estilo || presentacion || 'Artículo');
                     }).join(", ");
-                    textoDetalle = textoDetalle + ": " + listaItems;
+                    
+                    // Reemplaza el texto genérico por el detalle exacto de los ítems
+                    textoDetalle = listaItems;
                 } else if (m.observaciones && m.observaciones.trim() !== '') {
                     textoDetalle += " (" + m.observaciones + ")";
                 }
@@ -3111,7 +3118,6 @@ window.descargarEstadoCuentaPDF = function(clienteId) {
         ventanaImpresion.document.write(htmlContenido);
         ventanaImpresion.document.close();
     };
-
     // Sincronización automática inicial
     window.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
