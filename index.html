@@ -2202,6 +2202,12 @@ window.descargarRecetaPDF = function(clave) {
         return;
     }
 
+    var ventanaImpresion = window.open('', '_blank');
+    if (!ventanaImpresion) {
+        alert("Por favor, permití las ventanas emergentes (pop-ups) en tu navegador.");
+        return;
+    }
+
     var salesMacTxt = (r.salesMac && r.salesMac.length > 0) ? r.salesMac.map(function(s) { return (s.nombre || s.item || '') + " (" + (s.cantidad || 0) + "g)"; }).join(', ') : 'Ninguna';
     var salesLavTxt = (r.salesLav && r.salesLav.length > 0) ? r.salesLav.map(function(s) { return (s.nombre || s.item || '') + " (" + (s.cantidad || 0) + "g)"; }).join(', ') : 'Ninguna';
 
@@ -2209,61 +2215,70 @@ window.descargarRecetaPDF = function(clave) {
     var granosHtml = '';
     if (listaGranos.length > 0) {
         granosHtml = listaGranos.map(function(g) {
-            return '<li style="border-bottom: 1px solid #f1f5f9; padding: 4px 0; display: flex; justify-content: space-between; font-size: 11px;"><span>' + (g.nombre || g.item || 'Malta') + '</span><strong style="font-family: monospace;">' + (g.cantidad || 0) + ' kg</strong></li>';
+            return '<tr><td style="padding: 6px; border-bottom: 1px solid #e2e8f0;">' + (g.nombre || g.item || 'Malta') + '</td><td style="padding: 6px; border-bottom: 1px solid #e2e8f0; text-align: right; font-family: monospace; font-weight: bold;">' + (g.cantidad || 0) + ' kg</td></tr>';
         }).join('');
     } else {
-        granosHtml = '<li style="color: #64748b; font-style: italic; padding: 4px 0; font-size: 11px;">No hay granos especificados.</li>';
+        granosHtml = '<tr><td colspan="2" style="padding: 6px; color: #64748b; font-style: italic;">No hay granos especificados.</td></tr>';
     }
 
     var listaLupulos = r.lupulos || [];
     var lupulosHtml = '';
     if (listaLupulos.length > 0) {
         lupulosHtml = listaLupulos.map(function(l) {
-            return '<li style="border-bottom: 1px solid #f1f5f9; padding: 4px 0; display: flex; justify-content: space-between; font-size: 11px;"><span>' + (l.nombre || l.item || 'Lúpulo') + ' (' + (l.momento || '') + ')</span><strong style="font-family: monospace;">' + (l.cantidad || 0) + ' grs</strong></li>';
+            return '<tr><td style="padding: 6px; border-bottom: 1px solid #e2e8f0;">' + (l.nombre || l.item || 'Lúpulo') + ' (' + (l.momento || '') + ')</td><td style="padding: 6px; border-bottom: 1px solid #e2e8f0; text-align: right; font-family: monospace; font-weight: bold;">' + (l.cantidad || 0) + ' grs</td></tr>';
         }).join('');
     } else {
-        lupulosHtml = '<li style="color: #64748b; font-style: italic; padding: 4px 0; font-size: 11px;">No hay lúpulos especificados.</li>';
+        lupulosHtml = '<tr><td colspan="2" style="padding: 6px; color: #64748b; font-style: italic;">No hay lúpulos especificados.</td></tr>';
     }
 
-    // Contenedor temporal con diseño optimizado y compacto para entrar holgado en una hoja A4
-    var contenedorTemp = document.createElement('div');
-    contenedorTemp.style.position = 'fixed';
-    contenedorTemp.style.top = '0';
-    contenedorTemp.style.left = '0';
-    contenedorTemp.style.width = '720px';
-    contenedorTemp.style.backgroundColor = '#ffffff';
-    contenedorTemp.style.padding = '20px';
-    contenedorTemp.style.fontFamily = 'Arial, sans-serif';
-    contenedorTemp.style.color = '#0f172a';
-    contenedorTemp.style.boxSizing = 'border-box';
-    contenedorTemp.style.opacity = '0.01';
-    contenedorTemp.style.zIndex = '-999';
-    contenedorTemp.style.pointerEvents = 'none';
-
-    contenedorTemp.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #cbd5e1; padding-bottom: 8px; margin-bottom: 10px;">
-            <div>
-                <h1 style="font-size: 20px; font-weight: bold; color: #b45309; margin: 0; letter-spacing: 1px;">ALBARDÓN</h1>
-                <p style="color: #64748b; font-weight: bold; font-size: 9px; margin: 2px 0 0 0;">CERVEZA ARTESANAL SANTAFESINA</p>
+    var htmlContenido = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <title>Receta_Tecnica_${(r.nombre || 'Receta').replace(/\s+/g, '_')}</title>
+            <style>
+                body { font-family: Arial, sans-serif; color: #0f172a; padding: 20px; max-width: 800px; margin: 0 auto; box-sizing: border-box; }
+                .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #b45309; padding-bottom: 10px; margin-bottom: 15px; }
+                h1 { font-size: 22px; font-weight: bold; color: #b45309; margin: 0; }
+                .sub { color: #64748b; font-size: 10px; font-weight: bold; margin: 2px 0 0 0; }
+                .receta-title { font-size: 18px; font-weight: bold; color: #1e293b; text-align: right; margin: 0; }
+                .lote { color: #64748b; font-family: monospace; font-size: 12px; text-align: right; margin: 2px 0 0 0; }
+                .grid-stats { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; background-color: #f8fafc; padding: 10px; border-radius: 6px; text-align: center; font-family: monospace; border: 1px solid #e2e8f0; margin-bottom: 20px; }
+                .stat-box span { display: block; font-size: 9px; color: #64748b; }
+                .stat-box strong { font-size: 13px; color: #0f172a; }
+                h3 { font-size: 12px; font-weight: bold; color: #92400e; text-transform: uppercase; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; margin-top: 20px; margin-bottom: 8px; }
+                .grid-agua { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; color: #334155; margin-bottom: 15px; }
+                table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 15px; }
+                .levadura-box { margin-top: 15px; padding-top: 8px; border-top: 1px solid #cbd5e1; font-size: 13px; }
+                @media print {
+                    body { padding: 0; }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <div>
+                    <h1>ALBARDÓN</h1>
+                    <p class="sub">CERVEZA ARTESANAL SANTAFESINA</p>
+                </div>
+                <div>
+                    <h2 class="receta-title">${r.nombre || 'Receta'}</h2>
+                    <p class="lote">Lote: ${r.lote || 280} Lts</p>
+                </div>
             </div>
-            <div style="text-align: right;">
-                <h2 style="font-size: 16px; font-weight: bold; color: #1e293b; margin: 0;">${r.nombre || 'Receta'}</h2>
-                <p style="color: #64748b; font-family: monospace; font-size: 11px; margin: 2px 0 0 0;">Lote: ${r.lote || 280} Lts</p>
+
+            <div class="grid-stats">
+                <div class="stat-box"><span>OG / DI</span><strong>${r.diTeorica || '--'}</strong></div>
+                <div class="stat-box"><span>FG / DF</span><strong>${r.dfTeorica || '--'}</strong></div>
+                <div class="stat-box"><span>ABV</span><strong>${r.abv || '--'}%</strong></div>
+                <div class="stat-box"><span>IBU</span><strong>${r.ibu || '--'}</strong></div>
+                <div class="stat-box"><span>COLOR</span><strong>${r.srm || '--'} SRM</strong></div>
+                <div class="stat-box"><span>EFIC.</span><strong>${r.eficiencia || '70'}%</strong></div>
             </div>
-        </div>
 
-        <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; background-color: #f8fafc; padding: 8px; border-radius: 6px; text-align: center; font-family: monospace; border: 1px solid #e2e8f0; margin-bottom: 12px;">
-            <div><span style="display: block; font-size: 8px; color: #64748b;">OG / DI</span><strong style="font-size: 11px;">${r.diTeorica || '--'}</strong></div>
-            <div><span style="display: block; font-size: 8px; color: #64748b;">FG / DF</span><strong style="font-size: 11px;">${r.dfTeorica || '--'}</strong></div>
-            <div><span style="display: block; font-size: 8px; color: #64748b;">ABV</span><strong style="font-size: 11px;">${r.abv || '--'}%</strong></div>
-            <div><span style="display: block; font-size: 8px; color: #64748b;">IBU</span><strong style="font-size: 11px;">${r.ibu || '--'}</strong></div>
-            <div><span style="display: block; font-size: 8px; color: #64748b;">COLOR</span><strong style="font-size: 11px;">${r.srm || '--'} SRM</strong></div>
-            <div><span style="display: block; font-size: 8px; color: #64748b;">EFIC.</span><strong style="font-size: 11px;">${r.eficiencia || '70'}%</strong></div>
-        </div>
-
-        <div style="margin-bottom: 12px;">
-            <h3 style="font-size: 11px; font-weight: bold; color: #92400e; text-transform: uppercase; border-bottom: 1px solid #cbd5e1; padding-bottom: 3px; margin-bottom: 6px;">Agua, Macerado y Hervido</h3>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 11px; color: #334155;">
+            <h3>Agua, Macerado y Hervido</h3>
+            <div class="grid-agua">
                 <div><strong>Agua Macerado:</strong> ${r.aguaIni || '--'} L (${r.tempAguaIni || '--'} / Mac: ${r.tempMac || '--'})</div>
                 <div><strong>Sales Mac:</strong> ${salesMacTxt}</div>
                 <div><strong>Agua Lavado:</strong> ${r.aguaLav || '--'} L (${r.tempLav || '--'})</div>
@@ -2271,43 +2286,32 @@ window.descargarRecetaPDF = function(clave) {
                 <div><strong>Densidad Pre-Hervor:</strong> ${r.densPre || '--'} (${r.ltsPre || '--'} L)</div>
                 <div><strong>Hervor / Enfriado:</strong> ${r.tiempoHervor || 60} min (Evap: ${r.evaporacion || 6}%)</div>
             </div>
-        </div>
 
-        <div style="margin-bottom: 10px;">
-            <h3 style="font-size: 11px; font-weight: bold; color: #92400e; text-transform: uppercase; border-bottom: 1px solid #cbd5e1; padding-bottom: 3px; margin-bottom: 4px;">Maltas / Granos</h3>
-            <ul style="list-style: none; padding: 0; margin: 0;">${granosHtml}</ul>
-        </div>
+            <h3>Maltas / Granos</h3>
+            <table>
+                ${granosHtml}
+            </table>
 
-        <div style="margin-bottom: 10px;">
-            <h3 style="font-size: 11px; font-weight: bold; color: #92400e; text-transform: uppercase; border-bottom: 1px solid #cbd5e1; padding-bottom: 3px; margin-bottom: 4px;">Lúpulos y Levadura</h3>
-            <ul style="list-style: none; padding: 0; margin: 0;">${lupulosHtml}</ul>
-            <div style="margin-top: 6px; padding-top: 4px; border-top: 1px solid #cbd5e1; font-size: 11px;"><strong>Levadura:</strong> ${r.levadura || 'N/A'}</div>
-        </div>
+            <h3>Lúpulos</h3>
+            <table>
+                ${lupulosHtml}
+            </table>
+
+            <div class="levadura-box">
+                <strong>Levadura:</strong> ${r.levadura || 'N/A'}
+            </div>
+
+            <script>
+                window.onload = function() {
+                    window.print();
+                };
+            <\/script>
+        </body>
+        </html>
     `;
 
-    document.body.appendChild(contenedorTemp);
-
-    var opt = { 
-        margin: [5, 5, 5, 5], 
-        filename: 'Receta_Tecnica_' + (r.nombre ? r.nombre.replace(/\s+/g, '_') : 'Receta') + '.pdf', 
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, logging: false, windowWidth: 720 }, 
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
-    };
-
-    if (typeof html2pdf !== 'undefined') {
-        setTimeout(function() {
-            html2pdf().set(opt).from(contenedorTemp).save().then(function() {
-                document.body.removeChild(contenedorTemp);
-            }).catch(function(err) {
-                console.error("Error al generar html2pdf:", err);
-                document.body.removeChild(contenedorTemp);
-            });
-        }, 300);
-    } else {
-        alert("La librería html2pdf no está cargada.");
-        document.body.removeChild(contenedorTemp);
-    }
+    ventanaImpresion.document.write(htmlContenido);
+    ventanaImpresion.document.close();
 };
     <script>  // --- MÓDULO BARRILES ---
 let barrilEditandoIdx = null;
