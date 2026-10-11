@@ -3057,37 +3057,30 @@ window.descargarRecetaPDF = function(clave) {
     }, 500);
 };
 window.cargarRecetaEnCoccion = function(clave) {
+    console.log("1. Entrando a cargarRecetaEnCoccion con clave:", clave);
     if (!clave) return;
     var r = (typeof recetas !== 'undefined' ? recetas : {})[clave];
     if (!r) {
+        console.error("No se encontró la receta en el objeto global recetas.");
         alert("No se encontró la receta.");
         return;
     }
+    console.log("2. Receta encontrada:", r.nombre);
 
-    // 1. Cambiar a la pestaña de Cocción PRIMERO para que el DOM renderice los contenedores
+    // 1. Cambiar a la pestaña de Cocción PRIMERO
     var botonesTab = document.querySelectorAll('button, a, [data-tab]');
+    var tabEncontrada = false;
     botonesTab.forEach(function(el) {
         var textoBtn = (el.textContent || '').trim().toLowerCase();
         var attrTab = (el.getAttribute('data-tab') || '').toLowerCase();
         if (textoBtn === 'cocción' || textoBtn === 'coccion' || attrTab.includes('coccion')) {
             el.click();
+            tabEncontrada = true;
         }
     });
+    console.log("3. Pestaña de cocción activada:", tabEncontrada);
 
-    // 2. Sincronizar el select superior si existe
-    var selects = document.querySelectorAll('select');
-    for (var i = 0; i < selects.length; i++) {
-        var s = selects[i];
-        for (var j = 0; j < s.options.length; j++) {
-            if (s.options[j].value === clave || s.options[j].text.includes(r.nombre)) {
-                s.value = clave;
-                s.dispatchEvent(new Event('change', { bubbles: true }));
-                break;
-            }
-        }
-    }
-
-    // 3. Rellenar campos principales de cabecera
+    // 2. Rellenar cabecera básica
     var inputEstilo = document.querySelector('input[name*="estilo"], input[id*="estilo"]');
     if (inputEstilo) {
         inputEstilo.value = r.nombre || '';
@@ -3100,34 +3093,44 @@ window.cargarRecetaEnCoccion = function(clave) {
         inputLote.dispatchEvent(new Event('input', { bubbles: true }));
     }
 
-    // 4. Limpiar contenedores previos para evitar duplicados
+    // 3. Verificar contenedor de granos
     var containerGranos = document.getElementById('rec-granos-inputs');
+    console.log("4. Contenedor #rec-granos-inputs encontrado:", containerGranos);
     if (containerGranos) {
         containerGranos.innerHTML = '';
     }
 
-    // 5. Declarar y cargar las listas de granos de forma segura
+    // 4. Inyectar granos
     var listaGranos = r.granos || r.maltas || [];
+    console.log("5. Lista de granos a inyectar:", listaGranos);
+    console.log("6. ¿Existe la función agregarFilaGrano?:", typeof agregarFilaGrano);
+
     if (typeof agregarFilaGrano === 'function' && listaGranos.length > 0) {
         for (var g = 0; g < listaGranos.length; g++) {
             var itemGrano = listaGranos[g];
+            console.log("Agregando grano:", itemGrano);
             agregarFilaGrano(itemGrano.nombre || itemGrano.item || 'Malta', itemGrano.cantidad || 0);
         }
     }
 
-    // 6. Declarar y cargar las listas de lúpulos de forma segura
+    // 5. Inyectar lúpulos
     var listaLupulos = r.lupulos || [];
+    console.log("7. Lista de lúpulos a inyectar:", listaLupulos);
+    console.log("8. ¿Existe la función agregarFilaLupulo?:", typeof agregarFilaLupulo);
+
     if (typeof agregarFilaLupulo === 'function' && listaLupulos.length > 0) {
         for (var l = 0; l < listaLupulos.length; l++) {
             var itemLupulo = listaLupulos[l];
+            console.log("Agregando lúpulo:", itemLupulo);
             agregarFilaLupulo(itemLupulo.nombre || itemLupulo.item || 'Lúpulo', itemLupulo.cantidad || 0, itemLupulo.momento || '');
         }
     }
 
-    console.log("Receta cargada y procesada correctamente:", r.nombre);
+    console.log("9. Proceso de carga finalizado.");
 };
 
 window.usarRecetaEnCoccion = function(clave) {
+    console.log("usarRecetaEnCoccion llamada con clave:", clave);
     if (clave && typeof clave === 'string') {
         window.cargarRecetaEnCoccion(clave);
         return;
