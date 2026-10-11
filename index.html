@@ -2196,69 +2196,102 @@ function descargarFermentacionPDF() {
 }
 
 window.descargarRecetaPDF = function(clave) {
-    const r = recetas[clave];
-    if (!r) return;
+    var r = (typeof recetas !== 'undefined' ? recetas : {})[clave];
+    if (!r) {
+        alert("No se encontró la receta.");
+        return;
+    }
 
-    const salesMacTxt = (r.salesMac && r.salesMac.length > 0) ? r.salesMac.map(s => `${s.nombre} (${s.cantidad}g)`).join(', ') : 'Ninguna';
-    const salesLavTxt = (r.salesLav && r.salesLav.length > 0) ? r.salesLav.map(s => `${s.nombre} (${s.cantidad}g)`).join(', ') : 'Ninguna';
+    var salesMacTxt = (r.salesMac && r.salesMac.length > 0) ? r.salesMac.map(function(s) { return s.nombre + " (" + s.cantidad + "g)"; }).join(', ') : 'Ninguna';
+    var salesLavTxt = (r.salesLav && r.salesLav.length > 0) ? r.salesLav.map(function(s) { return s.nombre + " (" + s.cantidad + "g)"; }).join(', ') : 'Ninguna';
 
-    const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+    var setVal = function(id, val) { 
+        var el = document.getElementById(id); 
+        if (el) el.innerText = val; 
+    };
 
     setVal('rec-pdf-nombre', r.nombre);
-    setVal('rec-pdf-batch', `Lote: ${r.lote || 280} Lts`);
-    setVal('rec-pdf-og', r.diTeorica);
+    setVal('rec-pdf-batch', 'Lote: ' + (r.lote || 280) + ' Lts');
+    setVal('rec-pdf-og', r.diTeorica || '--');
     setVal('rec-pdf-fg', r.dfTeorica || '--');
-    setVal('rec-pdf-abv-val', `${r.abv || '--'}%`);
+    setVal('rec-pdf-abv-val', (r.abv || '--') + '%');
     setVal('rec-pdf-ibu-val', r.ibu || '--');
-    setVal('rec-pdf-srm-val', `${r.srm || '--'} SRM`);
-    setVal('rec-pdf-efic', `${r.eficiencia || '70'}%`);
+    setVal('rec-pdf-srm-val', (r.srm || '--') + ' SRM');
+    setVal('rec-pdf-efic', (r.eficiencia || '70') + '%');
 
-    const aguaDet = document.getElementById('rec-pdf-agua-det');
+    var aguaDet = document.getElementById('rec-pdf-agua-det');
     if (aguaDet) {
-        aguaDet.innerHTML = `
-            <div><strong>Agua Macerado:</strong> ${r.aguaIni || '--'} L (${r.tempAguaIni || '--'} / Mac: ${r.tempMac || '--'})</div>
-            <div><strong>Sales Mac:</strong> ${salesMacTxt}</div>
-            <div><strong>Agua Lavado:</strong> ${r.aguaLav || '--'} L (${r.tempLav || '--'})</div>
-            <div><strong>Sales Lavado:</strong> ${salesLavTxt}</div>
-            <div><strong>Densidad Pre-Hervor:</strong> ${r.densPre || '--'} (${r.ltsPre || '--'} L)</div>
-            <div><strong>Hervor / Enfriado:</strong> ${r.tiempoHervor || 60} min (Evap: ${r.evaporacion || 6}%)</div>
-        `;
+        aguaDet.innerHTML = 
+            '<div><strong>Agua Macerado:</strong> ' + (r.aguaIni || '--') + ' L (' + (r.tempAguaIni || '--') + ' / Mac: ' + (r.tempMac || '--') + ')</div>' +
+            '<div><strong>Sales Mac:</strong> ' + salesMacTxt + '</div>' +
+            '<div><strong>Agua Lavado:</strong> ' + (r.aguaLav || '--') + ' L (' + (r.tempLav || '--') + ')</div>' +
+            '<div><strong>Sales Lavado:</strong> ' + salesLavTxt + '</div>' +
+            '<div><strong>Densidad Pre-Hervor:</strong> ' + (r.densPre || '--') + ' (' + (r.ltsPre || '--') + ' L)</div>' +
+            '<div><strong>Hervor / Enfriado:</strong> ' + (r.tiempoHervor || 60) + ' min (Evap: ' + (r.evaporacion || 6) + '%)</div>';
     }
 
-    const granosEl = document.getElementById('rec-pdf-granos');
+    var granosEl = document.getElementById('rec-pdf-granos');
     if (granosEl && r.granos) {
-        granosEl.innerHTML = r.granos.map(g => `<li class="border-b border-slate-100 py-1 flex justify-between"><span>${g.nombre}</span><strong class="font-mono">${g.cantidad} kg</strong></li>`).join('');
+        granosEl.innerHTML = r.granos.map(function(g) {
+            return '<li style="border-bottom: 1px solid #f1f5f9; padding: 4px 0; display: flex; justify-content: space-between;"><span>' + g.nombre + '</span><strong style="font-family: monospace;">' + g.cantidad + ' kg</strong></li>';
+        }).join('');
     }
 
-    const lupulosEl = document.getElementById('rec-pdf-lupulos');
+    var lupulosEl = document.getElementById('rec-pdf-lupulos');
     if (lupulosEl && r.lupulos) {
-        lupulosEl.innerHTML = r.lupulos.map(l => `<li class="border-b border-slate-100 py-1 flex justify-between"><span>${l.nombre} (${l.momento})</span><strong class="font-mono">${l.cantidad} grs</strong></li>`).join('') + `<li class="pt-2"><strong>Levadura:</strong> ${r.levadura || 'N/A'}</li>`;
+        var levaduraTxt = '<li style="padding-top: 6px; border-top: 1px solid #f1f5f9; margin-top: 4px;"><strong>Levadura:</strong> ' + (r.levadura || 'N/A') + '</li>';
+        lupulosEl.innerHTML = r.lupulos.map(function(l) {
+            return '<li style="border-bottom: 1px solid #f1f5f9; padding: 4px 0; display: flex; justify-content: space-between;"><span>' + l.nombre + ' (' + l.momento + ')</span><strong style="font-family: monospace;">' + l.cantidad + ' grs</strong></li>';
+        }).join('') + levaduraTxt;
     }
 
-    const elemento = document.getElementById('plantilla-pdf-receta');
-    if (!elemento) return;
+    var elemento = document.getElementById('plantilla-pdf-receta');
+    if (!elemento) {
+        alert("No se encontró la plantilla HTML para el PDF de recetas.");
+        return;
+    }
     
-    elemento.classList.remove('oculto');
+    // Forzamos visibilidad total sacándole las clases de ocultamiento y asignando estilos de render
     elemento.classList.remove('hidden');
+    elemento.classList.remove('oculto');
+    elemento.style.display = 'block';
+    elemento.style.position = 'absolute';
+    elemento.style.left = '0';
+    elemento.style.top = '0';
+    elemento.style.zIndex = '99999';
+    elemento.style.width = '700px';
+    elemento.style.backgroundColor = '#ffffff';
 
-    const opt = { 
+    var opt = { 
         margin: 10, 
-        filename: `Receta_Tecnica_${r.nombre.replace(/\s+/g, '_')}.pdf`, 
-        html2canvas: { scale: 2, useCORS: true }, 
-        jsPDF: { unit: 'mm', format: 'a4' } 
+        filename: 'Receta_Tecnica_' + r.nombre.replace(/\s+/g, '_') + '.pdf', 
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, logging: false }, 
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
     };
     
     if (typeof html2pdf !== 'undefined') {
-        setTimeout(() => {
-            html2pdf().set(opt).from(elemento).save().then(() => {
+        // Damos un respiro de 400ms para que el DOM pinte completamente las listas y estilos
+        setTimeout(function() {
+            html2pdf().set(opt).from(elemento).save().then(function() {
+                // Restauramos el estado oculto original
+                elemento.style.display = '';
+                elemento.style.position = '';
+                elemento.style.left = '';
+                elemento.style.top = '';
+                elemento.style.zIndex = '';
+                elemento.style.width = '';
                 elemento.classList.add('hidden');
-                elemento.classList.add('oculto');
+            }).catch(function(err) {
+                console.error("Error al generar html2pdf:", err);
+                elemento.style.display = '';
+                elemento.classList.add('hidden');
             });
-        }, 200);
+        }, 400);
     } else {
         alert("La librería html2pdf no está cargada.");
+        elemento.style.display = '';
         elemento.classList.add('hidden');
-        elemento.classList.add('oculto');
     }
 };
     <script>  // --- MÓDULO BARRILES ---
