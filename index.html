@@ -3056,7 +3056,7 @@ window.descargarRecetaPDF = function(clave) {
         ventana.print();
     }, 500);
 };
-   window.cargarRecetaEnCoccion = function(clave) {
+  window.cargarRecetaEnCoccion = function(clave) {
     if (!clave) return;
     var r = (typeof recetas !== 'undefined' ? recetas : {})[clave];
     if (!r) {
@@ -3064,7 +3064,7 @@ window.descargarRecetaPDF = function(clave) {
         return;
     }
 
-    // 1. Sincronizar el selector desplegable superior si existe
+    // 1. Sincronizar el selector desplegable superior para disparar eventos nativos de la app
     var selects = document.querySelectorAll('select');
     for (var i = 0; i < selects.length; i++) {
         var s = selects[i];
@@ -3077,7 +3077,7 @@ window.descargarRecetaPDF = function(clave) {
         }
     }
 
-    // 2. Rellenar todos los inputs y textareas de la planilla según su contexto
+    // 2. Rellenar campos generales (estilo, lote, temperaturas y agua)
     var inputs = document.querySelectorAll('input, select, textarea');
     inputs.forEach(function(el) {
         var id = (el.id || '').toLowerCase();
@@ -3085,24 +3085,20 @@ window.descargarRecetaPDF = function(clave) {
         var ph = (el.getAttribute('placeholder') || '').toLowerCase();
         var texto = id + ' ' + name + ' ' + ph;
 
-        // Estilo / Nombre
         if (texto.includes('estilo') || texto.includes('nombre')) {
             el.value = r.nombre || '';
             el.dispatchEvent(new Event('input', { bubbles: true }));
         }
-        // Lote
         if (texto.includes('lote') && !texto.includes('lts') && !texto.includes('litros')) {
             el.value = r.lote || 280;
             el.dispatchEvent(new Event('input', { bubbles: true }));
         }
-        // Agua de Macerado / Litros de agua
-        if ((texto.includes('agua') || texto.includes('litros') || texto.includes('macerado')) && r.aguaIni) {
-            if (texto.includes('ini') || texto.includes('mac') || texto.includes('litros')) {
+        if (texto.includes('agua') || texto.includes('litros') || texto.includes('macerado')) {
+            if ((texto.includes('ini') || texto.includes('mac') || texto.includes('litros')) && r.aguaIni) {
                 el.value = r.aguaIni;
                 el.dispatchEvent(new Event('input', { bubbles: true }));
             }
         }
-        // Temperatura de agua / Macerado
         if (texto.includes('temp') || texto.includes('temperatura')) {
             if (texto.includes('mac') && r.tempMac) {
                 el.value = r.tempMac;
@@ -3114,7 +3110,19 @@ window.descargarRecetaPDF = function(clave) {
         }
     });
 
-    // 3. Cambiar automáticamente a la pestaña de Cocción
+    // 3. Renderizar o inyectar la tabla de granos y maltas si el contenedor existe
+    var contenedorGranos = document.querySelector('#granos-coccion, .granos-container, table[id*="grano"], div[id*="grano"]');
+    var listaGranos = r.granos || r.maltas || [];
+    if (listaGranos.length > 0) {
+        // Si la app tiene alguna función global para pintar granos, la usamos
+        if (typeof renderizarGranos === 'function') {
+            renderizarGranos(listaGranos);
+        } else if (typeof mostrarGranosCoccion === 'function') {
+            mostrarGranosCoccion(r);
+        }
+    }
+
+    // 4. Cambiar automáticamente a la pestaña de Cocción
     var botonesTab = document.querySelectorAll('button, a, [data-tab]');
     botonesTab.forEach(function(el) {
         var textoBtn = (el.textContent || '').trim().toLowerCase();
@@ -3124,7 +3132,7 @@ window.descargarRecetaPDF = function(clave) {
         }
     });
 
-    console.log("Receta cargada y procesada en cocción:", r.nombre);
+    console.log("Receta procesada para cocción:", r.nombre);
 };
 
 window.usarRecetaEnCoccion = function(clave) {
