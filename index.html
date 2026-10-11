@@ -3065,30 +3065,37 @@ window.cargarRecetaEnCoccion = function(clave) {
         return;
     }
 
-    // 1. Buscamos y rellenamos los inputs de texto/número de la planilla
-    var inputs = document.querySelectorAll('input, select, textarea');
-    inputs.forEach(function(el) {
-        var idName = (el.id + ' ' + el.name + ' ' + (el.getAttribute('placeholder') || '')).toLowerCase();
-        
-        if (idName.includes('estilo') || idName.includes('nombre')) {
-            el.value = r.nombre || '';
-            el.dispatchEvent(new Event('input', { bubbles: true }));
-            el.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-        if (idName.includes('lote') && !idName.includes('lts') && !idName.includes('litros')) {
-            el.value = r.lote || 280;
-            el.dispatchEvent(new Event('input', { bubbles: true }));
-            el.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-    });
+    // Buscamos el selector o input de la app y cargamos la receta usando el método original si existe
+    var selectReceta = document.querySelector('select[id*="receta"], select[class*="receta"]');
+    if (selectReceta) {
+        selectReceta.value = clave;
+        selectReceta.dispatchEvent(new Event('change', { bubbles: true }));
+    }
 
-    // 2. Intentamos activar la pestaña de cocción por si estamos en otra vista
+    // Si tu app tiene una función nativa de carga, la invocamos de forma segura
+    if (typeof seleccionarRecetaBase === 'function') {
+        seleccionarRecetaBase(clave);
+    } else if (typeof cargarReceta === 'function') {
+        cargarReceta(clave);
+    } else {
+        // Respaldo visual directo sobre los inputs principales de la planilla
+        var inputEstilo = document.querySelector('input[name*="estilo"], input[id*="estilo"]');
+        if (inputEstilo) {
+            inputEstilo.value = r.nombre || '';
+            inputEstilo.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        var inputLote = document.querySelector('input[name*="lote"], input[id*="lote"]');
+        if (inputLote) {
+            inputLote.value = r.lote || 280;
+            inputLote.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+    }
+
+    // Cambiamos automáticamente a la pestaña de cocción si el botón está disponible
     var tabCoccion = document.querySelector('[data-tab="coccion"], button[onclick*="coccion"], a[href*="coccion"]');
     if (tabCoccion && typeof tabCoccion.click === 'function') {
         tabCoccion.click();
     }
-
-    console.log("Receta cargada y aplicada en la planilla de cocción:", r.nombre);
 };
 
 window.usarRecetaEnCoccion = function(clave) {
