@@ -3057,8 +3057,19 @@ window.descargarRecetaPDF = function(clave) {
     }, 500);
 };
 window.cargarRecetaEnCoccion = function(clave) {
-    console.log("1. Entrando a cargarRecetaEnCoccion con clave:", clave);
-    if (!clave) return;
+    // Si no se pasa clave por parámetro, la buscamos automáticamente del select superior
+    if (!clave) {
+        var selectReceta = document.querySelector('select[id*="receta"], select');
+        if (selectReceta) {
+            clave = selectReceta.value;
+        }
+    }
+
+    if (!clave) {
+        alert("Por favor, seleccioná una receta primero.");
+        return;
+    }
+
     var r = (typeof recetas !== 'undefined' ? recetas : {})[clave];
     if (!r) {
         alert("No se encontró la receta.");
@@ -3075,7 +3086,20 @@ window.cargarRecetaEnCoccion = function(clave) {
         }
     });
 
-    // 2. Rellenar cabecera básica
+    // 2. Sincronizar el select superior con la clave elegida
+    var selects = document.querySelectorAll('select');
+    for (var i = 0; i < selects.length; i++) {
+        var s = selects[i];
+        for (var j = 0; j < s.options.length; j++) {
+            if (s.options[j].value === clave) {
+                s.value = clave;
+                s.dispatchEvent(new Event('change', { bubbles: true }));
+                break;
+            }
+        }
+    }
+
+    // 3. Rellenar cabecera básica
     var inputEstilo = document.querySelector('input[name*="estilo"], input[id*="estilo"]');
     if (inputEstilo) {
         inputEstilo.value = r.nombre || '';
@@ -3088,14 +3112,13 @@ window.cargarRecetaEnCoccion = function(clave) {
         inputLote.dispatchEvent(new Event('input', { bubbles: true }));
     }
 
-    // 3. Esperar a que la interfaz termine de estabilizarse para inyectar las filas
+    // 4. Inyectar filas de granos y lúpulos usando las funciones nativas de la app con un pequeño respiro de DOM
     setTimeout(function() {
         var containerGranos = document.getElementById('rec-granos-inputs');
         if (containerGranos) {
             containerGranos.innerHTML = '';
         }
 
-        // Inyectar granos
         var listaGranos = r.granos || r.maltas || [];
         if (typeof agregarFilaGrano === 'function' && listaGranos.length > 0) {
             for (var g = 0; g < listaGranos.length; g++) {
@@ -3104,7 +3127,6 @@ window.cargarRecetaEnCoccion = function(clave) {
             }
         }
 
-        // Inyectar lúpulos
         var listaLupulos = r.lupulos || [];
         if (typeof agregarFilaLupulo === 'function' && listaLupulos.length > 0) {
             for (var l = 0; l < listaLupulos.length; l++) {
@@ -3112,22 +3134,12 @@ window.cargarRecetaEnCoccion = function(clave) {
                 agregarFilaLupulo(itemLupulo.nombre || itemLupulo.item || 'Lúpulo', itemLupulo.cantidad || 0, itemLupulo.momento || '');
             }
         }
-        console.log("Inyección visual completada tras estabilización de DOM.");
-    }, 300);
+        console.log("Planilla poblada con éxito para:", r.nombre);
+    }, 150);
 };
 
 window.usarRecetaEnCoccion = function(clave) {
-    if (clave && typeof clave === 'string') {
-        window.cargarRecetaEnCoccion(clave);
-        return;
-    }
-
-    var selectReceta = document.querySelector('select[id*="receta"], select[class*="receta"], select');
-    if (selectReceta && selectReceta.value) {
-        window.cargarRecetaEnCoccion(selectReceta.value);
-    } else {
-        alert("Por favor, seleccioná una receta primero.");
-    }
+    window.cargarRecetaEnCoccion(clave);
 };
 })();
 </script>
