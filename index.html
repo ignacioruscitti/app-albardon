@@ -2202,15 +2202,15 @@ window.descargarRecetaPDF = function(clave) {
         return;
     }
 
-    var salesMacTxt = (r.salesMac && r.salesMac.length > 0) ? r.salesMac.map(function(s) { return s.nombre + " (" + s.cantidad + "g)"; }).join(', ') : 'Ninguna';
-    var salesLavTxt = (r.salesLav && r.salesLav.length > 0) ? r.salesLav.map(function(s) { return s.nombre + " (" + s.cantidad + "g)"; }).join(', ') : 'Ninguna';
+    var salesMacTxt = (r.salesMac && r.salesMac.length > 0) ? r.salesMac.map(function(s) { return (s.nombre || s.item || '') + " (" + (s.cantidad || 0) + "g)"; }).join(', ') : 'Ninguna';
+    var salesLavTxt = (r.salesLav && r.salesLav.length > 0) ? r.salesLav.map(function(s) { return (s.nombre || s.item || '') + " (" + (s.cantidad || 0) + "g)"; }).join(', ') : 'Ninguna';
 
     var setVal = function(id, val) { 
         var el = document.getElementById(id); 
         if (el) el.innerText = val; 
     };
 
-    setVal('rec-pdf-nombre', r.nombre);
+    setVal('rec-pdf-nombre', r.nombre || 'Receta');
     setVal('rec-pdf-batch', 'Lote: ' + (r.lote || 280) + ' Lts');
     setVal('rec-pdf-og', r.diTeorica || '--');
     setVal('rec-pdf-fg', r.dfTeorica || '--');
@@ -2230,19 +2230,34 @@ window.descargarRecetaPDF = function(clave) {
             '<div><strong>Hervor / Enfriado:</strong> ' + (r.tiempoHervor || 60) + ' min (Evap: ' + (r.evaporacion || 6) + '%)</div>';
     }
 
+    // Renderizado seguro de Granos
     var granosEl = document.getElementById('rec-pdf-granos');
-    if (granosEl && r.granos) {
-        granosEl.innerHTML = r.granos.map(function(g) {
-            return '<li style="border-bottom: 1px solid #f1f5f9; padding: 4px 0; display: flex; justify-content: space-between;"><span>' + g.nombre + '</span><strong style="font-family: monospace;">' + g.cantidad + ' kg</strong></li>';
-        }).join('');
+    var listaGranos = r.granos || r.maltas || [];
+    if (granosEl) {
+        if (listaGranos.length > 0) {
+            granosEl.innerHTML = listaGranos.map(function(g) {
+                var nombre = g.nombre || g.item || 'Malta';
+                var cant = g.cantidad || 0;
+                return '<li style="border-bottom: 1px solid #f1f5f9; padding: 4px 0; display: flex; justify-content: space-between;"><span>' + nombre + '</span><strong style="font-family: monospace;">' + cant + ' kg</strong></li>';
+            }).join('');
+        } else {
+            granosEl.innerHTML = '<li style="color: #888; font-style: italic; padding: 4px 0;">No hay granos especificados.</li>';
+        }
     }
 
+    // Renderizado seguro de Lúpulos y Levadura
     var lupulosEl = document.getElementById('rec-pdf-lupulos');
-    if (lupulosEl && r.lupulos) {
+    var listaLupulos = r.lupulos || [];
+    if (lupulosEl) {
         var levaduraTxt = '<li style="padding-top: 6px; border-top: 1px solid #f1f5f9; margin-top: 4px;"><strong>Levadura:</strong> ' + (r.levadura || 'N/A') + '</li>';
-        lupulosEl.innerHTML = r.lupulos.map(function(l) {
-            return '<li style="border-bottom: 1px solid #f1f5f9; padding: 4px 0; display: flex; justify-content: space-between;"><span>' + l.nombre + ' (' + l.momento + ')</span><strong style="font-family: monospace;">' + l.cantidad + ' grs</strong></li>';
-        }).join('') + levaduraTxt;
+        var lupulosHtml = listaLupulos.length > 0 ? listaLupulos.map(function(l) {
+            var nombre = l.nombre || l.item || 'Lúpulo';
+            var cant = l.cantidad || 0;
+            var momento = l.momento || '';
+            return '<li style="border-bottom: 1px solid #f1f5f9; padding: 4px 0; display: flex; justify-content: space-between;"><span>' + nombre + ' (' + momento + ')</span><strong style="font-family: monospace;">' + cant + ' grs</strong></li>';
+        }).join('') : '<li style="color: #888; font-style: italic; padding: 4px 0;">No hay lúpulos especificados.</li>';
+        
+        lupulosEl.innerHTML = lupulosHtml + levaduraTxt;
     }
 
     var elemento = document.getElementById('plantilla-pdf-receta');
@@ -2251,43 +2266,38 @@ window.descargarRecetaPDF = function(clave) {
         return;
     }
     
-    // Forzamos visibilidad total sacándole las clases de ocultamiento y asignando estilos de render
+    // Hacemos visible el elemento dentro del flujo normal con ancho estructurado
     elemento.classList.remove('hidden');
     elemento.classList.remove('oculto');
     elemento.style.display = 'block';
-    elemento.style.position = 'absolute';
-    elemento.style.left = '0';
-    elemento.style.top = '0';
-    elemento.style.zIndex = '99999';
-    elemento.style.width = '700px';
+    elemento.style.width = '100%';
+    elemento.style.maxWidth = '750px';
+    elemento.style.margin = '0 auto';
     elemento.style.backgroundColor = '#ffffff';
 
     var opt = { 
         margin: 10, 
-        filename: 'Receta_Tecnica_' + r.nombre.replace(/\s+/g, '_') + '.pdf', 
+        filename: 'Receta_Tecnica_' + (r.nombre ? r.nombre.replace(/\s+/g, '_') : 'Receta') + '.pdf', 
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, logging: false }, 
+        html2canvas: { scale: 2, useCORS: true, logging: false, windowWidth: 800 }, 
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
     };
     
     if (typeof html2pdf !== 'undefined') {
-        // Damos un respiro de 400ms para que el DOM pinte completamente las listas y estilos
         setTimeout(function() {
             html2pdf().set(opt).from(elemento).save().then(function() {
-                // Restauramos el estado oculto original
+                // Restauramos el estado original oculto
                 elemento.style.display = '';
-                elemento.style.position = '';
-                elemento.style.left = '';
-                elemento.style.top = '';
-                elemento.style.zIndex = '';
                 elemento.style.width = '';
+                elemento.style.maxWidth = '';
+                elemento.style.margin = '';
                 elemento.classList.add('hidden');
             }).catch(function(err) {
                 console.error("Error al generar html2pdf:", err);
                 elemento.style.display = '';
                 elemento.classList.add('hidden');
             });
-        }, 400);
+        }, 350);
     } else {
         alert("La librería html2pdf no está cargada.");
         elemento.style.display = '';
