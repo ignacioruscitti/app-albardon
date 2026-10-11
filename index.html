@@ -3056,5 +3056,38 @@ window.descargarRecetaPDF = function(clave) {
         ventana.print();
     }, 500);
 };
+
+window.cargarRecetaEnCoccion = function(clave) {
+    if (!clave) return;
+    var r = (typeof recetas !== 'undefined' ? recetas : {})[clave];
+    if (!r) {
+        alert("No se encontró la receta seleccionada.");
+        return;
+    }
+
+    // Buscamos y rellenamos los campos de la planilla si existen en la pantalla
+    var campoEstilo = document.getElementById('estilo-coccion') || document.querySelector('[name="estilo"]');
+    if (campoEstilo) campoEstilo.value = r.nombre || '';
+
+    var campoLote = document.getElementById('lote-coccion') || document.querySelector('[name="lote"]');
+    if (campoLote) campoLote.value = r.lote || 280;
+
+    // Disparamos evento para que la interfaz de la app actualice sus valores internos
+    if (campoEstilo) {
+        var evento = new Event('change', { bubbles: true });
+        campoEstilo.dispatchEvent(evento);
+    }
+    
+    console.log("Receta cargada en cocción:", r.nombre);
+};
+
+window.usarRecetaEnCoccion = function() {
+    var selectReceta = document.querySelector('select[id*="receta"], select[class*="receta"], select');
+    if (selectReceta && selectReceta.value) {
+        window.cargarRecetaEnCoccion(selectReceta.value);
+    } else {
+        alert("Por favor, seleccioná una receta primero.");
+    }
+};
 })();
 </script>
