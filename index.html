@@ -3065,34 +3065,38 @@ window.cargarRecetaEnCoccion = function(clave) {
         return;
     }
 
-    // 1. Rellenamos campos del formulario de cocción si existen
-    var campoEstilo = document.getElementById('estilo-coccion') || document.querySelector('[name="estilo"]');
-    if (campoEstilo) {
-        campoEstilo.value = r.nombre || '';
-        campoEstilo.dispatchEvent(new Event('change', { bubbles: true }));
+    // 1. Buscamos y rellenamos los inputs de texto/número de la planilla
+    var inputs = document.querySelectorAll('input, select, textarea');
+    inputs.forEach(function(el) {
+        var idName = (el.id + ' ' + el.name + ' ' + (el.getAttribute('placeholder') || '')).toLowerCase();
+        
+        if (idName.includes('estilo') || idName.includes('nombre')) {
+            el.value = r.nombre || '';
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+            el.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        if (idName.includes('lote') && !idName.includes('lts') && !idName.includes('litros')) {
+            el.value = r.lote || 280;
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+            el.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+    });
+
+    // 2. Intentamos activar la pestaña de cocción por si estamos en otra vista
+    var tabCoccion = document.querySelector('[data-tab="coccion"], button[onclick*="coccion"], a[href*="coccion"]');
+    if (tabCoccion && typeof tabCoccion.click === 'function') {
+        tabCoccion.click();
     }
 
-    var campoLote = document.getElementById('lote-coccion') || document.querySelector('[name="lote"]');
-    if (campoLote) {
-        campoLote.value = r.lote || 280;
-        campoLote.dispatchEvent(new Event('change', { bubbles: true }));
-    }
-
-    // 2. Si la app tiene pestaña de Cocción, la activamos automáticamente
-    var tabCoccion = document.querySelector('[data-tab="coccion"], button[onclick*="coccion"]');
-    if (tabCoccion) tabCoccion.click();
-
-    console.log("Receta cargada exitosamente en cocción:", r.nombre);
+    console.log("Receta cargada y aplicada en la planilla de cocción:", r.nombre);
 };
 
 window.usarRecetaEnCoccion = function(clave) {
-    // Si viene la clave directamente desde el botón (ej: 'Scottish 2026')
     if (clave && typeof clave === 'string') {
         window.cargarRecetaEnCoccion(clave);
         return;
     }
 
-    // Si se invoca desde el selector desplegable
     var selectReceta = document.querySelector('select[id*="receta"], select[class*="receta"], select');
     if (selectReceta && selectReceta.value) {
         window.cargarRecetaEnCoccion(selectReceta.value);
