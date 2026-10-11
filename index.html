@@ -3080,99 +3080,140 @@ window.descargarRecetaPDF = function(clave) {
         return;
     }
 
+    var ventanaImpresion = window.open('', '_blank');
+    if (!ventanaImpresion) {
+        alert("Por favor, permití las ventanas emergentes (pop-ups) en tu navegador.");
+        return;
+    }
+
     var salesMacTxt = (r.salesMac && r.salesMac.length > 0) ? r.salesMac.map(function(s) { return (s.nombre || s.item || '') + " (" + (s.cantidad || 0) + "g)"; }).join(', ') : 'Ninguna';
     var salesLavTxt = (r.salesLav && r.salesLav.length > 0) ? r.salesLav.map(function(s) { return (s.nombre || s.item || '') + " (" + (s.cantidad || 0) + "g)"; }).join(', ') : 'Ninguna';
 
-    var setVal = function(id, val) { 
-        var el = document.getElementById(id); 
-        if (el) el.innerText = val; 
-    };
-
-    // 1. Rellenamos datos básicos
-    setVal('rec-pdf-nombre', r.nombre || 'Receta');
-    setVal('rec-pdf-batch', 'Lote: ' + (r.lote || 280) + ' Lts');
-    setVal('rec-pdf-og', r.diTeorica || '--');
-    setVal('rec-pdf-fg', r.dfTeorica || '--');
-    setVal('rec-pdf-abv-val', (r.abv || '--') + '%');
-    setVal('rec-pdf-ibu-val', r.ibu || '--');
-    setVal('rec-pdf-srm-val', (r.srm || '--') + ' SRM');
-    setVal('rec-pdf-efic', (r.eficiencia || '70') + '%');
-
-    // 2. Rellenamos bloque de agua
-    var aguaDet = document.getElementById('rec-pdf-agua-det');
-    if (aguaDet) {
-        aguaDet.innerHTML = 
-            '<div><strong>Agua Macerado:</strong> ' + (r.aguaIni || '--') + ' L (' + (r.tempAguaIni || '--') + ' / Mac: ' + (r.tempMac || '--') + ')</div>' +
-            '<div><strong>Sales Mac:</strong> ' + salesMacTxt + '</div>' +
-            '<div><strong>Agua Lavado:</strong> ' + (r.aguaLav || '--') + ' L (' + (r.tempLav || '--') + ')</div>' +
-            '<div><strong>Sales Lavado:</strong> ' + salesLavTxt + '</div>' +
-            '<div><strong>Densidad Pre-Hervor:</strong> ' + (r.densPre || '--') + ' (' + (r.ltsPre || '--') + ' L)</div>' +
-            '<div><strong>Hervor / Enfriado:</strong> ' + (r.tiempoHervor || 60) + ' min (Evap: ' + (r.evaporacion || 6) + '%)</div>';
-    }
-
-    // 3. Rellenamos granos compactos
-    var granosEl = document.getElementById('rec-pdf-granos');
+    // Listado seguro de granos con tablas tradicionales
     var listaGranos = r.granos || r.maltas || [];
-    if (granosEl) {
-        granosEl.innerHTML = listaGranos.length > 0 ? listaGranos.map(function(g) {
-            return '<li style="border-bottom: 1px solid #f1f5f9; padding: 2px 0; display: flex; justify-content: space-between; font-size: 11px;"><span>' + (g.nombre || g.item || 'Malta') + '</span><strong style="font-family: monospace;">' + (g.cantidad || 0) + ' kg</strong></li>';
-        }).join('') : '<li style="color: #64748b; font-style: italic; font-size: 11px;">No hay granos especificados.</li>';
-    }
-
-    // 4. Rellenamos lúpulos y levadura compactos
-    var lupulosEl = document.getElementById('rec-pdf-lupulos');
-    var listaLupulos = r.lupulos || [];
-    if (lupulosEl) {
-        var levaduraTxt = '<li style="padding-top: 4px; border-top: 1px solid #f1f5f9; margin-top: 2px; font-size: 11px;"><strong>Levadura:</strong> ' + (r.levadura || 'N/A') + '</li>';
-        var lupulosHtml = listaLupulos.length > 0 ? listaLupulos.map(function(l) {
-            return '<li style="border-bottom: 1px solid #f1f5f9; padding: 2px 0; display: flex; justify-content: space-between; font-size: 11px;"><span>' + (l.nombre || l.item || 'Lúpulo') + ' (' + (l.momento || '') + ')</span><strong style="font-family: monospace;">' + (l.cantidad || 0) + ' grs</strong></li>';
-        }).join('') : '<li style="color: #64748b; font-style: italic; font-size: 11px;">No hay lúpulos especificados.</li>';
-        
-        lupulosEl.innerHTML = lupulosHtml + levaduraTxt;
-    }
-
-    // 5. Ajustamos el contenedor temporal para que entre holgado y centrado en la hoja
-    var elemento = document.getElementById('plantilla-pdf-receta');
-    if (!elemento) {
-        alert("No se encontró la plantilla HTML para el PDF.");
-        return;
-    }
-    
-    elemento.classList.remove('hidden');
-    elemento.classList.remove('oculto');
-    elemento.style.display = 'block';
-    elemento.style.width = '650px';
-    elemento.style.padding = '15px';
-    elemento.style.margin = '0 auto';
-    elemento.style.backgroundColor = '#ffffff';
-
-    var opt = { 
-        margin: [5, 5, 5, 5], 
-        filename: 'Receta_Tecnica_' + (r.nombre ? r.nombre.replace(/\s+/g, '_') : 'Receta') + '.pdf', 
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, logging: false, windowWidth: 700 }, 
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
-    };
-    
-    if (typeof html2pdf !== 'undefined') {
-        setTimeout(function() {
-            html2pdf().set(opt).from(elemento).save().then(function() {
-                elemento.style.display = '';
-                elemento.style.width = '';
-                elemento.style.padding = '';
-                elemento.style.margin = '';
-                elemento.classList.add('hidden');
-            }).catch(function(err) {
-                console.error("Error al generar html2pdf:", err);
-                elemento.style.display = '';
-                elemento.classList.add('hidden');
-            });
-        }, 500);
+    var granosHtml = '';
+    if (listaGranos.length > 0) {
+        granosHtml = listaGranos.map(function(g) {
+            return '<tr><td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0;">' + (g.nombre || g.item || 'Malta') + '</td><td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0; text-align: right; font-family: monospace; font-weight: bold;">' + (g.cantidad || 0) + ' kg</td></tr>';
+        }).join('');
     } else {
-        alert("La librería html2pdf no está cargada.");
-        elemento.style.display = '';
-        elemento.classList.add('hidden');
+        granosHtml = '<tr><td colspan="2" style="padding: 6px 8px; color: #64748b; font-style: italic;">No hay granos especificados.</td></tr>';
     }
+
+    // Listado seguro de lúpulos con tablas tradicionales
+    var listaLupulos = r.lupulos || [];
+    var lupulosHtml = '';
+    if (listaLupulos.length > 0) {
+        lupulosHtml = listaLupulos.map(function(l) {
+            return '<tr><td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0;">' + (l.nombre || l.item || 'Lúpulo') + ' (' + (l.momento || '') + ')</td><td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0; text-align: right; font-family: monospace; font-weight: bold;">' + (l.cantidad || 0) + ' grs</td></tr>';
+        }).join('');
+    } else {
+        lupulosHtml = '<tr><td colspan="2" style="padding: 6px 8px; color: #64748b; font-style: italic;">No hay lúpulos especificados.</td></tr>';
+    }
+
+    var htmlContenido = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <title>Receta_Tecnica_${(r.nombre || 'Receta').replace(/\s+/g, '_')}</title>
+            <style>
+                body { font-family: Arial, sans-serif; color: #0f172a; padding: 20px; max-width: 750px; margin: 0 auto; box-sizing: border-box; background: #ffffff; }
+                .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #b45309; padding-bottom: 10px; margin-bottom: 15px; }
+                h1 { font-size: 22px; font-weight: bold; color: #b45309; margin: 0; }
+                .sub { color: #64748b; font-size: 10px; font-weight: bold; margin: 2px 0 0 0; }
+                .receta-title { font-size: 18px; font-weight: bold; color: #1e293b; text-align: right; margin: 0; }
+                .lote { color: #64748b; font-family: monospace; font-size: 12px; text-align: right; margin: 2px 0 0 0; }
+                
+                .tabla-stats { width: 100%; border-collapse: collapse; background-color: #f8fafc; border: 1px solid #e2e8f0; margin-bottom: 20px; text-align: center; font-family: monospace; }
+                .tabla-stats td { padding: 8px; border: 1px solid #e2e8f0; font-size: 11px; }
+                .tabla-stats th { padding: 4px; font-size: 9px; color: #64748b; border: 1px solid #e2e8f0; background: #f1f5f9; }
+
+                h3 { font-size: 12px; font-weight: bold; color: #92400e; text-transform: uppercase; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; margin-top: 15px; margin-bottom: 8px; }
+                
+                .tabla-agua { width: 100%; font-size: 11px; color: #334155; border-collapse: collapse; margin-bottom: 15px; }
+                .tabla-agua td { padding: 4px 6px; width: 50%; vertical-align: top; }
+
+                .tabla-seccion { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 15px; }
+                
+                .levadura-box { margin-top: 10px; padding-top: 6px; border-top: 1px solid #cbd5e1; font-size: 11px; }
+                
+                @media print {
+                    body { padding: 0; }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <div>
+                    <h1>ALBARDÓN</h1>
+                    <p class="sub">CERVEZA ARTESANAL SANTAFESINA</p>
+                </div>
+                <div>
+                    <h2 class="receta-title">${r.nombre || 'Receta'}</h2>
+                    <p class="lote">Lote: ${r.lote || 280} Lts</p>
+                </div>
+            </div>
+
+            <table class="tabla-stats">
+                <tr>
+                    <th>OG / DI</th>
+                    <th>FG / DF</th>
+                    <th>ABV</th>
+                    <th>IBU</th>
+                    <th>COLOR</th>
+                    <th>EFIC.</th>
+                </tr>
+                <tr>
+                    <td><strong>${r.diTeorica || '--'}</strong></td>
+                    <td><strong>${r.dfTeorica || '--'}</strong></td>
+                    <td><strong>${r.abv || '--'}%</strong></td>
+                    <td><strong>${r.ibu || '--'}</strong></td>
+                    <td><strong>${r.srm || '--'} SRM</strong></td>
+                    <td><strong>${r.eficiencia || '70'}%</strong></td>
+                </tr>
+            </table>
+
+            <h3>Agua, Macerado y Hervido</h3>
+            <table class="tabla-agua">
+                <tr>
+                    <td><strong>Agua Macerado:</strong> ${r.aguaIni || '--'} L (${r.tempAguaIni || '--'} / Mac: ${r.tempMac || '--'})</td>
+                    <td><strong>Sales Mac:</strong> ${salesMacTxt}</td>
+                </tr>
+                <tr>
+                    <td><strong>Agua Lavado:</strong> ${r.aguaLav || '--'} L (${r.tempLav || '--'})</td>
+                    <td><strong>Sales Lavado:</strong> ${salesLavTxt}</td>
+                </tr>
+                <tr>
+                    <td><strong>Densidad Pre-Hervor:</strong> ${r.densPre || '--'} (${r.ltsPre || '--'} L)</td>
+                    <td><strong>Hervor / Enfriado:</strong> ${r.tiempoHervor || 60} min (Evap: ${r.evaporacion || 6}%)</td>
+                </tr>
+            </table>
+
+            <h3>Maltas / Granos</h3>
+            <table class="tabla-seccion">
+                ${granosHtml}
+            </table>
+
+            <h3>Lúpulos y Levadura</h3>
+            <table class="tabla-seccion">
+                ${lupulosHtml}
+            </table>
+            <div class="levadura-box">
+                <strong>Levadura:</strong> ${r.levadura || 'N/A'}
+            </div>
+
+            <script>
+                window.onload = function() {
+                    window.print();
+                };
+            <\/script>
+        </body>
+        </html>
+    `;
+
+    ventanaImpresion.document.write(htmlContenido);
+    ventanaImpresion.document.close();
 };
 })();
 </script>
