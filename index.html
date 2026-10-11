@@ -3057,7 +3057,7 @@ window.descargarRecetaPDF = function(clave) {
     }, 500);
 };
 window.cargarRecetaEnCoccion = function(clave) {
-    // Si no se pasa clave por parámetro, la buscamos automáticamente del select superior
+    // 1. Detectar la clave automáticamente del select superior si no se pasa por parámetro
     if (!clave) {
         var selectReceta = document.querySelector('select[id*="receta"], select');
         if (selectReceta) {
@@ -3076,7 +3076,7 @@ window.cargarRecetaEnCoccion = function(clave) {
         return;
     }
 
-    // 1. Cambiar a la pestaña de Cocción PRIMERO
+    // 2. Cambiar a la pestaña de Cocción PRIMERO para que el DOM esté activo
     var botonesTab = document.querySelectorAll('button, a, [data-tab]');
     botonesTab.forEach(function(el) {
         var textoBtn = (el.textContent || '').trim().toLowerCase();
@@ -3086,7 +3086,7 @@ window.cargarRecetaEnCoccion = function(clave) {
         }
     });
 
-    // 2. Sincronizar el select superior con la clave elegida
+    // 3. Sincronizar el select superior con la clave elegida
     var selects = document.querySelectorAll('select');
     for (var i = 0; i < selects.length; i++) {
         var s = selects[i];
@@ -3099,7 +3099,7 @@ window.cargarRecetaEnCoccion = function(clave) {
         }
     }
 
-    // 3. Rellenar cabecera básica
+    // 4. Rellenar cabecera básica (Estilo y Lote)
     var inputEstilo = document.querySelector('input[name*="estilo"], input[id*="estilo"]');
     if (inputEstilo) {
         inputEstilo.value = r.nombre || '';
@@ -3112,13 +3112,25 @@ window.cargarRecetaEnCoccion = function(clave) {
         inputLote.dispatchEvent(new Event('input', { bubbles: true }));
     }
 
-    // 4. Inyectar filas de granos y lúpulos usando las funciones nativas de la app con un pequeño respiro de DOM
+    // 5. Inyección con retardo de estabilización de DOM y limpieza de placeholders
     setTimeout(function() {
+        // Limpiar contenedor de granos
         var containerGranos = document.getElementById('rec-granos-inputs');
         if (containerGranos) {
             containerGranos.innerHTML = '';
+            // Ocultar textos de placeholder cercanos si existen
+            var padreGranos = containerGranos.parentElement;
+            if (padreGranos) {
+                var avisos = padreGranos.querySelectorAll('p, span');
+                avisos.forEach(function(av) {
+                    if (av.textContent.includes('Seleccione una receta')) {
+                        av.style.display = 'none';
+                    }
+                });
+            }
         }
 
+        // Inyectar granos usando la función nativa
         var listaGranos = r.granos || r.maltas || [];
         if (typeof agregarFilaGrano === 'function' && listaGranos.length > 0) {
             for (var g = 0; g < listaGranos.length; g++) {
@@ -3127,6 +3139,7 @@ window.cargarRecetaEnCoccion = function(clave) {
             }
         }
 
+        // Inyectar lúpulos usando la función nativa
         var listaLupulos = r.lupulos || [];
         if (typeof agregarFilaLupulo === 'function' && listaLupulos.length > 0) {
             for (var l = 0; l < listaLupulos.length; l++) {
@@ -3134,8 +3147,16 @@ window.cargarRecetaEnCoccion = function(clave) {
                 agregarFilaLupulo(itemLupulo.nombre || itemLupulo.item || 'Lúpulo', itemLupulo.cantidad || 0, itemLupulo.momento || '');
             }
         }
-        console.log("Planilla poblada con éxito para:", r.nombre);
-    }, 150);
+
+        // 6. Forzar actualización de eventos en los inputs creados para que la app calcule totales
+        var inputsCreados = document.querySelectorAll('.rec-grano-cant, input[type="number"]');
+        inputsCreados.forEach(function(inp) {
+            inp.dispatchEvent(new Event('input', { bubbles: true }));
+            inp.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+
+        console.log("Planilla poblada, limpiada y actualizada correctamente para:", r.nombre);
+    }, 200);
 };
 
 window.usarRecetaEnCoccion = function(clave) {
