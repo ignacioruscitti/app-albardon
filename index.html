@@ -3056,5 +3056,67 @@ window.descargarRecetaPDF = function(clave) {
         ventana.print();
     }, 500);
 };
+    window.cargarRecetaEnCoccion = function(clave) {
+    if (!clave) return;
+    var r = (typeof recetas !== 'undefined' ? recetas : {})[clave];
+    if (!r) {
+        alert("No se encontró la receta.");
+        return;
+    }
+
+    // 1. Sincronizamos con el selector desplegable superior de la planilla si existe
+    var selects = document.querySelectorAll('select');
+    for (var i = 0; i < selects.length; i++) {
+        var s = selects[i];
+        for (var j = 0; j < s.options.length; j++) {
+            if (s.options[j].value === clave || s.options[j].text.includes(r.nombre)) {
+                s.value = clave;
+                s.dispatchEvent(new Event('change', { bubbles: true }));
+                break;
+            }
+        }
+    }
+
+    // 2. Rellenamos los campos visibles principales de la planilla
+    var inputEstilo = document.querySelector('input[name*="estilo"], input[id*="estilo"], input[placeholder*="estilo" i]');
+    if (inputEstilo) {
+        inputEstilo.value = r.nombre || '';
+        inputEstilo.dispatchEvent(new Event('input', { bubbles: true }));
+        inputEstilo.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    var inputLote = document.querySelector('input[name*="lote"], input[id*="lote"]');
+    if (inputLote) {
+        inputLote.value = r.lote || 280;
+        inputLote.dispatchEvent(new Event('input', { bubbles: true }));
+        inputLote.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    // 3. Cambiamos automáticamente a la pestaña de Cocción
+    var botonesTab = document.querySelectorAll('button, a, [data-tab]');
+    botonesTab.forEach(function(el) {
+        var texto = (el.textContent || '').trim().toLowerCase();
+        var attrTab = (el.getAttribute('data-tab') || '').toLowerCase();
+        if (texto === 'cocción' || texto === 'coccion' || attrTab.includes('coccion')) {
+            el.click();
+        }
+    });
+
+    console.log("Receta cargada en cocción:", r.nombre);
+};
+
+window.usarRecetaEnCoccion = function(clave) {
+    if (clave && typeof clave === 'string') {
+        window.cargarRecetaEnCoccion(clave);
+        return;
+    }
+
+    var selectReceta = document.querySelector('select[id*="receta"], select[class*="receta"], select');
+    if (selectReceta && selectReceta.value) {
+        window.cargarRecetaEnCoccion(selectReceta.value);
+    } else {
+        alert("Por favor, seleccioná una receta primero.");
+    }
+};
 })();
 </script>
