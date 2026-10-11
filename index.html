@@ -3056,15 +3056,15 @@ window.descargarRecetaPDF = function(clave) {
         ventana.print();
     }, 500);
 };
+window.recetaPendienteCoccion = null;
+
 window.cargarRecetaEnCoccion = function(clave) {
-    // 1. Si no se pasa clave, la buscamos del selector superior
     if (!clave) {
         var selectReceta = document.querySelector('select[id*="receta"], select');
         if (selectReceta) {
             clave = selectReceta.value;
         }
     }
-
     if (!clave) {
         alert("Por favor, seleccioná una receta primero.");
         return;
@@ -3076,7 +3076,10 @@ window.cargarRecetaEnCoccion = function(clave) {
         return;
     }
 
-    // 2. Activar automáticamente la pestaña de Cocción
+    // Guardamos en memoria global para blindar la carga ante re-renderizados de la app
+    window.recetaPendienteCoccion = r;
+
+    // 1. Cambiar automáticamente a la pestaña de Cocción
     var botonesTab = document.querySelectorAll('button, a, [data-tab]');
     botonesTab.forEach(function(el) {
         var textoBtn = (el.textContent || '').trim().toLowerCase();
@@ -3086,54 +3089,65 @@ window.cargarRecetaEnCoccion = function(clave) {
         }
     });
 
-    // 3. Dar un respiro al DOM (150ms) para que la pestaña renderice las tablas y los inputs antes de inyectar
-    setTimeout(function() {
-        // Sincronizar el select superior
-        var selects = document.querySelectorAll('select');
-        selects.forEach(function(s) {
-            for (var j = 0; j < s.options.length; j++) {
-                if (s.options[j].value === clave) {
+    // 2. Ejecutar la inyección en múltiples momentos clave (50ms, 250ms y 600ms) 
+    // para asegurar que se pinte DESPUÉS de que la app termine de renderizar sus pestañas
+    [50, 250, 600].forEach(function(delay) {
+        setTimeout(function() {
+            if (!window.recetaPendienteCoccion) return;
+            var rec = window.recetaPendienteCoccion;
+
+            // Sincronizar el select superior si existe
+            var selects = document.querySelectorAll('select');
+            selects.forEach(function(s) {
+                if (s.value !== clave) {
                     s.value = clave;
-                    s.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            });
+
+            // Rellenar cabecera (Estilo y Lote)
+            var inputs = document.querySelectorAll('input');
+            inputs.forEach(function(inp) {
+                var nameId = (inp.id + ' ' + inp.name + ' ' + (inp.placeholder || '')).toLowerCase();
+                if (nameId.includes('estilo') || nameId.includes('nombre')) {
+                    if (!inp.value || inp.value === '') {
+                        inp.value = rec.nombre || '';
+                        inp.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                }
+                if (nameId.includes('lote') && !nameId.includes('lts')) {
+                    if (!inp.value || inp.value === '') {
+                        inp.value = rec.lote || 'L-2026-01';
+                        inp.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                }
+            });
+
+            // Inyectar Granos de forma limpia
+            var containerGranos = document.getElementById('rec-granos-inputs');
+            if (containerGranos && rec.granos && rec.granos.length > 0) {
+                // Solo si está vacío para evitar duplicados en los múltiples intentos
+                if (containerGranos.children.length === 0) {
+                    rec.granos.forEach(function(g) {
+                        if (typeof agregarFilaGrano === 'function') {
+                            agregarFilaGrano(g.nombre || g.item || 'Malta', g.cantidad || 0);
+                        }
+                    });
                 }
             }
-        });
 
-        // Rellenar cabecera (Estilo y Lote)
-        var inputEstilo = document.querySelector('input[name*="estilo"], input[id*="estilo"]');
-        if (inputEstilo) {
-            inputEstilo.value = r.nombre || '';
-            inputEstilo.dispatchEvent(new Event('input', { bubbles: true }));
-        }
+            // Inyectar Lúpulos de forma limpia
+            var listaLupulos = rec.lupulos || [];
+            if (listaLupulos.length > 0 && typeof agregarFilaLupulo === 'function') {
+                // Verificamos si podemos limpiar o agregar si es necesario
+                // Llamamos a la función nativa directamente
+                listaLupulos.forEach(function(l) {
+                    agregarFilaLupulo(l.nombre || l.item || 'Lúpulo', l.cantidad || 0, l.momento || '');
+                });
+            }
+        }, delay);
+    });
 
-        var inputLote = document.querySelector('input[name*="lote"], input[id*="lote"]');
-        if (inputLote) {
-            inputLote.value = r.lote || 'L-2026-01';
-            inputLote.dispatchEvent(new Event('input', { bubbles: true }));
-        }
-
-        // Limpiar e inyectar granos usando la función nativa
-        var containerGranos = document.getElementById('rec-granos-inputs');
-        if (containerGranos) {
-            containerGranos.innerHTML = '';
-        }
-        var listaGranos = r.granos || r.maltas || [];
-        if (typeof agregarFilaGrano === 'function' && listaGranos.length > 0) {
-            listaGranos.forEach(function(g) {
-                agregarFilaGrano(g.nombre || g.item || 'Malta', g.cantidad || 0);
-            });
-        }
-
-        // Limpiar e inyectar lúpulos usando la función nativa
-        var listaLupulos = r.lupulos || [];
-        if (typeof agregarFilaLupulo === 'function' && listaLupulos.length > 0) {
-            listaLupulos.forEach(function(l) {
-                agregarFilaLupulo(l.nombre || l.item || 'Lúpulo', l.cantidad || 0, l.momento || '');
-            });
-        }
-
-        console.log("Receta cargada y desplegada correctamente en la planilla:", r.nombre);
-    }, 150);
+    console.log("Carga asegurada para la receta:", r.nombre);
 };
 
 window.usarRecetaEnCoccion = function(clave) {
