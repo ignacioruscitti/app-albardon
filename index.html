@@ -3056,7 +3056,7 @@ window.descargarRecetaPDF = function(clave) {
         ventana.print();
     }, 500);
 };
-  window.cargarRecetaEnCoccion = function(clave) {
+ window.cargarRecetaEnCoccion = function(clave) {
     if (!clave) return;
     var r = (typeof recetas !== 'undefined' ? recetas : {})[clave];
     if (!r) {
@@ -3064,65 +3064,32 @@ window.descargarRecetaPDF = function(clave) {
         return;
     }
 
-    // 1. Sincronizar el selector desplegable superior para disparar eventos nativos de la app
+    // 1. Buscar y activar con precisión el select de "Cargar Receta Base"
     var selects = document.querySelectorAll('select');
+    var selectTarget = null;
+    
     for (var i = 0; i < selects.length; i++) {
         var s = selects[i];
         for (var j = 0; j < s.options.length; j++) {
-            if (s.options[j].value === clave || s.options[j].text.includes(r.nombre)) {
-                s.value = clave;
-                s.dispatchEvent(new Event('change', { bubbles: true }));
+            if (s.options[j].value === clave || s.options[j].text.trim() === (r.nombre || '').trim()) {
+                selectTarget = s;
                 break;
             }
         }
+        if (selectTarget) break;
     }
 
-    // 2. Rellenar campos generales (estilo, lote, temperaturas y agua)
-    var inputs = document.querySelectorAll('input, select, textarea');
-    inputs.forEach(function(el) {
-        var id = (el.id || '').toLowerCase();
-        var name = (el.name || '').toLowerCase();
-        var ph = (el.getAttribute('placeholder') || '').toLowerCase();
-        var texto = id + ' ' + name + ' ' + ph;
-
-        if (texto.includes('estilo') || texto.includes('nombre')) {
-            el.value = r.nombre || '';
-            el.dispatchEvent(new Event('input', { bubbles: true }));
-        }
-        if (texto.includes('lote') && !texto.includes('lts') && !texto.includes('litros')) {
-            el.value = r.lote || 280;
-            el.dispatchEvent(new Event('input', { bubbles: true }));
-        }
-        if (texto.includes('agua') || texto.includes('litros') || texto.includes('macerado')) {
-            if ((texto.includes('ini') || texto.includes('mac') || texto.includes('litros')) && r.aguaIni) {
-                el.value = r.aguaIni;
-                el.dispatchEvent(new Event('input', { bubbles: true }));
-            }
-        }
-        if (texto.includes('temp') || texto.includes('temperatura')) {
-            if (texto.includes('mac') && r.tempMac) {
-                el.value = r.tempMac;
-                el.dispatchEvent(new Event('input', { bubbles: true }));
-            } else if (r.tempAguaIni) {
-                el.value = r.tempAguaIni;
-                el.dispatchEvent(new Event('input', { bubbles: true }));
-            }
-        }
-    });
-
-    // 3. Renderizar o inyectar la tabla de granos y maltas si el contenedor existe
-    var contenedorGranos = document.querySelector('#granos-coccion, .granos-container, table[id*="grano"], div[id*="grano"]');
-    var listaGranos = r.granos || r.maltas || [];
-    if (listaGranos.length > 0) {
-        // Si la app tiene alguna función global para pintar granos, la usamos
-        if (typeof renderizarGranos === 'function') {
-            renderizarGranos(listaGranos);
-        } else if (typeof mostrarGranosCoccion === 'function') {
-            mostrarGranosCoccion(r);
+    if (selectTarget) {
+        selectTarget.value = clave;
+        // Disparamos todos los eventos posibles para garantizar que la app capture el cambio
+        selectTarget.dispatchEvent(new Event('change', { bubbles: true }));
+        selectTarget.dispatchEvent(new Event('input', { bubbles: true }));
+        if (typeof jQuery !== 'undefined') {
+            jQuery(selectTarget).trigger('change');
         }
     }
 
-    // 4. Cambiar automáticamente a la pestaña de Cocción
+    // 2. Cambiar automáticamente a la pestaña de Cocción
     var botonesTab = document.querySelectorAll('button, a, [data-tab]');
     botonesTab.forEach(function(el) {
         var textoBtn = (el.textContent || '').trim().toLowerCase();
@@ -3132,7 +3099,7 @@ window.descargarRecetaPDF = function(clave) {
         }
     });
 
-    console.log("Receta procesada para cocción:", r.nombre);
+    console.log("Activando carga nativa para receta:", r.nombre);
 };
 
 window.usarRecetaEnCoccion = function(clave) {
