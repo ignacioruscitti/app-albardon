@@ -3065,44 +3065,40 @@ window.cargarRecetaEnCoccion = function(clave) {
         return;
     }
 
-    // 1. Completar Estilo y Lote (que ya vimos que funcionan)
-    var inputs = document.querySelectorAll('input, select, textarea');
-    inputs.forEach(function(el) {
-        var idName = (el.id + ' ' + el.name + ' ' + (el.getAttribute('placeholder') || '')).toLowerCase();
-        
-        if (idName.includes('estilo') || idName.includes('nombre')) {
-            el.value = r.nombre || '';
-            el.dispatchEvent(new Event('input', { bubbles: true }));
-            el.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-        if (idName.includes('lote') && !idName.includes('lts') && !idName.includes('litros')) {
-            el.value = r.lote || 280;
-            el.dispatchEvent(new Event('input', { bubbles: true }));
-            el.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-        // Completar agua o litros si existen campos específicos
-        if (idName.includes('agua') || idName.includes('litros') || idName.includes('macerado')) {
-            if (r.aguaIni && (idName.includes('ini') || idName.includes('mac'))) {
-                el.value = r.aguaIni;
-                el.dispatchEvent(new Event('input', { bubbles: true }));
+    // 1. Buscamos el select desplegable original de "Cargar Receta Base" en la interfaz
+    var selects = document.querySelectorAll('select');
+    for (var i = 0; i < selects.length; i++) {
+        var s = selects[i];
+        // Verificamos si este select contiene las opciones de recetas
+        for (var j = 0; j < s.options.length; j++) {
+            if (s.options[j].value === clave || s.options[j].text.includes(r.nombre)) {
+                s.value = clave;
+                s.dispatchEvent(new Event('change', { bubbles: true }));
+                break;
             }
         }
-    });
-
-    // 2. Si la app cuenta con una tabla de granos o función interna para renderizar los ingredientes, la disparamos
-    if (typeof renderizarGranosCoccion === 'function') {
-        renderizarGranosCoccion(r);
-    } else if (typeof actualizarPlanillaCoccion === 'function') {
-        actualizarPlanillaCoccion(r);
     }
 
-    // 3. Cambiar automáticamente a la pestaña de Cocción
+    // 2. Rellenamos también los campos de texto principales por respaldo
+    var inputEstilo = document.querySelector('input[name*="estilo"], input[id*="estilo"]');
+    if (inputEstilo) {
+        inputEstilo.value = r.nombre || '';
+        inputEstilo.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    
+    var inputLote = document.querySelector('input[name*="lote"], input[id*="lote"]');
+    if (inputLote) {
+        inputLote.value = r.lote || 280;
+        inputLote.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    // 3. Cambiamos automáticamente a la pestaña de Cocción si está inactiva
     var tabCoccion = document.querySelector('[data-tab="coccion"], button[onclick*="coccion"], a[href*="coccion"]');
     if (tabCoccion && typeof tabCoccion.click === 'function') {
         tabCoccion.click();
     }
 
-    console.log("Receta completamente cargada en la planilla:", r.nombre);
+    console.log("Receta cargada en cocción vía select nativo:", r.nombre);
 };
 
 window.usarRecetaEnCoccion = function(clave) {
@@ -3115,7 +3111,7 @@ window.usarRecetaEnCoccion = function(clave) {
     if (selectReceta && selectReceta.value) {
         window.cargarRecetaEnCoccion(selectReceta.value);
     } else {
-        alert("No se encontró la receta para cargar.");
+        alert("Por favor, seleccioná una receta primero.");
     }
 };
 })();
