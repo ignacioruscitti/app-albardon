@@ -3065,37 +3065,44 @@ window.cargarRecetaEnCoccion = function(clave) {
         return;
     }
 
-    // Buscamos el selector o input de la app y cargamos la receta usando el método original si existe
-    var selectReceta = document.querySelector('select[id*="receta"], select[class*="receta"]');
-    if (selectReceta) {
-        selectReceta.value = clave;
-        selectReceta.dispatchEvent(new Event('change', { bubbles: true }));
+    // 1. Completar Estilo y Lote (que ya vimos que funcionan)
+    var inputs = document.querySelectorAll('input, select, textarea');
+    inputs.forEach(function(el) {
+        var idName = (el.id + ' ' + el.name + ' ' + (el.getAttribute('placeholder') || '')).toLowerCase();
+        
+        if (idName.includes('estilo') || idName.includes('nombre')) {
+            el.value = r.nombre || '';
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+            el.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        if (idName.includes('lote') && !idName.includes('lts') && !idName.includes('litros')) {
+            el.value = r.lote || 280;
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+            el.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        // Completar agua o litros si existen campos específicos
+        if (idName.includes('agua') || idName.includes('litros') || idName.includes('macerado')) {
+            if (r.aguaIni && (idName.includes('ini') || idName.includes('mac'))) {
+                el.value = r.aguaIni;
+                el.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        }
+    });
+
+    // 2. Si la app cuenta con una tabla de granos o función interna para renderizar los ingredientes, la disparamos
+    if (typeof renderizarGranosCoccion === 'function') {
+        renderizarGranosCoccion(r);
+    } else if (typeof actualizarPlanillaCoccion === 'function') {
+        actualizarPlanillaCoccion(r);
     }
 
-    // Si tu app tiene una función nativa de carga, la invocamos de forma segura
-    if (typeof seleccionarRecetaBase === 'function') {
-        seleccionarRecetaBase(clave);
-    } else if (typeof cargarReceta === 'function') {
-        cargarReceta(clave);
-    } else {
-        // Respaldo visual directo sobre los inputs principales de la planilla
-        var inputEstilo = document.querySelector('input[name*="estilo"], input[id*="estilo"]');
-        if (inputEstilo) {
-            inputEstilo.value = r.nombre || '';
-            inputEstilo.dispatchEvent(new Event('input', { bubbles: true }));
-        }
-        var inputLote = document.querySelector('input[name*="lote"], input[id*="lote"]');
-        if (inputLote) {
-            inputLote.value = r.lote || 280;
-            inputLote.dispatchEvent(new Event('input', { bubbles: true }));
-        }
-    }
-
-    // Cambiamos automáticamente a la pestaña de cocción si el botón está disponible
+    // 3. Cambiar automáticamente a la pestaña de Cocción
     var tabCoccion = document.querySelector('[data-tab="coccion"], button[onclick*="coccion"], a[href*="coccion"]');
     if (tabCoccion && typeof tabCoccion.click === 'function') {
         tabCoccion.click();
     }
+
+    console.log("Receta completamente cargada en la planilla:", r.nombre);
 };
 
 window.usarRecetaEnCoccion = function(clave) {
@@ -3108,7 +3115,7 @@ window.usarRecetaEnCoccion = function(clave) {
     if (selectReceta && selectReceta.value) {
         window.cargarRecetaEnCoccion(selectReceta.value);
     } else {
-        alert("Por favor, seleccioná una receta primero.");
+        alert("No se encontró la receta para cargar.");
     }
 };
 })();
