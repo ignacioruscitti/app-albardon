@@ -2238,16 +2238,31 @@ function descargarRecetaPDF(clave) {
     const elemento = document.getElementById('plantilla-pdf-receta');
     if (!elemento) return;
     
+    // Quitamos tanto 'oculto' como 'hidden' para asegurar que sea visible para html2pdf
     elemento.classList.remove('oculto');
-    const opt = { margin: 10, filename: `Receta_Tecnica_${r.nombre.replace(/\s+/g, '_')}.pdf`, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4' } };
+    elemento.classList.remove('hidden');
+
+    const opt = { 
+        margin: 10, 
+        filename: `Receta_Tecnica_${r.nombre.replace(/\s+/g, '_')}.pdf`, 
+        html2canvas: { scale: 2, useCORS: true }, 
+        jsPDF: { unit: 'mm', format: 'a4' } 
+    };
     
     if (typeof html2pdf !== 'undefined') {
-        html2pdf().set(opt).from(elemento).save().then(() => elemento.classList.add('hidden'));
+        // Damos un pequeño respiro de 200ms para que el DOM pinte los datos antes de exportar
+        setTimeout(() => {
+            html2pdf().set(opt).from(elemento).save().then(() => {
+                elemento.classList.add('hidden');
+                elemento.classList.add('oculto');
+            });
+        }, 200);
     } else {
+        alert("La librería html2pdf no está cargada.");
         elemento.classList.add('hidden');
+        elemento.classList.add('oculto');
     }
-} </script>
-    
+}
     <script>  // --- MÓDULO BARRILES ---
 let barrilEditandoIdx = null;
 
