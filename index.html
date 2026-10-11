@@ -2205,75 +2205,85 @@ window.descargarRecetaPDF = function(clave) {
     var salesMacTxt = (r.salesMac && r.salesMac.length > 0) ? r.salesMac.map(function(s) { return (s.nombre || s.item || '') + " (" + (s.cantidad || 0) + "g)"; }).join(', ') : 'Ninguna';
     var salesLavTxt = (r.salesLav && r.salesLav.length > 0) ? r.salesLav.map(function(s) { return (s.nombre || s.item || '') + " (" + (s.cantidad || 0) + "g)"; }).join(', ') : 'Ninguna';
 
-    var setVal = function(id, val) { 
-        var el = document.getElementById(id); 
-        if (el) el.innerText = val; 
-    };
-
-    setVal('rec-pdf-nombre', r.nombre || 'Receta');
-    setVal('rec-pdf-batch', 'Lote: ' + (r.lote || 280) + ' Lts');
-    setVal('rec-pdf-og', r.diTeorica || '--');
-    setVal('rec-pdf-fg', r.dfTeorica || '--');
-    setVal('rec-pdf-abv-val', (r.abv || '--') + '%');
-    setVal('rec-pdf-ibu-val', r.ibu || '--');
-    setVal('rec-pdf-srm-val', (r.srm || '--') + ' SRM');
-    setVal('rec-pdf-efic', (r.eficiencia || '70') + '%');
-
-    var aguaDet = document.getElementById('rec-pdf-agua-det');
-    if (aguaDet) {
-        aguaDet.innerHTML = 
-            '<div><strong>Agua Macerado:</strong> ' + (r.aguaIni || '--') + ' L (' + (r.tempAguaIni || '--') + ' / Mac: ' + (r.tempMac || '--') + ')</div>' +
-            '<div><strong>Sales Mac:</strong> ' + salesMacTxt + '</div>' +
-            '<div><strong>Agua Lavado:</strong> ' + (r.aguaLav || '--') + ' L (' + (r.tempLav || '--') + ')</div>' +
-            '<div><strong>Sales Lavado:</strong> ' + salesLavTxt + '</div>' +
-            '<div><strong>Densidad Pre-Hervor:</strong> ' + (r.densPre || '--') + ' (' + (r.ltsPre || '--') + ' L)</div>' +
-            '<div><strong>Hervor / Enfriado:</strong> ' + (r.tiempoHervor || 60) + ' min (Evap: ' + (r.evaporacion || 6) + '%)</div>';
-    }
-
-    // Renderizado seguro de Granos
-    var granosEl = document.getElementById('rec-pdf-granos');
+    // Construcción de listas de granos y lúpulos de manera segura
     var listaGranos = r.granos || r.maltas || [];
-    if (granosEl) {
-        if (listaGranos.length > 0) {
-            granosEl.innerHTML = listaGranos.map(function(g) {
-                var nombre = g.nombre || g.item || 'Malta';
-                var cant = g.cantidad || 0;
-                return '<li style="border-bottom: 1px solid #f1f5f9; padding: 4px 0; display: flex; justify-content: space-between;"><span>' + nombre + '</span><strong style="font-family: monospace;">' + cant + ' kg</strong></li>';
-            }).join('');
-        } else {
-            granosEl.innerHTML = '<li style="color: #888; font-style: italic; padding: 4px 0;">No hay granos especificados.</li>';
-        }
+    var granosHtml = '';
+    if (listaGranos.length > 0) {
+        granosHtml = listaGranos.map(function(g) {
+            return '<li style="border-bottom: 1px solid #e2e8f0; padding: 6px 0; display: flex; justify-content: space-between; font-size: 13px;"><span>' + (g.nombre || g.item || 'Malta') + '</span><strong style="font-family: monospace;">' + (g.cantidad || 0) + ' kg</strong></li>';
+        }).join('');
+    } else {
+        granosHtml = '<li style="color: #64748b; font-style: italic; padding: 6px 0; font-size: 13px;">No hay granos especificados.</li>';
     }
 
-    // Renderizado seguro de Lúpulos y Levadura
-    var lupulosEl = document.getElementById('rec-pdf-lupulos');
     var listaLupulos = r.lupulos || [];
-    if (lupulosEl) {
-        var levaduraTxt = '<li style="padding-top: 6px; border-top: 1px solid #f1f5f9; margin-top: 4px;"><strong>Levadura:</strong> ' + (r.levadura || 'N/A') + '</li>';
-        var lupulosHtml = listaLupulos.length > 0 ? listaLupulos.map(function(l) {
-            var nombre = l.nombre || l.item || 'Lúpulo';
-            var cant = l.cantidad || 0;
-            var momento = l.momento || '';
-            return '<li style="border-bottom: 1px solid #f1f5f9; padding: 4px 0; display: flex; justify-content: space-between;"><span>' + nombre + ' (' + momento + ')</span><strong style="font-family: monospace;">' + cant + ' grs</strong></li>';
-        }).join('') : '<li style="color: #888; font-style: italic; padding: 4px 0;">No hay lúpulos especificados.</li>';
-        
-        lupulosEl.innerHTML = lupulosHtml + levaduraTxt;
+    var lupulosHtml = '';
+    if (listaLupulos.length > 0) {
+        lupulosHtml = listaLupulos.map(function(l) {
+            return '<li style="border-bottom: 1px solid #e2e8f0; padding: 6px 0; display: flex; justify-content: space-between; font-size: 13px;"><span>' + (l.nombre || l.item || 'Lúpulo') + ' (' + (l.momento || '') + ')</span><strong style="font-family: monospace;">' + (l.cantidad || 0) + ' grs</strong></li>';
+        }).join('');
+    } else {
+        lupulosHtml = '<li style="color: #64748b; font-style: italic; padding: 6px 0; font-size: 13px;">No hay lúpulos especificados.</li>';
     }
 
-    var elemento = document.getElementById('plantilla-pdf-receta');
-    if (!elemento) {
-        alert("No se encontró la plantilla HTML para el PDF de recetas.");
-        return;
-    }
-    
-    // Hacemos visible el elemento dentro del flujo normal con ancho estructurado
-    elemento.classList.remove('hidden');
-    elemento.classList.remove('oculto');
-    elemento.style.display = 'block';
-    elemento.style.width = '100%';
-    elemento.style.maxWidth = '750px';
-    elemento.style.margin = '0 auto';
-    elemento.style.backgroundColor = '#ffffff';
+    // Creamos un contenedor temporal en memoria totalmente independiente y visible para el motor de render
+    var contenedorTemp = document.createElement('div');
+    contenedorTemp.style.position = 'fixed';
+    contenedorTemp.style.left = '-9999px';
+    contenedorTemp.style.top = '0';
+    contenedorTemp.style.width = '750px';
+    contenedorTemp.style.backgroundColor = '#ffffff';
+    contenedorTemp.style.padding = '30px';
+    contenedorTemp.style.fontFamily = 'Arial, sans-serif';
+    contenedorTemp.style.color = '#0f172a';
+    contenedorTemp.style.boxSizing = 'border-box';
+
+    contenedorTemp.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #cbd5e1; padding-bottom: 12px; margin-bottom: 15px;">
+            <div>
+                <h1 style="font-size: 24px; font-weight: bold; color: #b45309; margin: 0; letter-spacing: 1px;">ALBARDÓN</h1>
+                <p style="color: #64748b; font-weight: bold; font-size: 10px; margin: 2px 0 0 0;">CERVEZA ARTESANAL SANTAFESINA</p>
+            </div>
+            <div style="text-align: right;">
+                <h2 style="font-size: 18px; font-weight: bold; color: #1e293b; margin: 0;">${r.nombre || 'Receta'}</h2>
+                <p style="color: #64748b; font-family: monospace; font-size: 12px; margin: 2px 0 0 0;">Lote: ${r.lote || 280} Lts</p>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; background-color: #f8fafc; padding: 10px; border-radius: 6px; text-align: center; font-family: monospace; border: 1px solid #e2e8f0; margin-bottom: 20px;">
+            <div><span style="display: block; font-size: 9px; color: #64748b;">OG / DI</span><strong style="font-size: 12px;">${r.diTeorica || '--'}</strong></div>
+            <div><span style="display: block; font-size: 9px; color: #64748b;">FG / DF</span><strong style="font-size: 12px;">${r.dfTeorica || '--'}</strong></div>
+            <div><span style="display: block; font-size: 9px; color: #64748b;">ABV</span><strong style="font-size: 12px;">${r.abv || '--'}%</strong></div>
+            <div><span style="display: block; font-size: 9px; color: #64748b;">IBU</span><strong style="font-size: 12px;">${r.ibu || '--'}</strong></div>
+            <div><span style="display: block; font-size: 9px; color: #64748b;">COLOR</span><strong style="font-size: 12px;">${r.srm || '--'} SRM</strong></div>
+            <div><span style="display: block; font-size: 9px; color: #64748b;">EFIC.</span><strong style="font-size: 12px;">${r.eficiencia || '70'}%</strong></div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <h3 style="font-size: 12px; font-weight: bold; color: #92400e; text-transform: uppercase; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; margin-bottom: 8px;">Agua, Macerado y Hervido</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; color: #334155;">
+                <div><strong>Agua Macerado:</strong> ${r.aguaIni || '--'} L (${r.tempAguaIni || '--'} / Mac: ${r.tempMac || '--'})</div>
+                <div><strong>Sales Mac:</strong> ${salesMacTxt}</div>
+                <div><strong>Agua Lavado:</strong> ${r.aguaLav || '--'} L (${r.tempLav || '--'})</div>
+                <div><strong>Sales Lavado:</strong> ${salesLavTxt}</div>
+                <div><strong>Densidad Pre-Hervor:</strong> ${r.densPre || '--'} (${r.ltsPre || '--'} L)</div>
+                <div><strong>Hervor / Enfriado:</strong> ${r.tiempoHervor || 60} min (Evap: ${r.evaporacion || 6}%)</div>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <h3 style="font-size: 12px; font-weight: bold; color: #92400e; text-transform: uppercase; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; margin-bottom: 6px;">Maltas / Granos</h3>
+            <ul style="list-style: none; padding: 0; margin: 0;">${granosHtml}</ul>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <h3 style="font-size: 12px; font-weight: bold; color: #92400e; text-transform: uppercase; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; margin-bottom: 6px;">Lúpulos y Levadura</h3>
+            <ul style="list-style: none; padding: 0; margin: 0;">${lupulosHtml}</ul>
+            <div style="margin-top: 8px; padding-top: 6px; border-top: 1px solid #cbd5e1; font-size: 13px;"><strong>Levadura:</strong> ${r.levadura || 'N/A'}</div>
+        </div>
+    `;
+
+    document.body.appendChild(contenedorTemp);
 
     var opt = { 
         margin: 10, 
@@ -2282,26 +2292,17 @@ window.descargarRecetaPDF = function(clave) {
         html2canvas: { scale: 2, useCORS: true, logging: false, windowWidth: 800 }, 
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
     };
-    
+
     if (typeof html2pdf !== 'undefined') {
-        setTimeout(function() {
-            html2pdf().set(opt).from(elemento).save().then(function() {
-                // Restauramos el estado original oculto
-                elemento.style.display = '';
-                elemento.style.width = '';
-                elemento.style.maxWidth = '';
-                elemento.style.margin = '';
-                elemento.classList.add('hidden');
-            }).catch(function(err) {
-                console.error("Error al generar html2pdf:", err);
-                elemento.style.display = '';
-                elemento.classList.add('hidden');
-            });
-        }, 350);
+        html2pdf().set(opt).from(contenedorTemp).save().then(function() {
+            document.body.removeChild(contenedorTemp);
+        }).catch(function(err) {
+            console.error("Error al generar html2pdf:", err);
+            document.body.removeChild(contenedorTemp);
+        });
     } else {
         alert("La librería html2pdf no está cargada.");
-        elemento.style.display = '';
-        elemento.classList.add('hidden');
+        document.body.removeChild(contenedorTemp);
     }
 };
     <script>  // --- MÓDULO BARRILES ---
