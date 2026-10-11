@@ -3065,40 +3065,42 @@ window.cargarRecetaEnCoccion = function(clave) {
         return;
     }
 
-    // 1. Buscamos el select desplegable original de "Cargar Receta Base" en la interfaz
-    var selects = document.querySelectorAll('select');
-    for (var i = 0; i < selects.length; i++) {
-        var s = selects[i];
-        // Verificamos si este select contiene las opciones de recetas
-        for (var j = 0; j < s.options.length; j++) {
-            if (s.options[j].value === clave || s.options[j].text.includes(r.nombre)) {
-                s.value = clave;
-                s.dispatchEvent(new Event('change', { bubbles: true }));
-                break;
+    console.log("Cargando receta:", r);
+
+    // Buscamos todos los inputs y selects de la pantalla para rellenarlos inteligentemente
+    var elementos = document.querySelectorAll('input, select, textarea');
+    elementos.forEach(function(el) {
+        var id = (el.id || '').toLowerCase();
+        var name = (el.name || '').toLowerCase();
+        var placeholder = (el.getAttribute('placeholder') || '').toLowerCase();
+        var textoAsociado = id + ' ' + name + ' ' + placeholder;
+
+        // Rellenar estilo o nombre
+        if (textoAsociado.includes('estilo') || textoAsociado.includes('nombre')) {
+            el.value = r.nombre || '';
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+            el.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        // Rellenar lote
+        if (textoAsociado.includes('lote') && !textoAsociado.includes('lts')) {
+            el.value = r.lote || 280;
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+            el.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        // Rellenar agua de inicio / macerado
+        if (textoAsociado.includes('agua') || textoAsociado.includes('macerado') || textoAsociado.includes('litros')) {
+            if (r.aguaIni && (textoAsociado.includes('ini') || textoAsociado.includes('mac') || textoAsociado.includes('litros'))) {
+                el.value = r.aguaIni;
+                el.dispatchEvent(new Event('input', { bubbles: true }));
             }
         }
-    }
+    });
 
-    // 2. Rellenamos también los campos de texto principales por respaldo
-    var inputEstilo = document.querySelector('input[name*="estilo"], input[id*="estilo"]');
-    if (inputEstilo) {
-        inputEstilo.value = r.nombre || '';
-        inputEstilo.dispatchEvent(new Event('input', { bubbles: true }));
-    }
-    
-    var inputLote = document.querySelector('input[name*="lote"], input[id*="lote"]');
-    if (inputLote) {
-        inputLote.value = r.lote || 280;
-        inputLote.dispatchEvent(new Event('input', { bubbles: true }));
-    }
-
-    // 3. Cambiamos automáticamente a la pestaña de Cocción si está inactiva
+    // Cambiar automáticamente a la pestaña de Cocción
     var tabCoccion = document.querySelector('[data-tab="coccion"], button[onclick*="coccion"], a[href*="coccion"]');
     if (tabCoccion && typeof tabCoccion.click === 'function') {
         tabCoccion.click();
     }
-
-    console.log("Receta cargada en cocción vía select nativo:", r.nombre);
 };
 
 window.usarRecetaEnCoccion = function(clave) {
