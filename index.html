@@ -3061,24 +3061,19 @@ window.cargarRecetaEnCoccion = function(clave) {
     if (!clave) return;
     var r = (typeof recetas !== 'undefined' ? recetas : {})[clave];
     if (!r) {
-        console.error("No se encontró la receta en el objeto global recetas.");
         alert("No se encontró la receta.");
         return;
     }
-    console.log("2. Receta encontrada:", r.nombre);
 
     // 1. Cambiar a la pestaña de Cocción PRIMERO
     var botonesTab = document.querySelectorAll('button, a, [data-tab]');
-    var tabEncontrada = false;
     botonesTab.forEach(function(el) {
         var textoBtn = (el.textContent || '').trim().toLowerCase();
         var attrTab = (el.getAttribute('data-tab') || '').toLowerCase();
         if (textoBtn === 'cocción' || textoBtn === 'coccion' || attrTab.includes('coccion')) {
             el.click();
-            tabEncontrada = true;
         }
     });
-    console.log("3. Pestaña de cocción activada:", tabEncontrada);
 
     // 2. Rellenar cabecera básica
     var inputEstilo = document.querySelector('input[name*="estilo"], input[id*="estilo"]');
@@ -3093,44 +3088,35 @@ window.cargarRecetaEnCoccion = function(clave) {
         inputLote.dispatchEvent(new Event('input', { bubbles: true }));
     }
 
-    // 3. Verificar contenedor de granos
-    var containerGranos = document.getElementById('rec-granos-inputs');
-    console.log("4. Contenedor #rec-granos-inputs encontrado:", containerGranos);
-    if (containerGranos) {
-        containerGranos.innerHTML = '';
-    }
-
-    // 4. Inyectar granos
-    var listaGranos = r.granos || r.maltas || [];
-    console.log("5. Lista de granos a inyectar:", listaGranos);
-    console.log("6. ¿Existe la función agregarFilaGrano?:", typeof agregarFilaGrano);
-
-    if (typeof agregarFilaGrano === 'function' && listaGranos.length > 0) {
-        for (var g = 0; g < listaGranos.length; g++) {
-            var itemGrano = listaGranos[g];
-            console.log("Agregando grano:", itemGrano);
-            agregarFilaGrano(itemGrano.nombre || itemGrano.item || 'Malta', itemGrano.cantidad || 0);
+    // 3. Esperar a que la interfaz termine de estabilizarse para inyectar las filas
+    setTimeout(function() {
+        var containerGranos = document.getElementById('rec-granos-inputs');
+        if (containerGranos) {
+            containerGranos.innerHTML = '';
         }
-    }
 
-    // 5. Inyectar lúpulos
-    var listaLupulos = r.lupulos || [];
-    console.log("7. Lista de lúpulos a inyectar:", listaLupulos);
-    console.log("8. ¿Existe la función agregarFilaLupulo?:", typeof agregarFilaLupulo);
-
-    if (typeof agregarFilaLupulo === 'function' && listaLupulos.length > 0) {
-        for (var l = 0; l < listaLupulos.length; l++) {
-            var itemLupulo = listaLupulos[l];
-            console.log("Agregando lúpulo:", itemLupulo);
-            agregarFilaLupulo(itemLupulo.nombre || itemLupulo.item || 'Lúpulo', itemLupulo.cantidad || 0, itemLupulo.momento || '');
+        // Inyectar granos
+        var listaGranos = r.granos || r.maltas || [];
+        if (typeof agregarFilaGrano === 'function' && listaGranos.length > 0) {
+            for (var g = 0; g < listaGranos.length; g++) {
+                var itemGrano = listaGranos[g];
+                agregarFilaGrano(itemGrano.nombre || itemGrano.item || 'Malta', itemGrano.cantidad || 0);
+            }
         }
-    }
 
-    console.log("9. Proceso de carga finalizado.");
+        // Inyectar lúpulos
+        var listaLupulos = r.lupulos || [];
+        if (typeof agregarFilaLupulo === 'function' && listaLupulos.length > 0) {
+            for (var l = 0; l < listaLupulos.length; l++) {
+                var itemLupulo = listaLupulos[l];
+                agregarFilaLupulo(itemLupulo.nombre || itemLupulo.item || 'Lúpulo', itemLupulo.cantidad || 0, itemLupulo.momento || '');
+            }
+        }
+        console.log("Inyección visual completada tras estabilización de DOM.");
+    }, 300);
 };
 
 window.usarRecetaEnCoccion = function(clave) {
-    console.log("usarRecetaEnCoccion llamada con clave:", clave);
     if (clave && typeof clave === 'string') {
         window.cargarRecetaEnCoccion(clave);
         return;
