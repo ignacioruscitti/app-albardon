@@ -3056,7 +3056,7 @@ window.descargarRecetaPDF = function(clave) {
         ventana.print();
     }, 500);
 };
- window.cargarRecetaEnCoccion = function(clave) {
+window.cargarRecetaEnCoccion = function(clave) {
     if (!clave) return;
     var r = (typeof recetas !== 'undefined' ? recetas : {})[clave];
     if (!r) {
@@ -3064,32 +3064,65 @@ window.descargarRecetaPDF = function(clave) {
         return;
     }
 
-    // 1. Buscar y activar con precisión el select de "Cargar Receta Base"
-    var selects = document.querySelectorAll('select');
-    var selectTarget = null;
-    
-    for (var i = 0; i < selects.length; i++) {
-        var s = selects[i];
-        for (var j = 0; j < s.options.length; j++) {
-            if (s.options[j].value === clave || s.options[j].text.trim() === (r.nombre || '').trim()) {
-                selectTarget = s;
-                break;
+    // 1. Rellenar campos de texto principales (Estilo y Lote)
+    var inputs = document.querySelectorAll('input, select, textarea');
+    inputs.forEach(function(el) {
+        var idName = (el.id + ' ' + el.name + ' ' + (el.getAttribute('placeholder') || '')).toLowerCase();
+        
+        if (idName.includes('estilo') || idName.includes('nombre')) {
+            el.value = r.nombre || '';
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        if (idName.includes('lote') && !idName.includes('lts') && !idName.includes('litros')) {
+            el.value = r.lote || 280;
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        if ((idName.includes('agua') || idName.includes('litros')) && r.aguaIni) {
+            if (idName.includes('ini') || idName.includes('mac')) {
+                el.value = r.aguaIni;
+                el.dispatchEvent(new Event('input', { bubbles: true }));
             }
         }
-        if (selectTarget) break;
-    }
-
-    if (selectTarget) {
-        selectTarget.value = clave;
-        // Disparamos todos los eventos posibles para garantizar que la app capture el cambio
-        selectTarget.dispatchEvent(new Event('change', { bubbles: true }));
-        selectTarget.dispatchEvent(new Event('input', { bubbles: true }));
-        if (typeof jQuery !== 'undefined') {
-            jQuery(selectTarget).trigger('change');
+        if (idName.includes('temp')) {
+            if (idName.includes('mac') && r.tempMac) {
+                el.value = r.tempMac;
+                el.dispatchEvent(new Event('input', { bubbles: true }));
+            } else if (r.tempAguaIni) {
+                el.value = r.tempAguaIni;
+                el.dispatchEvent(new Event('input', { bubbles: true }));
+            }
         }
-    }
+    });
 
-    // 2. Cambiar automáticamente a la pestaña de Cocción
+    // 2. Inyectar datos en las tablas de la planilla si existen contenedores o filas de granos/lúpulos
+    var tablas = document.querySelectorAll('table');
+    tablas.forEach(function(tabla) {
+        var htmlTabla = tabla.outerHTML.toLowerCase();
+        if (htmlTabla.includes('grano') || htmlTabla.includes('malta')) {
+            var listaGranos = r.granos || r.maltas || [];
+            if (listaGranos.length > 0) {
+                var tbody = tabla.querySelector('tbody') || tabla;
+                var filas = '';
+                listaGranos.forEach(function(g) {
+                    filas += '<tr><td>' + (g.nombre || g.item || 'Malta') + '</td><td style="text-align: right;">' + (g.cantidad || 0) + ' kg</td></tr>';
+                });
+                tbody.innerHTML = filas;
+            }
+        }
+        if (htmlTabla.includes('lupulo') || htmlTabla.includes('lúpulo')) {
+            var listaLupulos = r.lupulos || [];
+            if (listaLupulos.length > 0) {
+                var tbodyL = tabla.querySelector('tbody') || tabla;
+                var filasL = '';
+                listaLupulos.forEach(function(l) {
+                    filasL += '<tr><td>' + (l.nombre || l.item || 'Lúpulo') + ' (' + (l.momento || '') + ')</td><td style="text-align: right;">' + (l.cantidad || 0) + ' grs</td></tr>';
+                });
+                tbodyL.innerHTML = filasL;
+            }
+        }
+    });
+
+    // 3. Cambiar automáticamente a la pestaña de Cocción
     var botonesTab = document.querySelectorAll('button, a, [data-tab]');
     botonesTab.forEach(function(el) {
         var textoBtn = (el.textContent || '').trim().toLowerCase();
@@ -3099,7 +3132,7 @@ window.descargarRecetaPDF = function(clave) {
         }
     });
 
-    console.log("Activando carga nativa para receta:", r.nombre);
+    console.log("Receta inyectada con éxito en la planilla:", r.nombre);
 };
 
 window.usarRecetaEnCoccion = function(clave) {
