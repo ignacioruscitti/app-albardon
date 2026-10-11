@@ -2205,7 +2205,6 @@ window.descargarRecetaPDF = function(clave) {
     var salesMacTxt = (r.salesMac && r.salesMac.length > 0) ? r.salesMac.map(function(s) { return (s.nombre || s.item || '') + " (" + (s.cantidad || 0) + "g)"; }).join(', ') : 'Ninguna';
     var salesLavTxt = (r.salesLav && r.salesLav.length > 0) ? r.salesLav.map(function(s) { return (s.nombre || s.item || '') + " (" + (s.cantidad || 0) + "g)"; }).join(', ') : 'Ninguna';
 
-    // Construcción de listas de granos y lúpulos de manera segura
     var listaGranos = r.granos || r.maltas || [];
     var granosHtml = '';
     if (listaGranos.length > 0) {
@@ -2226,17 +2225,20 @@ window.descargarRecetaPDF = function(clave) {
         lupulosHtml = '<li style="color: #64748b; font-style: italic; padding: 6px 0; font-size: 13px;">No hay lúpulos especificados.</li>';
     }
 
-    // Creamos un contenedor temporal en memoria totalmente independiente y visible para el motor de render
+    // Contenedor temporal renderizable real (invisible al usuario pero procesado por el navegador)
     var contenedorTemp = document.createElement('div');
     contenedorTemp.style.position = 'fixed';
-    contenedorTemp.style.left = '-9999px';
     contenedorTemp.style.top = '0';
+    contenedorTemp.style.left = '0';
     contenedorTemp.style.width = '750px';
     contenedorTemp.style.backgroundColor = '#ffffff';
     contenedorTemp.style.padding = '30px';
     contenedorTemp.style.fontFamily = 'Arial, sans-serif';
     contenedorTemp.style.color = '#0f172a';
     contenedorTemp.style.boxSizing = 'border-box';
+    contenedorTemp.style.opacity = '0.01'; // Invisible para el usuario pero pintado por el navegador
+    contenedorTemp.style.zIndex = '-999';
+    contenedorTemp.style.pointerEvents = 'none';
 
     contenedorTemp.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #cbd5e1; padding-bottom: 12px; margin-bottom: 15px;">
@@ -2294,12 +2296,14 @@ window.descargarRecetaPDF = function(clave) {
     };
 
     if (typeof html2pdf !== 'undefined') {
-        html2pdf().set(opt).from(contenedorTemp).save().then(function() {
-            document.body.removeChild(contenedorTemp);
-        }).catch(function(err) {
-            console.error("Error al generar html2pdf:", err);
-            document.body.removeChild(contenedorTemp);
-        });
+        setTimeout(function() {
+            html2pdf().set(opt).from(contenedorTemp).save().then(function() {
+                document.body.removeChild(contenedorTemp);
+            }).catch(function(err) {
+                console.error("Error al generar html2pdf:", err);
+                document.body.removeChild(contenedorTemp);
+            });
+        }, 300);
     } else {
         alert("La librería html2pdf no está cargada.");
         document.body.removeChild(contenedorTemp);
