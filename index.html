@@ -3056,10 +3056,8 @@ window.descargarRecetaPDF = function(clave) {
         ventana.print();
     }, 500);
 };
-// Inicializar la variable de estado global solo si no existe previamente
 window.recetaPendienteCoccion = window.recetaPendienteCoccion || null;
 
-// Función de respaldo única para evitar errores de funciones faltantes
 window.calcularABV = window.calcularABV || function() {};
 window.guardarCoccion = window.guardarCoccion || function() {
     console.log("guardarCoccion interceptado de forma segura.");
@@ -3087,10 +3085,9 @@ window.cargarRecetaEnCoccion = function(clave) {
         return;
     }
 
-    // 1. Asignar la receta al estado global oficial
     window.recetaPendienteCoccion = r;
 
-    // 2. Activar la pestaña "Cocción" de forma nativa
+    // 1. Activar la pestaña "Cocción" de forma nativa
     var botonesTab = document.querySelectorAll('button, a, [data-tab]');
     botonesTab.forEach(function(el) {
         var textoBtn = (el.textContent || '').trim().toLowerCase();
@@ -3100,7 +3097,7 @@ window.cargarRecetaEnCoccion = function(clave) {
         }
     });
 
-    // 3. Sincronizar campos e inyectar los granos de forma quirúrgica
+    // 2. Inyección dinámica inteligente basada en elementos reales de la vista
     setTimeout(function() {
         var inputEstilo = document.querySelector('input[name*="estilo"], input[id*="estilo"], input[placeholder*="Estilo"]');
         if (inputEstilo) {
@@ -3114,36 +3111,49 @@ window.cargarRecetaEnCoccion = function(clave) {
             inputLote.dispatchEvent(new Event('input', { bubbles: true }));
         }
 
-        // --- INYECCIÓN EXCLUSIVA EN EL CONTENEDOR DE GRANOS ---
-        var containerGranos = document.getElementById('rec-granos-inputs');
-        if (containerGranos) {
-            containerGranos.innerHTML = ''; // Limpiar filas anteriores
-            
-            var listaGranos = r.granos || r.maltas || [];
+        var listaGranos = r.granos || r.maltas || [];
+        var totalKg = listaGranos.reduce(function(acc, curr) { return acc + Number(curr.cantidad || 0); }, 0);
+
+        // Buscar o crear un contenedor seguro de granos debajo del indicador de totales
+        var elementoTotales = null;
+        document.querySelectorAll('div, span, p').forEach(function(el) {
+            if (el.textContent.includes('TOTALES DE KG')) {
+                elementoTotales = el;
+            }
+        });
+
+        if (elementoTotales) {
+            // Buscamos si ya creamos nuestro contenedor dinámico para no duplicarlo
+            var containerDinamico = document.getElementById('granos-inyectados-dinamicos');
+            if (!containerDinamico) {
+                containerDinamico = document.createElement('div');
+                containerDinamico.id = 'granos-inyectados-dinamicos';
+                containerDinamico.className = 'mt-4 space-y-2 p-4 bg-slate-900/50 rounded-lg border border-slate-800';
+                // Insertarlo justo después de la caja que contiene el total de kg
+                elementoTotales.parentElement.insertAdjacentElement('afterend', containerDinamico);
+            }
+
+            containerDinamico.innerHTML = '<h3 class="text-sm font-bold text-amber-400 mb-2">GRANOS / MOLIENDA (Cargados Automáticamente)</h3>';
+
             listaGranos.forEach(function(g) {
                 var nombreGrano = g.nombre || g.item || 'Malta';
                 var cantGrano = g.cantidad || 0;
 
                 var fila = document.createElement('div');
-                fila.className = 'flex items-center gap-2 mb-2 w-full';
+                fila.className = 'flex items-center gap-2 w-full mb-1';
                 fila.innerHTML = `
                     <input type="text" value="${nombreGrano}" class="flex-1 bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-sm text-white focus:outline-none">
                     <input type="number" value="${cantGrano}" class="w-24 bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-sm text-amber-300 font-bold focus:outline-none">
                     <button type="button" onclick="this.parentElement.remove()" class="text-red-400 hover:text-red-300 px-2 font-bold">×</button>
                 `;
-                containerGranos.appendChild(fila);
+                containerDinamico.appendChild(fila);
             });
 
-            // Actualizar el total de kg en pantalla
-            var totalKg = listaGranos.reduce(function(acc, curr) { return acc + Number(curr.cantidad || 0); }, 0);
-            document.querySelectorAll('div, span, p').forEach(function(el) {
-                if (el.textContent.includes('TOTALES DE KG')) {
-                    el.textContent = "TOTALES DE KG: " + totalKg.toFixed(1) + " kg";
-                }
-            });
+            // Actualizar el texto del total
+            elementoTotales.textContent = "TOTALES DE KG: " + totalKg.toFixed(1) + " kg";
         }
 
-        console.log("-> Receta y granos inyectados correctamente para:", r.nombre);
+        console.log("-> Granos inyectados dinámicamente con éxito para:", r.nombre);
     }, 300);
 };
 
