@@ -3066,8 +3066,6 @@ window.calcularABV = window.calcularABV || function() {};
 
 // --- 1. FUNCIÓN QUE LLAMA EL BOTÓN "Cocinar esta Receta" DE LAS TARJETAS ---
 window.guardarCoccion = function(clave) {
-    // Si la app llama a guardarCoccion sin argumentos o desde la tarjeta, 
-    // en realidad lo que queremos es CARGAR la receta en la planilla de cocción.
     window.cargarRecetaEnCoccion(clave);
 };
 
@@ -3117,8 +3115,6 @@ window.ejecutarGuardadoYPasarAFermentacion = function() {
         var listaGuardada = JSON.parse(localStorage.getItem('fermentaciones_albardon') || '[]');
         listaGuardada.push(registroCoccion);
         localStorage.setItem('fermentaciones_albardon', JSON.stringify(listaGuardada));
-        
-        // Guardar el lote activo para que la vista de fermentación lo mantenga visible
         localStorage.setItem('lote_activo_fermentacion', JSON.stringify(registroCoccion));
     } catch(e) {
         console.error("Error al guardar en localStorage:", e);
@@ -3134,18 +3130,60 @@ window.ejecutarGuardadoYPasarAFermentacion = function() {
         }
     });
 
-    // Refrescar y mantener estables los renglones de fermentación
+    // Inyección robusta de la tabla de seguimiento diario para que nunca quede vacía
     setTimeout(function() {
-        if (typeof renderFermentacion === 'function') {
-            try { renderFermentacion(); } catch(err) {}
+        var tablaSeguimiento = document.querySelector('table');
+        if (!tablaSeguimiento) {
+            // Buscar contenedor por el texto de la sección
+            document.querySelectorAll('div').forEach(function(d) {
+                if (d.textContent.includes('TABLA DE SEGUIMIENTO DIARIO')) {
+                    tablaSeguimiento = d.querySelector('table') || d.nextElementSibling;
+                }
+            });
         }
-        
-        var inputEstiloFerm = document.querySelector('input[name*="estilo-ferm"], input[id*="estilo-ferm"], #fermentacion-estilo');
-        if (inputEstiloFerm && !inputEstiloFerm.value) {
+
+        // Si encontramos la tabla o su contenedor, aseguramos los renglones iniciales de seguimiento
+        var contenedorTabla = document.getElementById('tabla-seguimiento-dinamica');
+        if (!contenedorTabla) {
+            contenedorTabla = document.createElement('div');
+            contenedorTabla.id = 'tabla-seguimiento-dinamica';
+            contenedorTabla.className = 'w-full mt-2 space-y-1';
+            
+            // Generar 7 días iniciales de control de fermentación por defecto
+            for (var dia = 1; dia <= 7; dia++) {
+                var filaDia = document.createElement('div');
+                filaDia.className = 'grid grid-cols-7 gap-2 items-center bg-slate-900/60 p-2 rounded border border-slate-800 text-sm';
+                filaDia.innerHTML = `
+                    <span class="text-amber-400 font-bold text-center">Día ${dia}</span>
+                    <input type="text" value="${new Date().toLocaleDateString()}" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white text-xs">
+                    <input type="text" placeholder="Densidad" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-amber-300 font-bold text-xs">
+                    <input type="text" placeholder="Temp °C" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-blue-300 font-bold text-xs">
+                    <input type="text" placeholder="Ajuste" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white text-xs">
+                    <input type="text" placeholder="pH" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white text-xs">
+                    <input type="text" placeholder="Notas / Purga" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white text-xs">
+                `;
+                contenedorTabla.appendChild(filaDia);
+            }
+
+            // Ubicarlo justo debajo del encabezado de la tabla si existe
+            var headerTabla = null;
+            document.querySelectorAll('div, span, h3').forEach(function(el) {
+                if (el.textContent.includes('TABLA DE SEGUIMIENTO DIARIO')) {
+                    headerTabla = el;
+                }
+            });
+
+            if (headerTabla && headerTabla.parentElement) {
+                headerTabla.parentElement.appendChild(contenedorTabla);
+            }
+        }
+
+        var inputEstiloFerm = document.querySelector('input[name*="estilo"], input[id*="estilo"]');
+        if (inputEstiloFerm) {
             inputEstiloFerm.value = nombreEstilo;
             inputEstiloFerm.dispatchEvent(new Event('input', { bubbles: true }));
         }
-    }, 200);
+    }, 250);
 
     alert("¡Cocción guardada correctamente y enviada a Fermentación!");
 };
