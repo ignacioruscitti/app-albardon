@@ -3126,52 +3126,61 @@ window.ejecutarGuardadoYPasarAFermentacion = function() {
         }
     });
 
-    // Inyección visual directa e independiente en la pantalla de fermentación
+    // Inyección fija y directa dentro de la tarjeta de la tabla nativa de fermentación
     setTimeout(function() {
-        // Buscamos cualquier contenedor principal de la vista de fermentación
-        var contenedorPrincipal = document.querySelector('main') || document.body;
-        
-        // Si ya existe una tabla forzada anterior, la eliminamos para actualizarla
-        var tablaAntigua = document.getElementById('tabla-seguimiento-forzada-id');
-        if (tablaAntigua) {
-            tablaAntigua.remove();
-        }
+        var contenedorTablaNativa = null;
+        document.querySelectorAll('div, section').forEach(function(el) {
+            if (el.textContent.includes('TABLA DE SEGUIMIENTO DIARIO')) {
+                contenedorTablaNativa = el.closest('div.bg-slate-800, div.rounded-lg, div') || el.parentElement;
+            }
+        });
 
-        var nuevaTabla = document.createElement('div');
-        nuevaTabla.id = 'tabla-seguimiento-forzada-id';
-        nuevaTabla.className = 'fixed bottom-4 right-4 z-50 w-full max-w-xl bg-slate-900 border-2 border-amber-500 rounded-xl p-4 shadow-2xl space-y-2';
-        
-        nuevaTabla.innerHTML = `
-            <div class="flex justify-between items-center border-b border-slate-700 pb-2">
-                <span class="text-sm font-bold text-amber-400">📋 SEGUIMIENTO DE FERMENTACIÓN — Lote: ${numeroLote}</span>
-                <button onclick="this.parentElement.parentElement.remove()" class="text-red-400 font-bold hover:text-red-300 text-lg px-2">×</button>
-            </div>
-            <div class="text-xs text-slate-300">Estilo: <strong class="text-white">${nombreEstilo}</strong></div>
-            <div class="grid grid-cols-6 gap-1 text-[11px] font-bold text-amber-300 text-center bg-slate-800 p-1 rounded">
-                <span>DÍA</span>
-                <span>FECHA</span>
-                <span>DENSIDAD</span>
-                <span>TEMP</span>
-                <span>pH</span>
-                <span>NOTAS</span>
-            </div>
-        `;
+        if (contenedorTablaNativa) {
+            // Eliminar contenedor anterior si ya existía
+            var tablaIncr = document.getElementById('tabla-seguimiento-incrustada');
+            if (tablaIncr) {
+                tablaIncr.remove();
+            }
 
-        for (var d = 1; d <= 5; d++) {
-            var fila = document.createElement('div');
-            fila.className = 'grid grid-cols-6 gap-1 items-center';
-            fila.innerHTML = `
-                <span class="text-white text-xs font-bold text-center bg-slate-800 py-1 rounded">Día ${d}</span>
-                <input type="text" value="${new Date().toLocaleDateString()}" class="bg-slate-950 border border-slate-700 rounded px-1 py-1 text-white text-xs text-center">
-                <input type="text" placeholder="1.010" class="bg-slate-950 border border-slate-700 rounded px-1 py-1 text-amber-300 font-bold text-xs text-center">
-                <input type="text" placeholder="18°C" class="bg-slate-950 border border-slate-700 rounded px-1 py-1 text-blue-300 font-bold text-xs text-center">
-                <input type="text" placeholder="4.2" class="bg-slate-950 border border-slate-700 rounded px-1 py-1 text-white text-xs text-center">
-                <input type="text" placeholder="Notas..." class="bg-slate-950 border border-slate-700 rounded px-1 py-1 text-white text-xs">
+            var nuevaIncr = document.createElement('div');
+            nuevaIncr.id = 'tabla-seguimiento-incrustada';
+            nuevaIncr.className = 'mt-3 space-y-2 p-3 bg-slate-900/60 rounded-lg border border-slate-700';
+
+            nuevaIncr.innerHTML = `
+                <div class="grid grid-cols-7 gap-2 text-xs font-bold text-amber-400 text-center mb-1 pb-1 border-b border-slate-700">
+                    <span>DÍA</span>
+                    <span>FECHA</span>
+                    <span>DENSIDAD</span>
+                    <span>TEMP</span>
+                    <span>AJUSTE</span>
+                    <span>pH</span>
+                    <span>NOTAS</span>
+                </div>
             `;
-            nuevaTabla.appendChild(fila);
+
+            for (var d = 1; d <= 7; d++) {
+                var fila = document.createElement('div');
+                fila.className = 'grid grid-cols-7 gap-2 items-center mb-1.5';
+                fila.innerHTML = `
+                    <span class="text-white text-xs font-bold text-center bg-slate-800 py-1.5 rounded">Día ${d}</span>
+                    <input type="text" value="${new Date().toLocaleDateString()}" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-1 text-white text-xs text-center">
+                    <input type="text" placeholder="1.010" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-1 text-amber-300 font-bold text-xs text-center">
+                    <input type="text" placeholder="18°C" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-1 text-blue-300 font-bold text-xs text-center">
+                    <input type="text" placeholder="-" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-1 text-white text-xs text-center">
+                    <input type="text" placeholder="4.2" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-1 text-white text-xs text-center">
+                    <input type="text" placeholder="Notas..." class="bg-slate-950 border border-slate-700 rounded px-1.5 py-1 text-white text-xs">
+                `;
+                nuevaIncr.appendChild(fila);
+            }
+
+            contenedorTablaNativa.appendChild(nuevaIncr);
         }
 
-        contenedorPrincipal.appendChild(nuevaTabla);
+        var inputEstiloFerm = document.querySelector('input[name*="estilo"], input[id*="estilo"]');
+        if (inputEstiloFerm) {
+            inputEstiloFerm.value = nombreEstilo;
+            inputEstiloFerm.dispatchEvent(new Event('input', { bubbles: true }));
+        }
     }, 300);
 
     alert("¡Cocción guardada correctamente y enviada a Fermentación!");
