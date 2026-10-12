@@ -3097,7 +3097,7 @@ window.cargarRecetaEnCoccion = function(clave) {
         }
     });
 
-    // 2. Sincronizar datos y poblar elementos de forma visual y directa
+    // 2. Sincronización y renderizado inteligente
     setTimeout(function() {
         var inputEstilo = document.querySelector('input[name*="estilo"], input[id*="estilo"], input[placeholder*="Estilo"]');
         if (inputEstilo) {
@@ -3111,7 +3111,7 @@ window.cargarRecetaEnCoccion = function(clave) {
             inputLote.dispatchEvent(new Event('input', { bubbles: true }));
         }
 
-        // --- GESTIÓN DE GRANOS / MOLIENDA ---
+        // --- GESTIÓN DE GRANOS ---
         var listaGranos = r.granos || r.maltas || [];
         var totalKg = listaGranos.reduce(function(acc, curr) { return acc + Number(curr.cantidad || 0); }, 0);
 
@@ -3150,14 +3150,13 @@ window.cargarRecetaEnCoccion = function(clave) {
             elementoTotales.textContent = "TOTALES DE KG: " + totalKg.toFixed(1) + " kg";
         }
 
-        // --- GESTIÓN DE LÚPULOS (DISEÑO QUIRÚRGICO) ---
+        // --- GESTIÓN DE LÚPULOS (SELECTOR ROBUSTO) ---
         var listaLupulos = r.lupulos || [];
         if (listaLupulos.length > 0) {
-            // Buscar el bloque o texto descriptivo de lúpulos en la interfaz
             var elementoLupulosTitulo = null;
             document.querySelectorAll('div, span, h2, h3, h4, p').forEach(function(el) {
-                var t = (el.textContent || '').trim();
-                if (t === 'LÚPULOS' || t === 'LUPULOS') {
+                var t = (el.textContent || '').trim().toUpperCase();
+                if (t.includes('LÚPULOS') || t.includes('LUPULOS')) {
                     elementoLupulosTitulo = el;
                 }
             });
@@ -3173,7 +3172,6 @@ window.cargarRecetaEnCoccion = function(clave) {
                     contenedorPadreLup.appendChild(containerLupulosDinamico);
                 }
 
-                // Ocultar texto de ayuda estático original si existe
                 contenedorPadreLup.querySelectorAll('p, span').forEach(function(p) {
                     if (p.textContent.includes('Seleccione una receta para autocompletar')) {
                         p.style.display = 'none';
@@ -3200,7 +3198,7 @@ window.cargarRecetaEnCoccion = function(clave) {
             }
         }
 
-        console.log("-> Receta, granos y lúpulos configurados por completo para:", r.nombre);
+        console.log("-> Configuración completa de granos y lúpulos aplicada para:", r.nombre);
     }, 300);
 };
 
