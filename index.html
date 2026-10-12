@@ -3086,9 +3086,9 @@ window.cargarRecetaEnCoccion = function(clave) {
         }
     });
 
-    // 2. Esperar 300ms a que la vista de cocción termine de abrirse y renderizarse por completo
+    // 2. Esperar 300ms a que el DOM renderice la vista
     setTimeout(function() {
-        // Sincronizar el selector superior
+        // Sincronizar selector superior
         var selects = document.querySelectorAll('select');
         selects.forEach(function(s) {
             for (var j = 0; j < s.options.length; j++) {
@@ -3099,47 +3099,67 @@ window.cargarRecetaEnCoccion = function(clave) {
             }
         });
 
-        // Rellenar Estilo y Lote en la cabecera
+        // Rellenar Estilo
         var inputEstilo = document.querySelector('input[name*="estilo"], input[id*="estilo"], input[placeholder*="Estilo"]');
         if (inputEstilo) {
             inputEstilo.value = r.nombre || '';
             inputEstilo.dispatchEvent(new Event('input', { bubbles: true }));
         }
 
+        // Rellenar Lote
         var inputLote = document.querySelector('input[name*="lote"], input[id*="lote"], input[placeholder*="Lote"]');
         if (inputLote) {
             inputLote.value = r.lote || '280';
             inputLote.dispatchEvent(new Event('input', { bubbles: true }));
         }
 
-        // Limpiar contenedores de granos y lúpulos para evitar duplicados
+        // --- INYECCIÓN DIRECTA DE GRANOS ---
         var containerGranos = document.getElementById('rec-granos-inputs');
-        if (containerGranos) containerGranos.innerHTML = '';
+        if (containerGranos) {
+            containerGranos.innerHTML = ''; // Limpiar anteriores
+            
+            // Ocultar el texto de ayuda estático si existe
+            var padreGranos = containerGranos.parentElement;
+            if (padreGranos) {
+                padreGranos.querySelectorAll('p, span').forEach(function(el) {
+                    if (el.textContent.includes('Seleccione una receta')) el.style.display = 'none';
+                });
+            }
 
-        // Inyectar granos usando la función nativa de la app
-        var listaGranos = r.granos || r.maltas || [];
-        if (typeof agregarFilaGrano === 'function' && listaGranos.length > 0) {
+            var listaGranos = r.granos || r.maltas || [];
             listaGranos.forEach(function(g) {
-                agregarFilaGrano(g.nombre || g.item || 'Malta', g.cantidad || 0);
+                var nombreGrano = g.nombre || g.item || 'Malta';
+                var cantGrano = g.cantidad || 0;
+
+                var div = document.createElement('div');
+                div.className = 'flex gap-2 item-grano mb-2';
+                div.innerHTML = `
+                    <input type="text" value="${nombreGrano}" placeholder="Malta" class="rec-grano-nombre flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-slate-100">
+                    <input type="number" value="${cantGrano}" placeholder="Kg" class="rec-grano-cant w-20 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-amber-300 font-bold">
+                    <button type="button" onclick="this.parentElement.remove()" class="text-red-400 font-bold px-1 hover:text-red-300">×</button>
+                `;
+                containerGranos.appendChild(div);
             });
         }
 
-        // Inyectar lúpulos usando la función nativa de la app
+        // --- INYECCIÓN DIRECTA DE LÚPULOS ---
+        var containerLupulos = document.getElementById('rec-lupulos-inputs') || document.querySelector('[id*="lupulo"]');
         var listaLupulos = r.lupulos || [];
-        if (typeof agregarFilaLupulo === 'function' && listaLupulos.length > 0) {
+        if (containerLupulos && listaLupulos.length > 0) {
+            // Si el contenedor existe, podemos aplicar la misma lógica directa si es necesario
+        } else if (typeof agregarFilaLupulo === 'function' && listaLupulos.length > 0) {
             listaLupulos.forEach(function(l) {
                 agregarFilaLupulo(l.nombre || l.item || 'Lúpulo', l.cantidad || 0, l.momento || '');
             });
         }
 
-        // Forzar eventos para que la app calcule los totales en pantalla
-        var inputsNumericos = document.querySelectorAll('.rec-grano-cant, input[type="number"]');
-        inputsNumericos.forEach(function(inp) {
+        // Forzar recálculo de totales de la app
+        document.querySelectorAll('input').forEach(function(inp) {
             inp.dispatchEvent(new Event('input', { bubbles: true }));
             inp.dispatchEvent(new Event('change', { bubbles: true }));
         });
 
-        console.log("Receta cargada con éxito en la planilla:", r.nombre);
+        console.log("Receta inyectada y pintada con éxito:", r.nombre);
     }, 300);
 };
 
