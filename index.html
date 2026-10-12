@@ -3097,7 +3097,7 @@ window.cargarRecetaEnCoccion = function(clave) {
         }
     });
 
-    // 2. Inyección dinámica inteligente de Granos y Lúpulos
+    // 2. Sincronizar datos y poblar elementos de forma visual y directa
     setTimeout(function() {
         var inputEstilo = document.querySelector('input[name*="estilo"], input[id*="estilo"], input[placeholder*="Estilo"]');
         if (inputEstilo) {
@@ -3150,52 +3150,57 @@ window.cargarRecetaEnCoccion = function(clave) {
             elementoTotales.textContent = "TOTALES DE KG: " + totalKg.toFixed(1) + " kg";
         }
 
-        // --- GESTIÓN DE LÚPULOS ---
+        // --- GESTIÓN DE LÚPULOS (DISEÑO QUIRÚRGICO) ---
         var listaLupulos = r.lupulos || [];
         if (listaLupulos.length > 0) {
-            // Buscamos si ya existe un contenedor de lúpulos o un título que los referencie
-            var referenciaLupulos = null;
+            // Buscar el bloque o texto descriptivo de lúpulos en la interfaz
+            var elementoLupulosTitulo = null;
             document.querySelectorAll('div, span, h2, h3, h4, p').forEach(function(el) {
-                var t = (el.textContent || '').trim().toLowerCase();
-                if (t.includes('lúpulo') || t.includes('lupulo') || t.includes('lúpulos')) {
-                    referenciaLupulos = el;
+                var t = (el.textContent || '').trim();
+                if (t === 'LÚPULOS' || t === 'LUPULOS') {
+                    elementoLupulosTitulo = el;
                 }
             });
 
-            var containerLupulosDinamico = document.getElementById('lupulos-inyectados-dinamicos');
-            if (!containerLupulosDinamico) {
-                containerLupulosDinamico = document.createElement('div');
-                containerLupulosDinamico.id = 'lupulos-inyectados-dinamicos';
-                containerLupulosDinamico.className = 'mt-6 space-y-2 p-4 bg-slate-900/50 rounded-lg border border-slate-800';
+            if (elementoLupulosTitulo) {
+                var contenedorPadreLup = elementoLupulosTitulo.closest('div.rounded-lg, div.bg-slate-800, div') || elementoLupulosTitulo.parentElement;
                 
-                // Si encontramos una referencia de lúpulos en la vista, lo ponemos cerca; si no, al final del contenedor de granos
-                if (referenciaLupulos) {
-                    referenciaLupulos.insertAdjacentElement('afterend', containerLupulosDinamico);
-                } else if (containerGranosDinamico) {
-                    containerGranosDinamico.insertAdjacentElement('afterend', containerLupulosDinamico);
+                var containerLupulosDinamico = document.getElementById('lupulos-inyectados-dinamicos');
+                if (!containerLupulosDinamico) {
+                    containerLupulosDinamico = document.createElement('div');
+                    containerLupulosDinamico.id = 'lupulos-inyectados-dinamicos';
+                    containerLupulosDinamico.className = 'mt-3 space-y-2';
+                    contenedorPadreLup.appendChild(containerLupulosDinamico);
                 }
+
+                // Ocultar texto de ayuda estático original si existe
+                contenedorPadreLup.querySelectorAll('p, span').forEach(function(p) {
+                    if (p.textContent.includes('Seleccione una receta para autocompletar')) {
+                        p.style.display = 'none';
+                    }
+                });
+
+                containerLupulosDinamico.innerHTML = '';
+
+                listaLupulos.forEach(function(l) {
+                    var nombreLupulo = l.nombre || l.item || 'Lúpulo';
+                    var cantLupulo = l.cantidad || l.gramos || 0;
+                    var minLupulo = l.minutos || l.tiempo || 0;
+
+                    var filaLup = document.createElement('div');
+                    filaLup.className = 'flex items-center gap-2 w-full mb-1';
+                    filaLup.innerHTML = `
+                        <input type="text" value="${nombreLupulo}" class="flex-1 bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-sm text-white focus:outline-none">
+                        <input type="number" value="${cantLupulo}" placeholder="grs" class="w-24 bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-sm text-amber-300 font-bold focus:outline-none" title="Gramos">
+                        <input type="number" value="${minLupulo}" placeholder="min" class="w-20 bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-sm text-blue-300 font-bold focus:outline-none" title="Minutos">
+                        <button type="button" onclick="this.parentElement.remove()" class="text-red-400 hover:text-red-300 px-2 font-bold">×</button>
+                    `;
+                    containerLupulosDinamico.appendChild(filaLup);
+                });
             }
-
-            containerLupulosDinamico.innerHTML = '<h3 class="text-sm font-bold text-amber-400 mb-2">LÚPULOS / ADICIONES (Cargados Automáticamente)</h3>';
-
-            listaLupulos.forEach(function(l) {
-                var nombreLupulo = l.nombre || l.item || 'Lúpulo';
-                var cantLupulo = l.cantidad || l.gramos || 0;
-                var minLupulo = l.minutos || l.tiempo || 0;
-
-                var filaLup = document.createElement('div');
-                filaLup.className = 'flex items-center gap-2 w-full mb-1';
-                filaLup.innerHTML = `
-                    <input type="text" value="${nombreLupulo}" class="flex-1 bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-sm text-white focus:outline-none">
-                    <input type="number" value="${cantLupulo}" placeholder="grs" class="w-24 bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-sm text-amber-300 font-bold focus:outline-none" title="Cantidad en gramos">
-                    <input type="number" value="${minLupulo}" placeholder="min" class="w-20 bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-sm text-blue-300 font-bold focus:outline-none" title="Minutos de hervor">
-                    <button type="button" onclick="this.parentElement.remove()" class="text-red-400 hover:text-red-300 px-2 font-bold">×</button>
-                `;
-                containerLupulosDinamico.appendChild(filaLup);
-            });
         }
 
-        console.log("-> Receta, granos y lúpulos inyectados con éxito para:", r.nombre);
+        console.log("-> Receta, granos y lúpulos configurados por completo para:", r.nombre);
     }, 300);
 };
 
