@@ -3150,19 +3150,18 @@ window.cargarRecetaEnCoccion = function(clave) {
             elementoTotales.textContent = "TOTALES DE KG: " + totalKg.toFixed(1) + " kg";
         }
 
-        // --- GESTIÓN DE LÚPULOS (SELECTOR ROBUSTO) ---
+        // --- GESTIÓN DE LÚPULOS (ANCLA DIRECTA AL TEXTO DE LA APP) ---
         var listaLupulos = r.lupulos || [];
         if (listaLupulos.length > 0) {
-            var elementoLupulosTitulo = null;
-            document.querySelectorAll('div, span, h2, h3, h4, p').forEach(function(el) {
-                var t = (el.textContent || '').trim().toUpperCase();
-                if (t.includes('LÚPULOS') || t.includes('LUPULOS')) {
-                    elementoLupulosTitulo = el;
+            var textoAyudaLup = null;
+            document.querySelectorAll('p, span, div').forEach(function(el) {
+                if (el.textContent.includes('Seleccione una receta para autocompletar adiciones de lúpulo')) {
+                    textoAyudaLup = el;
                 }
             });
 
-            if (elementoLupulosTitulo) {
-                var contenedorPadreLup = elementoLupulosTitulo.closest('div.rounded-lg, div.bg-slate-800, div') || elementoLupulosTitulo.parentElement;
+            if (textoAyudaLup) {
+                var contenedorPadreLup = textoAyudaLup.parentElement;
                 
                 var containerLupulosDinamico = document.getElementById('lupulos-inyectados-dinamicos');
                 if (!containerLupulosDinamico) {
@@ -3172,11 +3171,8 @@ window.cargarRecetaEnCoccion = function(clave) {
                     contenedorPadreLup.appendChild(containerLupulosDinamico);
                 }
 
-                contenedorPadreLup.querySelectorAll('p, span').forEach(function(p) {
-                    if (p.textContent.includes('Seleccione una receta para autocompletar')) {
-                        p.style.display = 'none';
-                    }
-                });
+                // Ocultar el texto de ayuda estático original
+                textoAyudaLup.style.display = 'none';
 
                 containerLupulosDinamico.innerHTML = '';
 
