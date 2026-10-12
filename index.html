@@ -3081,7 +3081,7 @@ window.cargarRecetaEnCoccion = function(clave) {
         return;
     }
 
-    // 1. Activar la pestaña de Cocción
+    // 1. Activar la pestaña de Cocción usando el botón nativo
     var botonesTab = document.querySelectorAll('button, a, [data-tab]');
     botonesTab.forEach(function(el) {
         var textoBtn = (el.textContent || '').trim().toLowerCase();
@@ -3091,20 +3091,16 @@ window.cargarRecetaEnCoccion = function(clave) {
         }
     });
 
-    // 2. Esperar 300ms a que renderice la vista
+    // 2. Dar un respiro de 200ms para que la vista de cocción despierte y luego inyectar
     setTimeout(function() {
-        // Sincronizar selector superior
+        // Sincronizar todos los selectores de la página
         var selects = document.querySelectorAll('select');
         selects.forEach(function(s) {
-            for (var j = 0; j < s.options.length; j++) {
-                if (s.options[j].value === clave) {
-                    s.value = clave;
-                    s.dispatchEvent(new Event('change', { bubbles: true }));
-                }
-            }
+            s.value = clave;
+            s.dispatchEvent(new Event('change', { bubbles: true }));
         });
 
-        // Rellenar Estilo y Lote
+        // Rellenar Estilo y Lote mediante inputs directos
         var inputEstilo = document.querySelector('input[name*="estilo"], input[id*="estilo"], input[placeholder*="Estilo"]');
         if (inputEstilo) {
             inputEstilo.value = r.nombre || '';
@@ -3117,12 +3113,19 @@ window.cargarRecetaEnCoccion = function(clave) {
             inputLote.dispatchEvent(new Event('input', { bubbles: true }));
         }
 
-        // --- CARGA DE GRANOS USANDO FUNCIÓN NATIVA O INYECCIÓN ROBUSTA ---
+        // Si la app tiene funciones de renderizado global, las invocamos para forzar el redibujo
+        if (typeof renderRecetas === 'function') {
+            try { renderRecetas(); } catch(e) {}
+        }
+        if (typeof actualizarSelectRecetas === 'function') {
+            try { actualizarSelectRecetas(); } catch(e) {}
+        }
+
+        // --- INYECCIÓN MANUAL DE FILAS DE GRANOS ---
         var containerGranos = document.getElementById('rec-granos-inputs');
         if (containerGranos) {
-            containerGranos.innerHTML = ''; // Limpiar contenedor
+            containerGranos.innerHTML = '';
             
-            // Ocultar texto de ayuda estático
             var padreGranos = containerGranos.parentElement;
             if (padreGranos) {
                 padreGranos.querySelectorAll('p, span').forEach(function(el) {
@@ -3131,37 +3134,30 @@ window.cargarRecetaEnCoccion = function(clave) {
             }
 
             var listaGranos = r.granos || r.maltas || [];
-            
-            // Si la app tiene una función nativa de agregar fila, la probamos primero
-            if (typeof agregarFilaGrano === 'function') {
-                listaGranos.forEach(function(g) {
-                    agregarFilaGrano(g.nombre || g.item || 'Malta', g.cantidad || 0);
-                });
-            } else {
-                // Si no, inyectamos la estructura exacta con clases de Tailwind
-                listaGranos.forEach(function(g) {
-                    var nombreGrano = g.nombre || g.item || 'Malta';
-                    var cantGrano = g.cantidad || 0;
+            listaGranos.forEach(function(g) {
+                var nombreGrano = g.nombre || g.item || 'Malta';
+                var cantGrano = g.cantidad || 0;
 
-                    var fila = document.createElement('div');
-                    fila.className = 'flex items-center gap-2 mb-2 w-full';
-                    fila.innerHTML = `
-                        <input type="text" value="${nombreGrano}" class="flex-1 bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-sm text-white focus:outline-none focus:border-amber-500">
-                        <input type="number" value="${cantGrano}" class="w-24 bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-sm text-amber-300 font-bold focus:outline-none focus:border-amber-500">
-                        <button type="button" onclick="this.parentElement.remove()" class="text-red-400 hover:text-red-300 px-2 font-bold">×</button>
-                    `;
-                    containerGranos.appendChild(fila);
-                });
+                var fila = document.createElement('div');
+                fila.className = 'flex items-center gap-2 mb-2 w-full row-grano-dinamica';
+                fila.innerHTML = `
+                    <input type="text" value="${nombreGrano}" class="flex-1 bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-sm text-white">
+                    <input type="number" value="${cantGrano}" class="w-24 bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-sm text-amber-300 font-bold">
+                    <button type="button" onclick="this.parentElement.remove()" class="text-red-400 hover:text-red-300 px-2 font-bold">×</button>
+                `;
+                containerGranos.appendChild(fila);
+            });
+
+            // Calcular y mostrar el total de kg de forma visual directa
+            var totalKg = listaGranos.reduce(function(acc, curr) { return acc + Number(curr.cantidad || 0); }, 0);
+            var etiquetaTotal = document.querySelector('#totales-kg, .total-kg, [id*="total"]');
+            if (etiquetaTotal) {
+                etiquetaTotal.textContent = "TOTALES DE KG: " + totalKg + " kg";
             }
         }
 
-        // Forzar actualización general de eventos
-        document.querySelectorAll('input').forEach(function(inp) {
-            inp.dispatchEvent(new Event('input', { bubbles: true }));
-        });
-
-        console.log("Granos inyectados correctamente para:", r.nombre);
-    }, 300);
+        console.log("Planilla de cocción sincronizada con la receta:", r.nombre);
+    }, 200);
 };
 
 window.usarRecetaEnCoccion = function(clave) {
