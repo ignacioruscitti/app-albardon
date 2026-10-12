@@ -3065,7 +3065,7 @@ window.calcularABV = window.calcularABV || function() {
 
 window.cargarRecetaEnCoccion = function(clave) {
     if (!clave) {
-        var selectReceta = document.querySelector('select[id*="receta"], select');
+        var selectReceta = document.querySelector('select');
         if (selectReceta) {
             clave = selectReceta.value;
         }
@@ -3075,16 +3075,7 @@ window.cargarRecetaEnCoccion = function(clave) {
         return;
     }
 
-    var r = (typeof recetas !== 'undefined' ? recetas : {})[clave];
-    if (!r) {
-        alert("No se encontró la receta.");
-        return;
-    }
-
-    // 1. Inyectar la receta en la variable de estado oficial de la app
-    window.recetaPendienteCoccion = r;
-
-    // 2. Activar la pestaña de Cocción de forma nativa
+    // 1. Activar la pestaña de Cocción haciendo clic en su botón
     var botonesTab = document.querySelectorAll('button, a, [data-tab]');
     botonesTab.forEach(function(el) {
         var textoBtn = (el.textContent || '').trim().toLowerCase();
@@ -3094,33 +3085,35 @@ window.cargarRecetaEnCoccion = function(clave) {
         }
     });
 
-    // 3. Esperar un instante y forzar el renderizado oficial de la app
+    // 2. Esperar 300ms a que la vista de cocción termine de montarse en el DOM
     setTimeout(function() {
+        // Buscar todos los selects de la página para encontrar el de "Cargar Receta Base"
         var selects = document.querySelectorAll('select');
+        var encontrado = false;
+
         selects.forEach(function(s) {
-            s.value = clave;
-            s.dispatchEvent(new Event('change', { bubbles: true }));
+            for (var i = 0; i < s.options.length; i++) {
+                // Verificamos si la opción coincide con la clave o contiene el texto de la clave
+                var optVal = s.options[i].value;
+                var optText = s.options[i].text;
+                
+                if (optVal === clave || optVal.includes(clave) || optText.includes(clave)) {
+                    s.value = optVal;
+                    // Disparamos los eventos que la app escucha para rellenar todo automáticamente
+                    s.dispatchEvent(new Event('change', { bubbles: true }));
+                    s.dispatchEvent(new InputEvent('input', { bubbles: true }));
+                    encontrado = true;
+                    break;
+                }
+            }
         });
 
-        var inputEstilo = document.querySelector('input[name*="estilo"], input[id*="estilo"], input[placeholder*="Estilo"]');
-        if (inputEstilo) {
-            inputEstilo.value = r.nombre || '';
-            inputEstilo.dispatchEvent(new Event('input', { bubbles: true }));
+        if (encontrado) {
+            console.log("Receta seleccionada con éxito en el selector nativo:", clave);
+        } else {
+            console.warn("No se encontró la opción en los selects de la vista.");
         }
-
-        var inputLote = document.querySelector('input[name*="lote"], input[id*="lote"], input[placeholder*="Lote"]');
-        if (inputLote) {
-            inputLote.value = r.lote || '280';
-            inputLote.dispatchEvent(new Event('input', { bubbles: true }));
-        }
-
-        // Llamar a la función de renderizado interna de la app
-        if (typeof renderRecetas === 'function') {
-            renderRecetas();
-        }
-
-        console.log("Receta sincronizada con el motor de la app:", r.nombre);
-    }, 250);
+    }, 300);
 };
 
 window.usarRecetaEnCoccion = function(clave) {
