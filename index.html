@@ -3060,7 +3060,8 @@ window.recetaPendienteCoccion = window.recetaPendienteCoccion || null;
 
 window.calcularABV = window.calcularABV || function() {};
 
-// --- FUNCIÓN DE GUARDADO REAL Y PASE A FERMENTACIÓN ---
+// --- 1. ESTE ES EL BOTÓN DE GUARDAR Y PASAR A FERMENTACIÓN ---
+// (Solo debe ejecutarse al hacer clic en "Guardar Cocción y Pasar a Fermentación")
 window.guardarCoccion = function() {
     var estilo = document.querySelector('input[name*="estilo"], input[id*="estilo"], input[placeholder*="Estilo"]');
     var lote = document.querySelector('input[name*="lote"], input[id*="lote"], input[placeholder*="Lote"]');
@@ -3068,7 +3069,6 @@ window.guardarCoccion = function() {
     var nombreEstilo = estilo ? estilo.value : 'Estilo Desconocido';
     var numeroLote = lote ? lote.value : '280';
 
-    // Recopilar granos de la sección dinámica
     var granos = [];
     var inputsGranos = document.querySelectorAll('#granos-inyectados-dinamicos input');
     for (var i = 0; i < inputsGranos.length; i += 2) {
@@ -3080,7 +3080,6 @@ window.guardarCoccion = function() {
         }
     }
 
-    // Recopilar lúpulos de la sección dinámica
     var lupulos = [];
     var filasLup = document.querySelectorAll('#lupulos-inyectados-dinamicos > div');
     filasLup.forEach(function(fila) {
@@ -3104,7 +3103,6 @@ window.guardarCoccion = function() {
         recetaBase: window.recetaPendienteCoccion || {}
     };
 
-    // Guardar en localStorage para persistencia en el SPA
     try {
         var listaGuardada = JSON.parse(localStorage.getItem('fermentaciones_albardon') || '[]');
         listaGuardada.push(registroCoccion);
@@ -3113,21 +3111,16 @@ window.guardarCoccion = function() {
         console.error("Error al guardar en localStorage:", e);
     }
 
-    console.log("-> Cocción guardada con éxito:", registroCoccion);
-
-    // 1. Activar la pestaña "Fermentación" de forma nativa
+    // Activar la pestaña "Fermentación"
     var botonesTab = document.querySelectorAll('button, a, [data-tab]');
-    var tabEncontrada = false;
     botonesTab.forEach(function(el) {
         var textoBtn = (el.textContent || '').trim().toLowerCase();
         var attrTab = (el.getAttribute('data-tab') || '').toLowerCase();
         if (textoBtn.includes('fermentaci') || attrTab.includes('fermentacion')) {
             el.click();
-            tabEncontrada = true;
         }
     });
 
-    // 2. Intentar disparar renderizado nativo de fermentación si existe
     if (typeof renderFermentacion === 'function') {
         try { renderFermentacion(); } catch(err) {}
     }
@@ -3135,6 +3128,7 @@ window.guardarCoccion = function() {
     alert("¡Cocción guardada correctamente y enviada a Fermentación!");
 };
 
+// --- 2. ESTE ES EL CARGADOR DE RECETAS (Al hacer clic en "Cocinar esta receta") ---
 window.cargarRecetaEnCoccion = function(clave) {
     var selectReceta = document.querySelector('select');
     if (!clave && selectReceta) {
@@ -3159,7 +3153,7 @@ window.cargarRecetaEnCoccion = function(clave) {
 
     window.recetaPendienteCoccion = r;
 
-    // Activar la pestaña "Cocción"
+    // Cambiar a la pestaña de Cocción
     var botonesTab = document.querySelectorAll('button, a, [data-tab]');
     botonesTab.forEach(function(el) {
         var textoBtn = (el.textContent || '').trim().toLowerCase();
@@ -3169,6 +3163,7 @@ window.cargarRecetaEnCoccion = function(clave) {
         }
     });
 
+    // Inyectar datos en la planilla de cocción sin guardar nada todavía
     setTimeout(function() {
         var inputEstilo = document.querySelector('input[name*="estilo"], input[id*="estilo"], input[placeholder*="Estilo"]');
         if (inputEstilo) {
@@ -3182,7 +3177,7 @@ window.cargarRecetaEnCoccion = function(clave) {
             inputLote.dispatchEvent(new Event('input', { bubbles: true }));
         }
 
-        // --- GESTIÓN DE GRANOS ---
+        // --- GRANOS ---
         var listaGranos = r.granos || r.maltas || [];
         var totalKg = listaGranos.reduce(function(acc, curr) { return acc + Number(curr.cantidad || 0); }, 0);
 
@@ -3221,7 +3216,7 @@ window.cargarRecetaEnCoccion = function(clave) {
             elementoTotales.textContent = "TOTALES DE KG: " + totalKg.toFixed(1) + " kg";
         }
 
-        // --- GESTIÓN DE LÚPULOS ---
+        // --- LÚPULOS ---
         var listaLupulos = r.lupulos || [];
         if (listaLupulos.length > 0) {
             var textoAyudaLup = null;
@@ -3263,7 +3258,7 @@ window.cargarRecetaEnCoccion = function(clave) {
             }
         }
 
-        console.log("-> Configuración completa aplicada para:", r.nombre);
+        console.log("-> Receta cargada en cocción correctamente:", r.nombre);
     }, 300);
 };
 
