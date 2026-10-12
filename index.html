@@ -3060,6 +3060,10 @@ window.recetaPendienteCoccion = window.recetaPendienteCoccion || null;
 
 window.calcularABV = window.calcularABV || function() {};
 
+window.recetaPendienteCoccion = window.recetaPendienteCoccion || null;
+
+window.calcularABV = window.calcularABV || function() {};
+
 // --- 1. FUNCIÓN QUE LLAMA EL BOTÓN "Cocinar esta Receta" DE LAS TARJETAS ---
 window.guardarCoccion = function(clave) {
     // Si la app llama a guardarCoccion sin argumentos o desde la tarjeta, 
@@ -3113,11 +3117,14 @@ window.ejecutarGuardadoYPasarAFermentacion = function() {
         var listaGuardada = JSON.parse(localStorage.getItem('fermentaciones_albardon') || '[]');
         listaGuardada.push(registroCoccion);
         localStorage.setItem('fermentaciones_albardon', JSON.stringify(listaGuardada));
+        
+        // Guardar el lote activo para que la vista de fermentación lo mantenga visible
+        localStorage.setItem('lote_activo_fermentacion', JSON.stringify(registroCoccion));
     } catch(e) {
         console.error("Error al guardar en localStorage:", e);
     }
 
-    // Activar la pestaña "Fermentación"
+    // Activar la pestaña "Fermentación" de forma nativa
     var botonesTab = document.querySelectorAll('button, a, [data-tab]');
     botonesTab.forEach(function(el) {
         var textoBtn = (el.textContent || '').trim().toLowerCase();
@@ -3127,9 +3134,18 @@ window.ejecutarGuardadoYPasarAFermentacion = function() {
         }
     });
 
-    if (typeof renderFermentacion === 'function') {
-        try { renderFermentacion(); } catch(err) {}
-    }
+    // Refrescar y mantener estables los renglones de fermentación
+    setTimeout(function() {
+        if (typeof renderFermentacion === 'function') {
+            try { renderFermentacion(); } catch(err) {}
+        }
+        
+        var inputEstiloFerm = document.querySelector('input[name*="estilo-ferm"], input[id*="estilo-ferm"], #fermentacion-estilo');
+        if (inputEstiloFerm && !inputEstiloFerm.value) {
+            inputEstiloFerm.value = nombreEstilo;
+            inputEstiloFerm.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+    }, 200);
 
     alert("¡Cocción guardada correctamente y enviada a Fermentación!");
 };
