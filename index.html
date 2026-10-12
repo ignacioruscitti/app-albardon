@@ -3068,9 +3068,12 @@ window.guardarCoccion = window.guardarCoccion || function() {
     console.log("guardarCoccion interceptado de forma segura.");
 };
 
+// Respaldo de seguridad para funciones nativas faltantes
+window.guardarCoccion = window.guardarCoccion || function() {};
+
 window.cargarRecetaEnCoccion = function(clave) {
-    var selectReceta = document.querySelector('select[id*="receta"], select');
-    
+    // 1. Resolver la clave de la receta de forma segura
+    var selectReceta = document.querySelector('select');
     if (!clave && selectReceta) {
         clave = selectReceta.value;
     }
@@ -3091,7 +3094,7 @@ window.cargarRecetaEnCoccion = function(clave) {
         return;
     }
 
-    // 1. Activar la pestaña "Cocción"
+    // 2. Activar la pestaña de "Cocción" de forma nativa mediante su botón
     var botonesTab = document.querySelectorAll('button, a, [data-tab]');
     botonesTab.forEach(function(el) {
         var textoBtn = (el.textContent || '').trim().toLowerCase();
@@ -3101,14 +3104,14 @@ window.cargarRecetaEnCoccion = function(clave) {
         }
     });
 
-    // 2. Ejecutar la sincronización de datos con un pequeño retraso
+    // 3. Sincronización de datos con el DOM una vez renderizada la pestaña
     setTimeout(function() {
-        // Asignar al estado global de la app
+        // Asignar al estado global si la app lo utiliza
         if (typeof recetaPendienteCoccion !== 'undefined') {
             window.recetaPendienteCoccion = r;
         }
 
-        // Rellenar cabecera (Estilo y Lote)
+        // Rellenar Estilo de forma robusta buscando por etiqueta o ID parcial
         var inputEstilo = document.querySelector('input[name*="estilo"], input[id*="estilo"], input[placeholder*="Estilo"]');
         if (inputEstilo) {
             inputEstilo.value = r.nombre || '';
@@ -3116,6 +3119,7 @@ window.cargarRecetaEnCoccion = function(clave) {
             inputEstilo.dispatchEvent(new Event('change', { bubbles: true }));
         }
 
+        // Rellenar Nº Lote
         var inputLote = document.querySelector('input[name*="lote"], input[id*="lote"], input[placeholder*="Lote"]');
         if (inputLote) {
             inputLote.value = r.lote || '280';
@@ -3123,21 +3127,34 @@ window.cargarRecetaEnCoccion = function(clave) {
             inputLote.dispatchEvent(new Event('change', { bubbles: true }));
         }
 
-        // --- INYECCIÓN DIRECTA DE LOS GRANOS EN LA TABLA ---
+        // --- MANEJO PROFESIONAL DE LA LISTA DE GRANOS ---
+        var listaGranos = r.granos || r.maltas || [];
+        var totalKg = listaGranos.reduce(function(acc, curr) { return acc + Number(curr.cantidad || 0); }, 0);
+
+        // Actualizar etiqueta de totales visual en pantalla
+        var etiquetasTotales = document.querySelectorAll('div, span, p');
+        etiquetasTotales.forEach(function(el) {
+            if (el.textContent.includes('TOTALES DE KG')) {
+                el.textContent = "TOTALES DE KG: " + totalKg.toFixed(1) + " kg";
+            }
+        });
+
+        // Buscar el contenedor real de inputs de granos o crearlos si el contenedor existe vacío
         var containerGranos = document.getElementById('rec-granos-inputs');
         if (containerGranos) {
-            containerGranos.innerHTML = ''; // Limpiar filas anteriores
+            containerGranos.innerHTML = ''; // Limpiar estado previo
             
+            // Ocultar texto de ayuda estático
             var padreGranos = containerGranos.parentElement;
             if (padreGranos) {
-                padreGranos.querySelectorAll('p, span').forEach(function(el) {
-                    if (el.textContent.includes('Seleccione una receta')) {
-                        el.style.display = 'none';
+                padreGranos.querySelectorAll('p, span').forEach(function(p) {
+                    if (p.textContent.includes('Seleccione una receta')) {
+                        p.style.display = 'none';
                     }
                 });
             }
 
-            var listaGranos = r.granos || r.maltas || [];
+            // Inyectar cada grano con su respectiva cantidad en formato limpio
             listaGranos.forEach(function(g) {
                 var nombreGrano = g.nombre || g.item || 'Malta';
                 var cantGrano = g.cantidad || 0;
@@ -3151,21 +3168,14 @@ window.cargarRecetaEnCoccion = function(clave) {
                 `;
                 containerGranos.appendChild(fila);
             });
-
-            // Calcular y reflejar el total de kilos de forma explícita
-            var totalKg = listaGranos.reduce(function(acc, curr) { return acc + Number(curr.cantidad || 0); }, 0);
-            var etiquetaTotal = document.querySelector('#totales-kg, .total-kg, [id*="total"]');
-            if (etiquetaTotal) {
-                etiquetaTotal.textContent = "TOTALES DE KG: " + totalKg.toFixed(1) + " kg";
-            }
         }
 
-        // Intentar invocar el renderizado nativo si existe
+        // Ejecutar funciones de renderizado nativo de la app si están disponibles
         if (typeof renderRecetas === 'function') {
-            try { renderRecetas(); } catch (err) {}
+            try { renderRecetas(); } catch(e) {}
         }
 
-        console.log("-> Receta inyectada y protegida correctamente:", r.nombre);
+        console.log("-> Carga de receta en cocción finalizada con éxito:", r.nombre);
     }, 300);
 };
 
