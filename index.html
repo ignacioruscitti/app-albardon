@@ -3097,7 +3097,7 @@ window.cargarRecetaEnCoccion = function(clave) {
         }
     });
 
-    // 2. Inyección dinámica inteligente basada en elementos reales de la vista
+    // 2. Inyección dinámica inteligente de Granos y Lúpulos
     setTimeout(function() {
         var inputEstilo = document.querySelector('input[name*="estilo"], input[id*="estilo"], input[placeholder*="Estilo"]');
         if (inputEstilo) {
@@ -3111,10 +3111,10 @@ window.cargarRecetaEnCoccion = function(clave) {
             inputLote.dispatchEvent(new Event('input', { bubbles: true }));
         }
 
+        // --- GESTIÓN DE GRANOS / MOLIENDA ---
         var listaGranos = r.granos || r.maltas || [];
         var totalKg = listaGranos.reduce(function(acc, curr) { return acc + Number(curr.cantidad || 0); }, 0);
 
-        // Buscar o crear un contenedor seguro de granos debajo del indicador de totales
         var elementoTotales = null;
         document.querySelectorAll('div, span, p').forEach(function(el) {
             if (el.textContent.includes('TOTALES DE KG')) {
@@ -3123,17 +3123,15 @@ window.cargarRecetaEnCoccion = function(clave) {
         });
 
         if (elementoTotales) {
-            // Buscamos si ya creamos nuestro contenedor dinámico para no duplicarlo
-            var containerDinamico = document.getElementById('granos-inyectados-dinamicos');
-            if (!containerDinamico) {
-                containerDinamico = document.createElement('div');
-                containerDinamico.id = 'granos-inyectados-dinamicos';
-                containerDinamico.className = 'mt-4 space-y-2 p-4 bg-slate-900/50 rounded-lg border border-slate-800';
-                // Insertarlo justo después de la caja que contiene el total de kg
-                elementoTotales.parentElement.insertAdjacentElement('afterend', containerDinamico);
+            var containerGranosDinamico = document.getElementById('granos-inyectados-dinamicos');
+            if (!containerGranosDinamico) {
+                containerGranosDinamico = document.createElement('div');
+                containerGranosDinamico.id = 'granos-inyectados-dinamicos';
+                containerGranosDinamico.className = 'mt-4 space-y-2 p-4 bg-slate-900/50 rounded-lg border border-slate-800';
+                elementoTotales.parentElement.insertAdjacentElement('afterend', containerGranosDinamico);
             }
 
-            containerDinamico.innerHTML = '<h3 class="text-sm font-bold text-amber-400 mb-2">GRANOS / MOLIENDA (Cargados Automáticamente)</h3>';
+            containerGranosDinamico.innerHTML = '<h3 class="text-sm font-bold text-amber-400 mb-2">GRANOS / MOLIENDA (Cargados Automáticamente)</h3>';
 
             listaGranos.forEach(function(g) {
                 var nombreGrano = g.nombre || g.item || 'Malta';
@@ -3146,14 +3144,58 @@ window.cargarRecetaEnCoccion = function(clave) {
                     <input type="number" value="${cantGrano}" class="w-24 bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-sm text-amber-300 font-bold focus:outline-none">
                     <button type="button" onclick="this.parentElement.remove()" class="text-red-400 hover:text-red-300 px-2 font-bold">×</button>
                 `;
-                containerDinamico.appendChild(fila);
+                containerGranosDinamico.appendChild(fila);
             });
 
-            // Actualizar el texto del total
             elementoTotales.textContent = "TOTALES DE KG: " + totalKg.toFixed(1) + " kg";
         }
 
-        console.log("-> Granos inyectados dinámicamente con éxito para:", r.nombre);
+        // --- GESTIÓN DE LÚPULOS ---
+        var listaLupulos = r.lupulos || [];
+        if (listaLupulos.length > 0) {
+            // Buscamos si ya existe un contenedor de lúpulos o un título que los referencie
+            var referenciaLupulos = null;
+            document.querySelectorAll('div, span, h2, h3, h4, p').forEach(function(el) {
+                var t = (el.textContent || '').trim().toLowerCase();
+                if (t.includes('lúpulo') || t.includes('lupulo') || t.includes('lúpulos')) {
+                    referenciaLupulos = el;
+                }
+            });
+
+            var containerLupulosDinamico = document.getElementById('lupulos-inyectados-dinamicos');
+            if (!containerLupulosDinamico) {
+                containerLupulosDinamico = document.createElement('div');
+                containerLupulosDinamico.id = 'lupulos-inyectados-dinamicos';
+                containerLupulosDinamico.className = 'mt-6 space-y-2 p-4 bg-slate-900/50 rounded-lg border border-slate-800';
+                
+                // Si encontramos una referencia de lúpulos en la vista, lo ponemos cerca; si no, al final del contenedor de granos
+                if (referenciaLupulos) {
+                    referenciaLupulos.insertAdjacentElement('afterend', containerLupulosDinamico);
+                } else if (containerGranosDinamico) {
+                    containerGranosDinamico.insertAdjacentElement('afterend', containerLupulosDinamico);
+                }
+            }
+
+            containerLupulosDinamico.innerHTML = '<h3 class="text-sm font-bold text-amber-400 mb-2">LÚPULOS / ADICIONES (Cargados Automáticamente)</h3>';
+
+            listaLupulos.forEach(function(l) {
+                var nombreLupulo = l.nombre || l.item || 'Lúpulo';
+                var cantLupulo = l.cantidad || l.gramos || 0;
+                var minLupulo = l.minutos || l.tiempo || 0;
+
+                var filaLup = document.createElement('div');
+                filaLup.className = 'flex items-center gap-2 w-full mb-1';
+                filaLup.innerHTML = `
+                    <input type="text" value="${nombreLupulo}" class="flex-1 bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-sm text-white focus:outline-none">
+                    <input type="number" value="${cantLupulo}" placeholder="grs" class="w-24 bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-sm text-amber-300 font-bold focus:outline-none" title="Cantidad en gramos">
+                    <input type="number" value="${minLupulo}" placeholder="min" class="w-20 bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-sm text-blue-300 font-bold focus:outline-none" title="Minutos de hervor">
+                    <button type="button" onclick="this.parentElement.remove()" class="text-red-400 hover:text-red-300 px-2 font-bold">×</button>
+                `;
+                containerLupulosDinamico.appendChild(filaLup);
+            });
+        }
+
+        console.log("-> Receta, granos y lúpulos inyectados con éxito para:", r.nombre);
     }, 300);
 };
 
