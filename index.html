@@ -3059,8 +3059,80 @@ window.descargarRecetaPDF = function(clave) {
 window.recetaPendienteCoccion = window.recetaPendienteCoccion || null;
 
 window.calcularABV = window.calcularABV || function() {};
-window.guardarCoccion = window.guardarCoccion || function() {
-    console.log("guardarCoccion interceptado de forma segura.");
+
+// --- FUNCIÓN DE GUARDADO REAL Y PASE A FERMENTACIÓN ---
+window.guardarCoccion = function() {
+    var estilo = document.querySelector('input[name*="estilo"], input[id*="estilo"], input[placeholder*="Estilo"]');
+    var lote = document.querySelector('input[name*="lote"], input[id*="lote"], input[placeholder*="Lote"]');
+    
+    var nombreEstilo = estilo ? estilo.value : 'Estilo Desconocido';
+    var numeroLote = lote ? lote.value : '280';
+
+    // Recopilar granos de la sección dinámica
+    var granos = [];
+    var inputsGranos = document.querySelectorAll('#granos-inyectados-dinamicos input');
+    for (var i = 0; i < inputsGranos.length; i += 2) {
+        if (inputsGranos[i] && inputsGranos[i+1]) {
+            granos.push({
+                nombre: inputsGranos[i].value,
+                cantidad: parseFloat(inputsGranos[i+1].value) || 0
+            });
+        }
+    }
+
+    // Recopilar lúpulos de la sección dinámica
+    var lupulos = [];
+    var filasLup = document.querySelectorAll('#lupulos-inyectados-dinamicos > div');
+    filasLup.forEach(function(fila) {
+        var inputs = fila.querySelectorAll('input');
+        if (inputs.length >= 3) {
+            lupulos.push({
+                nombre: inputs[0].value,
+                cantidad: parseFloat(inputs[1].value) || 0,
+                minutos: parseInt(inputs[2].value) || 0
+            });
+        }
+    });
+
+    var registroCoccion = {
+        id: 'LOTE-' + numeroLote,
+        estilo: nombreEstilo,
+        lote: numeroLote,
+        fecha: new Date().toLocaleDateString(),
+        granos: granos,
+        lupulos: lupulos,
+        recetaBase: window.recetaPendienteCoccion || {}
+    };
+
+    // Guardar en localStorage para persistencia en el SPA
+    try {
+        var listaGuardada = JSON.parse(localStorage.getItem('fermentaciones_albardon') || '[]');
+        listaGuardada.push(registroCoccion);
+        localStorage.setItem('fermentaciones_albardon', JSON.stringify(listaGuardada));
+    } catch(e) {
+        console.error("Error al guardar en localStorage:", e);
+    }
+
+    console.log("-> Cocción guardada con éxito:", registroCoccion);
+
+    // 1. Activar la pestaña "Fermentación" de forma nativa
+    var botonesTab = document.querySelectorAll('button, a, [data-tab]');
+    var tabEncontrada = false;
+    botonesTab.forEach(function(el) {
+        var textoBtn = (el.textContent || '').trim().toLowerCase();
+        var attrTab = (el.getAttribute('data-tab') || '').toLowerCase();
+        if (textoBtn.includes('fermentaci') || attrTab.includes('fermentacion')) {
+            el.click();
+            tabEncontrada = true;
+        }
+    });
+
+    // 2. Intentar disparar renderizado nativo de fermentación si existe
+    if (typeof renderFermentacion === 'function') {
+        try { renderFermentacion(); } catch(err) {}
+    }
+
+    alert("¡Cocción guardada correctamente y enviada a Fermentación!");
 };
 
 window.cargarRecetaEnCoccion = function(clave) {
@@ -3087,7 +3159,7 @@ window.cargarRecetaEnCoccion = function(clave) {
 
     window.recetaPendienteCoccion = r;
 
-    // 1. Activar la pestaña "Cocción" de forma nativa
+    // Activar la pestaña "Cocción"
     var botonesTab = document.querySelectorAll('button, a, [data-tab]');
     botonesTab.forEach(function(el) {
         var textoBtn = (el.textContent || '').trim().toLowerCase();
@@ -3097,7 +3169,6 @@ window.cargarRecetaEnCoccion = function(clave) {
         }
     });
 
-    // 2. Sincronización y renderizado inteligente
     setTimeout(function() {
         var inputEstilo = document.querySelector('input[name*="estilo"], input[id*="estilo"], input[placeholder*="Estilo"]');
         if (inputEstilo) {
@@ -3150,7 +3221,7 @@ window.cargarRecetaEnCoccion = function(clave) {
             elementoTotales.textContent = "TOTALES DE KG: " + totalKg.toFixed(1) + " kg";
         }
 
-        // --- GESTIÓN DE LÚPULOS (ANCLA DIRECTA AL TEXTO DE LA APP) ---
+        // --- GESTIÓN DE LÚPULOS ---
         var listaLupulos = r.lupulos || [];
         if (listaLupulos.length > 0) {
             var textoAyudaLup = null;
@@ -3171,9 +3242,7 @@ window.cargarRecetaEnCoccion = function(clave) {
                     contenedorPadreLup.appendChild(containerLupulosDinamico);
                 }
 
-                // Ocultar el texto de ayuda estático original
                 textoAyudaLup.style.display = 'none';
-
                 containerLupulosDinamico.innerHTML = '';
 
                 listaLupulos.forEach(function(l) {
@@ -3194,7 +3263,7 @@ window.cargarRecetaEnCoccion = function(clave) {
             }
         }
 
-        console.log("-> Configuración completa de granos y lúpulos aplicada para:", r.nombre);
+        console.log("-> Configuración completa aplicada para:", r.nombre);
     }, 300);
 };
 
