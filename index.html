@@ -3126,52 +3126,56 @@ window.ejecutarGuardadoYPasarAFermentacion = function() {
         }
     });
 
-    // Inyección robusta y directa de la tabla de seguimiento diario
+    // Inyección robusta garantizada buscando el bloque "TABLA DE SEGUIMIENTO DIARIO"
     setTimeout(function() {
-        var elementoEncabezadoTabla = null;
-        document.querySelectorAll('div, span, h3').forEach(function(el) {
-            if (el.textContent.includes('TABLA DE SEGUIMIENTO DIARIO')) {
-                elementoEncabezadoTabla = el;
+        var objetivoTabla = null;
+        document.querySelectorAll('div, section, span').forEach(function(el) {
+            if (el.textContent.trim() === 'TABLA DE SEGUIMIENTO DIARIO' || el.textContent.includes('TABLA DE SEGUIMIENTO DIARIO')) {
+                objetivoTabla = el;
             }
         });
 
-        if (elementoEncabezadoTabla) {
-            var contenedorPadreTabla = elementoEncabezadoTabla.closest('div.rounded-lg, div.bg-slate-800, div') || elementoEncabezadoTabla.parentElement;
+        if (objetivoTabla) {
+            // Subimos un nivel para encontrar el contenedor padre de esa tarjeta/bloque
+            var contenedorTarjeta = objetivoTabla.closest('div.bg-slate-900, div.bg-slate-800, div.rounded-lg, div') || objetivoTabla.parentElement;
 
-            var tablaDinamicaFerm = document.getElementById('tabla-seguimiento-completa-dinamica');
-            if (!tablaDinamicaFerm) {
-                tablaDinamicaFerm = document.createElement('div');
-                tablaDinamicaFerm.id = 'tabla-seguimiento-completa-dinamica';
-                tablaDinamicaFerm.className = 'mt-3 space-y-2 p-3 bg-slate-900/50 rounded-lg border border-slate-800';
-                contenedorPadreTabla.appendChild(tablaDinamicaFerm);
+            var miTablaForzada = document.getElementById('forzar-tabla-seguimiento-id');
+            if (!miTablaForzada) {
+                miTablaForzada = document.createElement('div');
+                miTablaForzada.id = 'forzar-tabla-seguimiento-id';
+                miTablaForzada.className = 'mt-3 p-3 bg-slate-900/80 rounded-lg border border-slate-700 space-y-2';
+                contenedorTarjeta.appendChild(miTablaForzada);
             }
 
-            tablaDinamicaFerm.innerHTML = `
-                <div class="grid grid-cols-7 gap-2 text-xs font-bold text-amber-400 text-center mb-2 border-b border-slate-700 pb-1">
+            miTablaForzada.innerHTML = `
+                <div class="text-xs font-bold text-amber-400 mb-2 flex justify-between">
+                    <span>REGISTRO DE SEGUIMIENTO DIARIO (Lote: ${numeroLote})</span>
+                    <span>Estilo: ${nombreEstilo}</span>
+                </div>
+                <div class="grid grid-cols-7 gap-2 text-xs font-bold text-slate-400 text-center border-b border-slate-700 pb-1">
                     <span>DÍA</span>
                     <span>FECHA</span>
                     <span>DENSIDAD</span>
-                    <span>TEMPERATURA</span>
+                    <span>TEMP (°C)</span>
                     <span>AJUSTE</span>
                     <span>pH</span>
-                    <span>NOTAS / PURGA</span>
+                    <span>NOTAS</span>
                 </div>
             `;
 
-            // Crear 7 días de seguimiento interactivos
-            for (var dia = 1; dia <= 7; dia++) {
-                var filaDia = document.createElement('div');
-                filaDia.className = 'grid grid-cols-7 gap-2 items-center mb-2';
-                filaDia.innerHTML = `
-                    <span class="text-white font-bold text-xs text-center bg-slate-800 py-1.5 rounded">Día ${dia}</span>
-                    <input type="text" value="${new Date().toLocaleDateString()}" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white text-xs text-center">
-                    <input type="text" placeholder="1.010" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-amber-300 font-bold text-xs text-center">
-                    <input type="text" placeholder="18°C" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-blue-300 font-bold text-xs text-center">
-                    <input type="text" placeholder="-" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white text-xs text-center">
-                    <input type="text" placeholder="4.2" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white text-xs text-center">
-                    <input type="text" placeholder="Notas..." class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white text-xs">
+            for (var d = 1; d <= 7; d++) {
+                var row = document.createElement('div');
+                row.className = 'grid grid-cols-7 gap-2 items-center mb-1.5';
+                row.innerHTML = `
+                    <span class="text-white text-xs font-bold text-center bg-slate-800 py-1.5 rounded">Día ${d}</span>
+                    <input type="text" value="${new Date().toLocaleDateString()}" class="bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-white text-xs text-center">
+                    <input type="text" placeholder="1.010" class="bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-amber-300 font-bold text-xs text-center">
+                    <input type="text" placeholder="18°C" class="bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-blue-300 font-bold text-xs text-center">
+                    <input type="text" placeholder="-" class="bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-white text-xs text-center">
+                    <input type="text" placeholder="4.2" class="bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-white text-xs text-center">
+                    <input type="text" placeholder="Notas..." class="bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-white text-xs">
                 `;
-                tablaDinamicaFerm.appendChild(filaDia);
+                miTablaForzada.appendChild(row);
             }
         }
 
@@ -3180,7 +3184,7 @@ window.ejecutarGuardadoYPasarAFermentacion = function() {
             inputEstiloFerm.value = nombreEstilo;
             inputEstiloFerm.dispatchEvent(new Event('input', { bubbles: true }));
         }
-    }, 250);
+    }, 300);
 
     alert("¡Cocción guardada correctamente y enviada a Fermentación!");
 };
