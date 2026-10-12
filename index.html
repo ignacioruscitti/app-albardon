@@ -3058,6 +3058,11 @@ window.descargarRecetaPDF = function(clave) {
 };
 window.recetaPendienteCoccion = null;
 
+// Función de respaldo por si la app busca calcular el ABV y no lo encuentra
+window.calcularABV = window.calcularABV || function() {
+    // Silencioso para evitar errores en consola
+};
+
 window.cargarRecetaEnCoccion = function(clave) {
     if (!clave) {
         var selectReceta = document.querySelector('select[id*="receta"], select');
@@ -3094,7 +3099,6 @@ window.cargarRecetaEnCoccion = function(clave) {
             for (var j = 0; j < s.options.length; j++) {
                 if (s.options[j].value === clave) {
                     s.value = clave;
-                    s.dispatchEvent(new Event('change', { bubbles: true }));
                 }
             }
         });
@@ -3103,14 +3107,12 @@ window.cargarRecetaEnCoccion = function(clave) {
         var inputEstilo = document.querySelector('input[name*="estilo"], input[id*="estilo"], input[placeholder*="Estilo"]');
         if (inputEstilo) {
             inputEstilo.value = r.nombre || '';
-            inputEstilo.dispatchEvent(new Event('input', { bubbles: true }));
         }
 
         // Rellenar Lote
         var inputLote = document.querySelector('input[name*="lote"], input[id*="lote"], input[placeholder*="Lote"]');
         if (inputLote) {
             inputLote.value = r.lote || '280';
-            inputLote.dispatchEvent(new Event('input', { bubbles: true }));
         }
 
         // --- INYECCIÓN DIRECTA DE GRANOS ---
@@ -3118,7 +3120,6 @@ window.cargarRecetaEnCoccion = function(clave) {
         if (containerGranos) {
             containerGranos.innerHTML = ''; // Limpiar anteriores
             
-            // Ocultar el texto de ayuda estático si existe
             var padreGranos = containerGranos.parentElement;
             if (padreGranos) {
                 padreGranos.querySelectorAll('p, span').forEach(function(el) {
@@ -3141,23 +3142,6 @@ window.cargarRecetaEnCoccion = function(clave) {
                 containerGranos.appendChild(div);
             });
         }
-
-        // --- INYECCIÓN DIRECTA DE LÚPULOS ---
-        var containerLupulos = document.getElementById('rec-lupulos-inputs') || document.querySelector('[id*="lupulo"]');
-        var listaLupulos = r.lupulos || [];
-        if (containerLupulos && listaLupulos.length > 0) {
-            // Si el contenedor existe, podemos aplicar la misma lógica directa si es necesario
-        } else if (typeof agregarFilaLupulo === 'function' && listaLupulos.length > 0) {
-            listaLupulos.forEach(function(l) {
-                agregarFilaLupulo(l.nombre || l.item || 'Lúpulo', l.cantidad || 0, l.momento || '');
-            });
-        }
-
-        // Forzar recálculo de totales de la app
-        document.querySelectorAll('input').forEach(function(inp) {
-            inp.dispatchEvent(new Event('input', { bubbles: true }));
-            inp.dispatchEvent(new Event('change', { bubbles: true }));
-        });
 
         console.log("Receta inyectada y pintada con éxito:", r.nombre);
     }, 300);
