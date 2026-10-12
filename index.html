@@ -3091,7 +3091,7 @@ window.cargarRecetaEnCoccion = function(clave) {
         }
     });
 
-    // 2. Esperar 300ms a que el DOM renderice la vista
+    // 2. Esperar 300ms a que renderice la vista
     setTimeout(function() {
         // Sincronizar selector superior
         var selects = document.querySelectorAll('select');
@@ -3099,27 +3099,30 @@ window.cargarRecetaEnCoccion = function(clave) {
             for (var j = 0; j < s.options.length; j++) {
                 if (s.options[j].value === clave) {
                     s.value = clave;
+                    s.dispatchEvent(new Event('change', { bubbles: true }));
                 }
             }
         });
 
-        // Rellenar Estilo
+        // Rellenar Estilo y Lote
         var inputEstilo = document.querySelector('input[name*="estilo"], input[id*="estilo"], input[placeholder*="Estilo"]');
         if (inputEstilo) {
             inputEstilo.value = r.nombre || '';
+            inputEstilo.dispatchEvent(new Event('input', { bubbles: true }));
         }
 
-        // Rellenar Lote
         var inputLote = document.querySelector('input[name*="lote"], input[id*="lote"], input[placeholder*="Lote"]');
         if (inputLote) {
             inputLote.value = r.lote || '280';
+            inputLote.dispatchEvent(new Event('input', { bubbles: true }));
         }
 
-        // --- INYECCIÓN DIRECTA DE GRANOS ---
+        // --- CARGA DE GRANOS USANDO FUNCIÓN NATIVA O INYECCIÓN ROBUSTA ---
         var containerGranos = document.getElementById('rec-granos-inputs');
         if (containerGranos) {
-            containerGranos.innerHTML = ''; // Limpiar anteriores
+            containerGranos.innerHTML = ''; // Limpiar contenedor
             
+            // Ocultar texto de ayuda estático
             var padreGranos = containerGranos.parentElement;
             if (padreGranos) {
                 padreGranos.querySelectorAll('p, span').forEach(function(el) {
@@ -3128,22 +3131,36 @@ window.cargarRecetaEnCoccion = function(clave) {
             }
 
             var listaGranos = r.granos || r.maltas || [];
-            listaGranos.forEach(function(g) {
-                var nombreGrano = g.nombre || g.item || 'Malta';
-                var cantGrano = g.cantidad || 0;
+            
+            // Si la app tiene una función nativa de agregar fila, la probamos primero
+            if (typeof agregarFilaGrano === 'function') {
+                listaGranos.forEach(function(g) {
+                    agregarFilaGrano(g.nombre || g.item || 'Malta', g.cantidad || 0);
+                });
+            } else {
+                // Si no, inyectamos la estructura exacta con clases de Tailwind
+                listaGranos.forEach(function(g) {
+                    var nombreGrano = g.nombre || g.item || 'Malta';
+                    var cantGrano = g.cantidad || 0;
 
-                var div = document.createElement('div');
-                div.className = 'flex gap-2 item-grano mb-2';
-                div.innerHTML = `
-                    <input type="text" value="${nombreGrano}" placeholder="Malta" class="rec-grano-nombre flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-slate-100">
-                    <input type="number" value="${cantGrano}" placeholder="Kg" class="rec-grano-cant w-20 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-amber-300 font-bold">
-                    <button type="button" onclick="this.parentElement.remove()" class="text-red-400 font-bold px-1 hover:text-red-300">×</button>
-                `;
-                containerGranos.appendChild(div);
-            });
+                    var fila = document.createElement('div');
+                    fila.className = 'flex items-center gap-2 mb-2 w-full';
+                    fila.innerHTML = `
+                        <input type="text" value="${nombreGrano}" class="flex-1 bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-sm text-white focus:outline-none focus:border-amber-500">
+                        <input type="number" value="${cantGrano}" class="w-24 bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-sm text-amber-300 font-bold focus:outline-none focus:border-amber-500">
+                        <button type="button" onclick="this.parentElement.remove()" class="text-red-400 hover:text-red-300 px-2 font-bold">×</button>
+                    `;
+                    containerGranos.appendChild(fila);
+                });
+            }
         }
 
-        console.log("Receta inyectada y pintada con éxito:", r.nombre);
+        // Forzar actualización general de eventos
+        document.querySelectorAll('input').forEach(function(inp) {
+            inp.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+
+        console.log("Granos inyectados correctamente para:", r.nombre);
     }, 300);
 };
 
