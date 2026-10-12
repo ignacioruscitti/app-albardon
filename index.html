@@ -3060,9 +3060,15 @@ window.recetaPendienteCoccion = window.recetaPendienteCoccion || null;
 
 window.calcularABV = window.calcularABV || function() {};
 
-// --- 1. ESTE ES EL BOTÓN DE GUARDAR Y PASAR A FERMENTACIÓN ---
-// (Solo debe ejecutarse al hacer clic en "Guardar Cocción y Pasar a Fermentación")
-window.guardarCoccion = function() {
+// --- 1. FUNCIÓN QUE LLAMA EL BOTÓN "Cocinar esta Receta" DE LAS TARJETAS ---
+window.guardarCoccion = function(clave) {
+    // Si la app llama a guardarCoccion sin argumentos o desde la tarjeta, 
+    // en realidad lo que queremos es CARGAR la receta en la planilla de cocción.
+    window.cargarRecetaEnCoccion(clave);
+};
+
+// --- 2. EL VERDADERO GUARDADO FINAL (Para el botón naranja dentro de la planilla) ---
+window.ejecutarGuardadoYPasarAFermentacion = function() {
     var estilo = document.querySelector('input[name*="estilo"], input[id*="estilo"], input[placeholder*="Estilo"]');
     var lote = document.querySelector('input[name*="lote"], input[id*="lote"], input[placeholder*="Lote"]');
     
@@ -3128,7 +3134,7 @@ window.guardarCoccion = function() {
     alert("¡Cocción guardada correctamente y enviada a Fermentación!");
 };
 
-// --- 2. ESTE ES EL CARGADOR DE RECETAS (Al hacer clic en "Cocinar esta receta") ---
+// --- 3. EL CARGADOR DE RECETAS EN LA PLANILLA ---
 window.cargarRecetaEnCoccion = function(clave) {
     var selectReceta = document.querySelector('select');
     if (!clave && selectReceta) {
@@ -3163,7 +3169,6 @@ window.cargarRecetaEnCoccion = function(clave) {
         }
     });
 
-    // Inyectar datos en la planilla de cocción sin guardar nada todavía
     setTimeout(function() {
         var inputEstilo = document.querySelector('input[name*="estilo"], input[id*="estilo"], input[placeholder*="Estilo"]');
         if (inputEstilo) {
@@ -3175,6 +3180,16 @@ window.cargarRecetaEnCoccion = function(clave) {
         if (inputLote) {
             inputLote.value = r.lote || '280';
             inputLote.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+
+        // Interceptar el botón grande naranja de la planilla para que ejecute nuestro guardado real
+        var botonGuardarPantalla = document.querySelector('button.bg-amber-500, button.bg-amber-600, button[class*="amber"]');
+        if (botonGuardarPantalla && !botonGuardarPantalla.getAttribute('data-custom-bound')) {
+            botonGuardarPantalla.setAttribute('data-custom-bound', 'true');
+            botonGuardarPantalla.onclick = function(e) {
+                e.preventDefault();
+                window.ejecutarGuardadoYPasarAFermentacion();
+            };
         }
 
         // --- GRANOS ---
@@ -3258,7 +3273,7 @@ window.cargarRecetaEnCoccion = function(clave) {
             }
         }
 
-        console.log("-> Receta cargada en cocción correctamente:", r.nombre);
+        console.log("-> Receta cargada correctamente en cocción desde tarjeta:", r.nombre);
     }, 300);
 };
 
