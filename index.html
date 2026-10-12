@@ -3060,10 +3060,6 @@ window.recetaPendienteCoccion = window.recetaPendienteCoccion || null;
 
 window.calcularABV = window.calcularABV || function() {};
 
-window.recetaPendienteCoccion = window.recetaPendienteCoccion || null;
-
-window.calcularABV = window.calcularABV || function() {};
-
 // --- 1. FUNCIÓN QUE LLAMA EL BOTÓN "Cocinar esta Receta" DE LAS TARJETAS ---
 window.guardarCoccion = function(clave) {
     window.cargarRecetaEnCoccion(clave);
@@ -3130,51 +3126,52 @@ window.ejecutarGuardadoYPasarAFermentacion = function() {
         }
     });
 
-    // Inyección robusta de la tabla de seguimiento diario para que nunca quede vacía
+    // Inyección robusta y directa de la tabla de seguimiento diario
     setTimeout(function() {
-        var tablaSeguimiento = document.querySelector('table');
-        if (!tablaSeguimiento) {
-            // Buscar contenedor por el texto de la sección
-            document.querySelectorAll('div').forEach(function(d) {
-                if (d.textContent.includes('TABLA DE SEGUIMIENTO DIARIO')) {
-                    tablaSeguimiento = d.querySelector('table') || d.nextElementSibling;
-                }
-            });
-        }
+        var elementoEncabezadoTabla = null;
+        document.querySelectorAll('div, span, h3').forEach(function(el) {
+            if (el.textContent.includes('TABLA DE SEGUIMIENTO DIARIO')) {
+                elementoEncabezadoTabla = el;
+            }
+        });
 
-        // Si encontramos la tabla o su contenedor, aseguramos los renglones iniciales de seguimiento
-        var contenedorTabla = document.getElementById('tabla-seguimiento-dinamica');
-        if (!contenedorTabla) {
-            contenedorTabla = document.createElement('div');
-            contenedorTabla.id = 'tabla-seguimiento-dinamica';
-            contenedorTabla.className = 'w-full mt-2 space-y-1';
-            
-            // Generar 7 días iniciales de control de fermentación por defecto
-            for (var dia = 1; dia <= 7; dia++) {
-                var filaDia = document.createElement('div');
-                filaDia.className = 'grid grid-cols-7 gap-2 items-center bg-slate-900/60 p-2 rounded border border-slate-800 text-sm';
-                filaDia.innerHTML = `
-                    <span class="text-amber-400 font-bold text-center">Día ${dia}</span>
-                    <input type="text" value="${new Date().toLocaleDateString()}" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white text-xs">
-                    <input type="text" placeholder="Densidad" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-amber-300 font-bold text-xs">
-                    <input type="text" placeholder="Temp °C" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-blue-300 font-bold text-xs">
-                    <input type="text" placeholder="Ajuste" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white text-xs">
-                    <input type="text" placeholder="pH" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white text-xs">
-                    <input type="text" placeholder="Notas / Purga" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white text-xs">
-                `;
-                contenedorTabla.appendChild(filaDia);
+        if (elementoEncabezadoTabla) {
+            var contenedorPadreTabla = elementoEncabezadoTabla.closest('div.rounded-lg, div.bg-slate-800, div') || elementoEncabezadoTabla.parentElement;
+
+            var tablaDinamicaFerm = document.getElementById('tabla-seguimiento-completa-dinamica');
+            if (!tablaDinamicaFerm) {
+                tablaDinamicaFerm = document.createElement('div');
+                tablaDinamicaFerm.id = 'tabla-seguimiento-completa-dinamica';
+                tablaDinamicaFerm.className = 'mt-3 space-y-2 p-3 bg-slate-900/50 rounded-lg border border-slate-800';
+                contenedorPadreTabla.appendChild(tablaDinamicaFerm);
             }
 
-            // Ubicarlo justo debajo del encabezado de la tabla si existe
-            var headerTabla = null;
-            document.querySelectorAll('div, span, h3').forEach(function(el) {
-                if (el.textContent.includes('TABLA DE SEGUIMIENTO DIARIO')) {
-                    headerTabla = el;
-                }
-            });
+            tablaDinamicaFerm.innerHTML = `
+                <div class="grid grid-cols-7 gap-2 text-xs font-bold text-amber-400 text-center mb-2 border-b border-slate-700 pb-1">
+                    <span>DÍA</span>
+                    <span>FECHA</span>
+                    <span>DENSIDAD</span>
+                    <span>TEMPERATURA</span>
+                    <span>AJUSTE</span>
+                    <span>pH</span>
+                    <span>NOTAS / PURGA</span>
+                </div>
+            `;
 
-            if (headerTabla && headerTabla.parentElement) {
-                headerTabla.parentElement.appendChild(contenedorTabla);
+            // Crear 7 días de seguimiento interactivos
+            for (var dia = 1; dia <= 7; dia++) {
+                var filaDia = document.createElement('div');
+                filaDia.className = 'grid grid-cols-7 gap-2 items-center mb-2';
+                filaDia.innerHTML = `
+                    <span class="text-white font-bold text-xs text-center bg-slate-800 py-1.5 rounded">Día ${dia}</span>
+                    <input type="text" value="${new Date().toLocaleDateString()}" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white text-xs text-center">
+                    <input type="text" placeholder="1.010" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-amber-300 font-bold text-xs text-center">
+                    <input type="text" placeholder="18°C" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-blue-300 font-bold text-xs text-center">
+                    <input type="text" placeholder="-" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white text-xs text-center">
+                    <input type="text" placeholder="4.2" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white text-xs text-center">
+                    <input type="text" placeholder="Notas..." class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white text-xs">
+                `;
+                tablaDinamicaFerm.appendChild(filaDia);
             }
         }
 
