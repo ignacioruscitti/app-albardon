@@ -3063,10 +3063,10 @@ window.guardarCoccion = function(clave) {
 };
 
 window.ejecutarGuardadoYPasarAFermentacion = function() {
-    var estilo = document.querySelector('input[name*="estilo"], input[id*="estilo"], input[placeholder*="Estilo"]');
+    var estilo = document.querySelector('#ferm-estilo, input[name*="estilo"], input[id*="estilo"]');
     var lote = document.querySelector('input[name*="lote"], input[id*="lote"], input[placeholder*="Lote"]');
     
-    var nombreEstilo = estilo ? estilo.value : 'Estilo Desconocido';
+    var nombreEstilo = estilo ? estilo.value : (window.recetaPendienteCoccion ? window.recetaPendienteCoccion.nombre : 'Estilo Desconocido');
     var numeroLote = lote ? lote.value : '280';
 
     var granos = [];
@@ -3112,6 +3112,7 @@ window.ejecutarGuardadoYPasarAFermentacion = function() {
         console.error("Error al guardar en localStorage:", e);
     }
 
+    // Activar la pestaña "Fermentación"
     var botonesTab = document.querySelectorAll('button, a, [data-tab]');
     botonesTab.forEach(function(el) {
         var textoBtn = (el.textContent || '').trim().toLowerCase();
@@ -3122,7 +3123,14 @@ window.ejecutarGuardadoYPasarAFermentacion = function() {
     });
 
     setTimeout(function() {
-        // Buscamos directamente la sección que contiene el título "TABLA DE SEGUIMIENTO DIARIO"
+        // Actualizar directamente el input de estilo con el ID exacto
+        var inputEstiloFerm = document.querySelector('#ferm-estilo');
+        if (inputEstiloFerm) {
+            inputEstiloFerm.value = nombreEstilo;
+            inputEstiloFerm.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+
+        // Buscar el contenedor de la tabla de seguimiento diario e inyectar los renglones
         var elementos = document.querySelectorAll('div, span, h3, section');
         var contenedorTabla = null;
 
@@ -3158,12 +3166,6 @@ window.ejecutarGuardadoYPasarAFermentacion = function() {
             }
 
             contenedorTabla.appendChild(nuevaIncr);
-        }
-
-        var inputEstiloFerm = document.querySelector('input[name*="estilo"], input[id*="estilo"]');
-        if (inputEstiloFerm) {
-            inputEstiloFerm.value = nombreEstilo;
-            inputEstiloFerm.dispatchEvent(new Event('input', { bubbles: true }));
         }
     }, 300);
 
