@@ -3122,14 +3122,17 @@ window.ejecutarGuardadoYPasarAFermentacion = function() {
     });
 
     setTimeout(function() {
-        var contenedorTablaNativa = null;
-        document.querySelectorAll('div, section').forEach(function(el) {
-            if (el.textContent.includes('TABLA DE SEGUIMIENTO DIARIO')) {
-                contenedorTablaNativa = el.closest('div.bg-slate-800, div.rounded-lg, div') || el.parentElement;
+        // Buscamos directamente la sección que contiene el título "TABLA DE SEGUIMIENTO DIARIO"
+        var elementos = document.querySelectorAll('div, span, h3, section');
+        var contenedorTabla = null;
+
+        elementos.forEach(function(el) {
+            if (el.textContent.trim() === 'TABLA DE SEGUIMIENTO DIARIO') {
+                contenedorTabla = el.parentElement;
             }
         });
 
-        if (contenedorTablaNativa) {
+        if (contenedorTabla) {
             var tablaIncr = document.getElementById('tabla-seguimiento-incrustada');
             if (tablaIncr) {
                 tablaIncr.remove();
@@ -3137,19 +3140,7 @@ window.ejecutarGuardadoYPasarAFermentacion = function() {
 
             var nuevaIncr = document.createElement('div');
             nuevaIncr.id = 'tabla-seguimiento-incrustada';
-            nuevaIncr.className = 'mt-3 space-y-2 p-3 bg-slate-900/60 rounded-lg border border-slate-700';
-
-            nuevaIncr.innerHTML = `
-                <div class="grid grid-cols-7 gap-2 text-xs font-bold text-amber-400 text-center mb-1 pb-1 border-b border-slate-700">
-                    <span>DÍA</span>
-                    <span>FECHA</span>
-                    <span>DENSIDAD</span>
-                    <span>TEMP</span>
-                    <span>AJUSTE</span>
-                    <span>pH</span>
-                    <span>NOTAS</span>
-                </div>
-            `;
+            nuevaIncr.className = 'mt-3 space-y-2 p-3 bg-slate-900/80 rounded-lg border border-slate-700';
 
             for (var d = 1; d <= 7; d++) {
                 var fila = document.createElement('div');
@@ -3166,7 +3157,7 @@ window.ejecutarGuardadoYPasarAFermentacion = function() {
                 nuevaIncr.appendChild(fila);
             }
 
-            contenedorTablaNativa.appendChild(nuevaIncr);
+            contenedorTabla.appendChild(nuevaIncr);
         }
 
         var inputEstiloFerm = document.querySelector('input[name*="estilo"], input[id*="estilo"]');
