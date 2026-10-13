@@ -3063,63 +3063,53 @@ window.guardarCoccion = function(clave) {
 };
 
 window.ejecutarGuardadoYPasarAFermentacion = function() {
-    // Capturar de forma exacta desde los inputs específicos de la planilla de cocción por su posición o tipo
-    var inputsCocacion = document.querySelectorAll('input');
-    var estiloIngresado = "APA 2026";
-    var fechaIngresada = "05/09/2026";
-    var loteIngresado = "L-2026-09";
+    // 1. Capturar directamente de los IDs fijos o de los inputs actuales en pantalla
+    var inputEstiloCocina = document.querySelector('#cocina-estilo') || document.querySelector('input');
+    var inputFechaCoccion = document.querySelector('#cocina-fecha') || document.querySelector('input[type="date"], input[placeholder*="fecha" i], input[value*="/"]');
+    var inputLoteCocina = document.querySelector('#cocina-lote') || document.querySelector('input[value*="L-"]');
 
-    // Recorremos los inputs de arriba hacia abajo de la pantalla de cocción
-    if (inputsCocacion.length > 0) {
-        for (var i = 0; i < inputsCocacion.length; i++) {
-            var val = inputsCocacion[i].value ? inputsCocacion[i].value.trim() : '';
-            // El primer input de texto suele ser el Estilo
-            if (i === 0 && val) estiloIngresado = val;
-            // Detectar formato de fecha DD/MM/YYYY o YYYY-MM-DD
-            if ((val.includes('/') || val.includes('-')) && val.length >= 8 && val.length <= 10 && !val.includes('L-')) {
-                fechaIngresada = val;
-            }
-            // Detectar formato de lote L-XXXX
-            if (val.includes('L-') || val.includes('2026')) {
-                if (val.length < 15 && !val.includes('/')) loteIngresado = val;
-            }
-        }
-    }
+    var estilo = inputEstiloCocina ? inputEstiloCocina.value.trim() : 'APA 2026';
+    var fecha = inputFechaCoccion ? inputFechaCoccion.value.trim() : '05/09/2026';
+    var lote = inputLoteCocina ? inputLoteCocina.value.trim() : 'L-2026-09';
 
+    // Recoger granos dinámicos
     var granos = [];
     var inputsGranos = document.querySelectorAll('#granos-inyectados-dinamicos input');
-    for (var j = 0; j < inputsGranos.length; j += 2) {
-        if (inputsGranos[j] && inputsGranos[j+1]) {
+    for (var i = 0; i < inputsGranos.length; i += 2) {
+        if (inputsGranos[i] && inputsGranos[i+1]) {
             granos.push({
-                nombre: inputsGranos[j].value,
-                cantidad: parseFloat(inputsGranos[j+1].value) || 0
+                nombre: inputsGranos[i].value,
+                cantidad: parseFloat(inputsGranos[i+1].value) || 0
             });
         }
     }
 
+    // Recoger lúpulos dinámicos
     var lupulos = [];
     var filasLup = document.querySelectorAll('#lupulos-inyectados-dinamicos > div');
     filasLup.forEach(function(fila) {
-        var inpList = fila.querySelectorAll('input');
-        if (inpList.length >= 3) {
+        var inputs = fila.querySelectorAll('input');
+        if (inputs.length >= 3) {
             lupulos.push({
-                nombre: inpList[0].value,
-                cantidad: parseFloat(inpList[1].value) || 0,
-                minutos: parseInt(inpList[2].value) || 0
+                nombre: inputs[0].value,
+                cantidad: parseFloat(inputs[1].value) || 0,
+                minutos: parseInt(inputs[2].value) || 0
             });
         }
     });
 
+    // Objeto consolidado del lote
     var registroCoccion = {
-        id: 'LOTE-' + loteIngresado,
-        estilo: estiloIngresado,
-        lote: loteIngresado,
-        fecha: fechaIngresada,
+        id: 'LOTE-' + lote,
+        estilo: estilo,
+        lote: lote,
+        fecha: fecha,
         granos: granos,
         lupulos: lupulos,
         recetaBase: window.recetaPendienteCoccion || {}
     };
 
+    // Guardar en localStorage de forma persistente
     try {
         var listaGuardada = JSON.parse(localStorage.getItem('fermentaciones_albardon') || '[]');
         listaGuardada.push(registroCoccion);
@@ -3129,7 +3119,7 @@ window.ejecutarGuardadoYPasarAFermentacion = function() {
         console.error("Error al guardar en localStorage:", e);
     }
 
-    // 1. Cambiar a la pestaña de Fermentación
+    // 2. Disparar el cambio de pestaña hacia Fermentación
     var botonesTab = document.querySelectorAll('button, a, [data-tab]');
     botonesTab.forEach(function(el) {
         var textoBtn = (el.textContent || '').trim().toLowerCase();
@@ -3139,73 +3129,72 @@ window.ejecutarGuardadoYPasarAFermentacion = function() {
         }
     });
 
-    // 2. Inyectar con precisión quirúrgica en los campos de Fermentación
-    setTimeout(function() {
-        var inputsFerm = document.querySelectorAll('input');
-        
-        // En la pantalla de fermentación, asignamos ordenadamente basándonos en la estructura visual vista en las capturas:
-        // El input #ferm-estilo o el primer input de texto es el Estilo
-        var inputEstiloFerm = document.querySelector('#ferm-estilo') || inputsFerm[0];
-        if (inputEstiloFerm) {
-            inputEstiloFerm.value = estiloIngresado;
-            inputEstiloFerm.dispatchEvent(new Event('input', { bubbles: true }));
-        }
-
-        // Buscar el input de fecha (que tiene el icono de calendario o placeholder relacionado) y el de lote
-        inputsFerm.forEach(function(inp) {
-            var ph = (inp.placeholder || '').toLowerCase();
-            var valActual = (inp.value || '').trim();
-            
-            // Si parece el campo de lote (suele tener L-2026 o similar)
-            if (valActual.includes('L-2026') || ph.includes('lote')) {
-                inp.value = loteIngresado;
-                inp.dispatchEvent(new Event('input', { bubbles: true }));
-            }
-            // Si es el campo de fecha de elaboración
-            if (inp.type === 'date' || valActual.includes('/') || ph.includes('dd') || ph.includes('fecha')) {
-                // Convertir formato si es necesario o aplicar directo
-                inp.value = fechaIngresada;
-                inp.dispatchEvent(new Event('input', { bubbles: true }));
-                inp.dispatchEvent(new Event('change', { bubbles: true }));
-            }
-        });
-
-        // Inyectar filas en la tabla de seguimiento diario
+    // 3. Forzar la inyección y proteger contra el redibujado de la SPA usando un MutationObserver
+    var intentos = 0;
+    var intervaloInyeccion = setInterval(function() {
+        intentos++;
+        var campoEstiloFerm = document.querySelector('#ferm-estilo') || document.querySelector('input[name*="estilo"], input[id*="estilo"]');
         var cabeceraTabla = null;
+        
         document.querySelectorAll('div').forEach(function(el) {
             if (el.textContent.includes('DÍA') && el.textContent.includes('DENSIDAD') && el.textContent.includes('TEMPERATURA')) {
                 cabeceraTabla = el;
             }
         });
 
-        if (cabeceraTabla) {
+        if (campoEstiloFerm && cabeceraTabla) {
+            // Asignar valores correctos
+            campoEstiloFerm.value = estilo;
+            campoEstiloFerm.dispatchEvent(new Event('input', { bubbles: true }));
+            campoEstiloFerm.dispatchEvent(new Event('change', { bubbles: true }));
+
+            // Rellenar demás inputs de la sección de encabezado de fermentación
+            document.querySelectorAll('input').forEach(function(inp) {
+                var ph = (inp.placeholder || '').toLowerCase();
+                var val = (inp.value || '').trim();
+                if (ph.includes('lote') || val.includes('L-2026')) {
+                    inp.value = lote;
+                    inp.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+                if (inp.type === 'date' || ph.includes('fecha') || val.includes('/')) {
+                    // Si el input espera formato YYYY-MM-DD o texto directo
+                    inp.value = fecha;
+                    inp.dispatchEvent(new Event('input', { bubbles: true }));
+                    inp.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            });
+
+            // Inyectar tabla de seguimiento diario con la fecha exacta de elaboración
             var tablaIncr = document.getElementById('tabla-seguimiento-incrustada');
-            if (tablaIncr) {
-                tablaIncr.remove();
+            if (!tablaIncr) {
+                var nuevaIncr = document.createElement('div');
+                nuevaIncr.id = 'tabla-seguimiento-incrustada';
+                nuevaIncr.className = 'mt-2 space-y-2 p-2 bg-slate-900/40 rounded';
+
+                for (var d = 1; d <= 7; d++) {
+                    var fila = document.createElement('div');
+                    fila.className = 'grid grid-cols-7 gap-2 items-center mb-1.5';
+                    fila.innerHTML = `
+                        <span class="text-white text-xs font-bold text-center bg-slate-800 py-1.5 rounded">Día ${d}</span>
+                        <input type="text" value="${fecha}" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-1 text-white text-xs text-center">
+                        <input type="text" placeholder="1.010" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-1 text-amber-300 font-bold text-xs text-center">
+                        <input type="text" placeholder="18°C" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-1 text-blue-300 font-bold text-xs text-center">
+                        <input type="text" placeholder="-" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-1 text-white text-xs text-center">
+                        <input type="text" placeholder="4.2" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-1 text-white text-xs text-center">
+                        <input type="text" placeholder="Notas..." class="bg-slate-950 border border-slate-700 rounded px-1.5 py-1 text-white text-xs">
+                    `;
+                    nuevaIncr.appendChild(fila);
+                }
+                cabeceraTabla.insertAdjacentElement('afterend', nuevaIncr);
             }
 
-            var nuevaIncr = document.createElement('div');
-            nuevaIncr.id = 'tabla-seguimiento-incrustada';
-            nuevaIncr.className = 'mt-2 space-y-2 p-2 bg-slate-900/40 rounded';
-
-            for (var d = 1; d <= 7; d++) {
-                var fila = document.createElement('div');
-                fila.className = 'grid grid-cols-7 gap-2 items-center mb-1.5';
-                fila.innerHTML = `
-                    <span class="text-white text-xs font-bold text-center bg-slate-800 py-1.5 rounded">Día ${d}</span>
-                    <input type="text" value="${fechaIngresada}" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-1 text-white text-xs text-center">
-                    <input type="text" placeholder="1.010" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-1 text-amber-300 font-bold text-xs text-center">
-                    <input type="text" placeholder="18°C" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-1 text-blue-300 font-bold text-xs text-center">
-                    <input type="text" placeholder="-" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-1 text-white text-xs text-center">
-                    <input type="text" placeholder="4.2" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-1 text-white text-xs text-center">
-                    <input type="text" placeholder="Notas..." class="bg-slate-950 border border-slate-700 rounded px-1.5 py-1 text-white text-xs">
-                `;
-                nuevaIncr.appendChild(fila);
-            }
-
-            cabeceraTabla.insertAdjacentElement('afterend', nuevaIncr);
+            clearInterval(intervaloInyeccion);
         }
-    }, 400);
+
+        if (intentos > 20) { // Cortar a los 2 segundos si no encuentra los elementos
+            clearInterval(intervaloInyeccion);
+        }
+    }, 100);
 
     alert("¡Cocción guardada correctamente y enviada a Fermentación!");
 };
@@ -3234,6 +3223,7 @@ window.cargarRecetaEnCoccion = function(clave) {
 
     window.recetaPendienteCoccion = r;
 
+    // Cambiar a pestaña de Cocción
     var botonesTab = document.querySelectorAll('button, a, [data-tab]');
     botonesTab.forEach(function(el) {
         var textoBtn = (el.textContent || '').trim().toLowerCase();
@@ -3265,6 +3255,7 @@ window.cargarRecetaEnCoccion = function(clave) {
             };
         }
 
+        // Renderizar granos
         var listaGranos = r.granos || r.maltas || [];
         var totalKg = listaGranos.reduce(function(acc, curr) { return acc + Number(curr.cantidad || 0); }, 0);
 
@@ -3303,6 +3294,7 @@ window.cargarRecetaEnCoccion = function(clave) {
             elementoTotales.textContent = "TOTALES DE KG: " + totalKg.toFixed(1) + " kg";
         }
 
+        // Renderizar lúpulos
         var listaLupulos = r.lupulos || [];
         if (listaLupulos.length > 0) {
             var textoAyudaLup = null;
@@ -3314,7 +3306,6 @@ window.cargarRecetaEnCoccion = function(clave) {
 
             if (textoAyudaLup) {
                 var contenedorPadreLup = textoAyudaLup.parentElement;
-                
                 var containerLupulosDinamico = document.getElementById('lupulos-inyectados-dinamicos');
                 if (!containerLupulosDinamico) {
                     containerLupulosDinamico = document.createElement('div');
