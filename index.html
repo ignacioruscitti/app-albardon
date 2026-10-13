@@ -3063,23 +3063,22 @@ window.guardarCoccion = function(clave) {
 };
 
 window.ejecutarGuardadoYPasarAFermentacion = function() {
-    // Capturar exactamente los valores de la planilla de cocción de la imagen
-    var inputsEncabezado = document.querySelectorAll('input[type="text"], input');
-    var nombreEstilo = 'APA 2026';
-    var fechaCoccion = '05/09/2026';
-    var numeroLote = 'L-2026-09';
+    // 1. Leer directamente los valores exactos que están en pantalla en ese momento
+    var inputs = document.querySelectorAll('input');
+    var estiloIngresado = "APA 2026";
+    var fechaIngresada = "05/09/2026";
+    var loteIngresado = "L-2026-09";
 
-    // Buscar de forma dinámica en los inputs del encabezado si el usuario los modificó
-    inputsEncabezado.forEach(function(inp) {
+    inputs.forEach(function(inp) {
         var val = inp.value ? inp.value.trim() : '';
-        if (val.includes('APA') || val.includes('Pilsen') || val.includes('Stout') || val.includes('Scottish')) {
-            nombreEstilo = val;
+        if (val && (val.includes('APA') || val.includes('Pilsen') || val.includes('Scottish') || val.includes('Stout') || val.includes('Ginger') || val.includes('2026'))) {
+            if (val.length < 30 && !val.includes('L-')) estiloIngresado = val;
         }
-        if (val.includes('L-2026') || val.includes('LOTE') || val.startsWith('L-')) {
-            numeroLote = val;
+        if (val && val.includes('L-2026')) {
+            loteIngresado = val;
         }
-        if (val.includes('/') && val.length >= 8 && val.length <= 10) {
-            fechaCoccion = val;
+        if (val && (val.includes('/') || val.includes('-')) && val.length >= 8 && val.length <= 10) {
+            fechaIngresada = val;
         }
     });
 
@@ -3097,21 +3096,21 @@ window.ejecutarGuardadoYPasarAFermentacion = function() {
     var lupulos = [];
     var filasLup = document.querySelectorAll('#lupulos-inyectados-dinamicos > div');
     filasLup.forEach(function(fila) {
-        var inputs = fila.querySelectorAll('input');
-        if (inputs.length >= 3) {
+        var inpList = fila.querySelectorAll('input');
+        if (inpList.length >= 3) {
             lupulos.push({
-                nombre: inputs[0].value,
-                cantidad: parseFloat(inputs[1].value) || 0,
-                minutos: parseInt(inputs[2].value) || 0
+                nombre: inpList[0].value,
+                cantidad: parseFloat(inpList[1].value) || 0,
+                minutos: parseInt(inpList[2].value) || 0
             });
         }
     });
 
     var registroCoccion = {
-        id: 'LOTE-' + numeroLote,
-        estilo: nombreEstilo,
-        lote: numeroLote,
-        fecha: fechaCoccion,
+        id: 'LOTE-' + loteIngresado,
+        estilo: estiloIngresado,
+        lote: loteIngresado,
+        fecha: fechaIngresada,
         granos: granos,
         lupulos: lupulos,
         recetaBase: window.recetaPendienteCoccion || {}
@@ -3126,7 +3125,7 @@ window.ejecutarGuardadoYPasarAFermentacion = function() {
         console.error("Error al guardar en localStorage:", e);
     }
 
-    // Activar la pestaña "Fermentación" de forma nativa
+    // 2. Cambiar a la pestaña de Fermentación
     var botonesTab = document.querySelectorAll('button, a, [data-tab]');
     botonesTab.forEach(function(el) {
         var textoBtn = (el.textContent || '').trim().toLowerCase();
@@ -3136,29 +3135,27 @@ window.ejecutarGuardadoYPasarAFermentacion = function() {
         }
     });
 
+    // 3. Sobrescribir de forma persistente tras el renderizado de la SPA
     setTimeout(function() {
-        // Asignar Estilo en Fermentación
         var inputEstiloFerm = document.querySelector('#ferm-estilo');
         if (inputEstiloFerm) {
-            inputEstiloFerm.value = nombreEstilo;
+            inputEstiloFerm.value = estiloIngresado;
             inputEstiloFerm.dispatchEvent(new Event('input', { bubbles: true }));
         }
 
-        // Asignar Lote y Fecha buscando por etiquetas en la vista de Fermentación
         document.querySelectorAll('input').forEach(function(inp) {
-            var placeholder = (inp.placeholder || '').toLowerCase();
-            var val = (inp.value || '').toLowerCase();
-            if (val.includes('l-2026') || placeholder.includes('lote')) {
-                inp.value = numeroLote;
+            var ph = (inp.placeholder || '').toLowerCase();
+            if (ph.includes('lote') || inp.value.includes('L-2026-01')) {
+                inp.value = loteIngresado;
                 inp.dispatchEvent(new Event('input', { bubbles: true }));
             }
-            if (val.includes('/') || placeholder.includes('fecha')) {
-                inp.value = fechaCoccion;
+            if (ph.includes('fecha') || inp.value.includes('13 / 10 / 2026')) {
+                inp.value = fechaIngresada;
                 inp.dispatchEvent(new Event('input', { bubbles: true }));
             }
         });
 
-        // Inyectar filas en la TABLA DE SEGUIMIENTO DIARIO respetando la fecha de cocción
+        // Inyectar filas en la tabla de seguimiento
         var cabeceraTabla = null;
         document.querySelectorAll('div').forEach(function(el) {
             if (el.textContent.includes('DÍA') && el.textContent.includes('DENSIDAD') && el.textContent.includes('TEMPERATURA')) {
@@ -3181,7 +3178,7 @@ window.ejecutarGuardadoYPasarAFermentacion = function() {
                 fila.className = 'grid grid-cols-7 gap-2 items-center mb-1.5';
                 fila.innerHTML = `
                     <span class="text-white text-xs font-bold text-center bg-slate-800 py-1.5 rounded">Día ${d}</span>
-                    <input type="text" value="${fechaCoccion}" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-1 text-white text-xs text-center">
+                    <input type="text" value="${fechaIngresada}" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-1 text-white text-xs text-center">
                     <input type="text" placeholder="1.010" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-1 text-amber-300 font-bold text-xs text-center">
                     <input type="text" placeholder="18°C" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-1 text-blue-300 font-bold text-xs text-center">
                     <input type="text" placeholder="-" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-1 text-white text-xs text-center">
@@ -3193,7 +3190,7 @@ window.ejecutarGuardadoYPasarAFermentacion = function() {
 
             cabeceraTabla.insertAdjacentElement('afterend', nuevaIncr);
         }
-    }, 300);
+    }, 400);
 
     alert("¡Cocción guardada correctamente y enviada a Fermentación!");
 };
