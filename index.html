@@ -3058,14 +3058,10 @@ window.descargarRecetaPDF = function(clave) {
 };
 window.recetaPendienteCoccion = window.recetaPendienteCoccion || null;
 
-window.calcularABV = window.calcularABV || function() {};
-
-// --- 1. FUNCIÓN QUE LLAMA EL BOTÓN "Cocinar esta Receta" DE LAS TARJETAS ---
 window.guardarCoccion = function(clave) {
     window.cargarRecetaEnCoccion(clave);
 };
 
-// --- 2. EL VERDADERO GUARDADO FINAL (Para el botón naranja dentro de la planilla) ---
 window.ejecutarGuardadoYPasarAFermentacion = function() {
     var estilo = document.querySelector('input[name*="estilo"], input[id*="estilo"], input[placeholder*="Estilo"]');
     var lote = document.querySelector('input[name*="lote"], input[id*="lote"], input[placeholder*="Lote"]');
@@ -3116,7 +3112,6 @@ window.ejecutarGuardadoYPasarAFermentacion = function() {
         console.error("Error al guardar en localStorage:", e);
     }
 
-    // Activar la pestaña "Fermentación" de forma nativa
     var botonesTab = document.querySelectorAll('button, a, [data-tab]');
     botonesTab.forEach(function(el) {
         var textoBtn = (el.textContent || '').trim().toLowerCase();
@@ -3126,7 +3121,6 @@ window.ejecutarGuardadoYPasarAFermentacion = function() {
         }
     });
 
-    // Inyección fija y directa dentro de la tarjeta de la tabla nativa de fermentación
     setTimeout(function() {
         var contenedorTablaNativa = null;
         document.querySelectorAll('div, section').forEach(function(el) {
@@ -3136,7 +3130,6 @@ window.ejecutarGuardadoYPasarAFermentacion = function() {
         });
 
         if (contenedorTablaNativa) {
-            // Eliminar contenedor anterior si ya existía
             var tablaIncr = document.getElementById('tabla-seguimiento-incrustada');
             if (tablaIncr) {
                 tablaIncr.remove();
@@ -3186,7 +3179,6 @@ window.ejecutarGuardadoYPasarAFermentacion = function() {
     alert("¡Cocción guardada correctamente y enviada a Fermentación!");
 };
 
-// --- 3. EL CARGADOR DE RECETAS EN LA PLANILLA ---
 window.cargarRecetaEnCoccion = function(clave) {
     var selectReceta = document.querySelector('select');
     if (!clave && selectReceta) {
@@ -3211,7 +3203,6 @@ window.cargarRecetaEnCoccion = function(clave) {
 
     window.recetaPendienteCoccion = r;
 
-    // Cambiar a la pestaña de Cocción
     var botonesTab = document.querySelectorAll('button, a, [data-tab]');
     botonesTab.forEach(function(el) {
         var textoBtn = (el.textContent || '').trim().toLowerCase();
@@ -3234,7 +3225,6 @@ window.cargarRecetaEnCoccion = function(clave) {
             inputLote.dispatchEvent(new Event('input', { bubbles: true }));
         }
 
-        // Interceptar el botón grande naranja de la planilla para que ejecute nuestro guardado real
         var botonGuardarPantalla = document.querySelector('button.bg-amber-500, button.bg-amber-600, button[class*="amber"]');
         if (botonGuardarPantalla && !botonGuardarPantalla.getAttribute('data-custom-bound')) {
             botonGuardarPantalla.setAttribute('data-custom-bound', 'true');
@@ -3244,7 +3234,6 @@ window.cargarRecetaEnCoccion = function(clave) {
             };
         }
 
-        // --- GRANOS ---
         var listaGranos = r.granos || r.maltas || [];
         var totalKg = listaGranos.reduce(function(acc, curr) { return acc + Number(curr.cantidad || 0); }, 0);
 
@@ -3283,7 +3272,6 @@ window.cargarRecetaEnCoccion = function(clave) {
             elementoTotales.textContent = "TOTALES DE KG: " + totalKg.toFixed(1) + " kg";
         }
 
-        // --- LÚPULOS ---
         var listaLupulos = r.lupulos || [];
         if (listaLupulos.length > 0) {
             var textoAyudaLup = null;
@@ -3324,8 +3312,6 @@ window.cargarRecetaEnCoccion = function(clave) {
                 });
             }
         }
-
-        console.log("-> Receta cargada correctamente en cocción desde tarjeta:", r.nombre);
     }, 300);
 };
 
