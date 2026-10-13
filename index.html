@@ -3056,6 +3056,139 @@ window.descargarRecetaPDF = function(clave) {
         ventana.print();
     }, 500);
 };
+window.recetaPendienteCoccion = window.recetaPendienteCoccion || null;
 
+window.cargarRecetaEnCoccion = function(clave) {
+    var selectReceta = document.querySelector('select');
+    if (!clave && selectReceta) {
+        clave = selectReceta.value;
+    }
+
+    if (!clave || clave === "" || clave.includes("Seleccionar")) {
+        var keys = typeof recetas !== 'undefined' ? Object.keys(recetas) : [];
+        if (keys.length > 0) {
+            clave = keys[0];
+        } else {
+            alert("Por favor, seleccioná una receta primero.");
+            return;
+        }
+    }
+
+    var r = (typeof recetas !== 'undefined' ? recetas : {})[clave];
+    if (!r) {
+        alert("No se encontró la receta en el sistema.");
+        return;
+    }
+
+    window.recetaPendienteCoccion = r;
+
+    // Cambiar a pestaña de Cocción
+    var botonesTab = document.querySelectorAll('button, a, [data-tab]');
+    botonesTab.forEach(function(el) {
+        var textoBtn = (el.textContent || '').trim().toLowerCase();
+        var attrTab = (el.getAttribute('data-tab') || '').toLowerCase();
+        if (textoBtn.includes('cocci') || attrTab.includes('coccion')) {
+            el.click();
+        }
+    });
+
+    setTimeout(function() {
+        var inputEstilo = document.querySelector('input[name*="estilo"], input[id*="estilo"], input[placeholder*="Estilo"]');
+        if (inputEstilo) {
+            inputEstilo.value = r.nombre || '';
+            inputEstilo.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+
+        var inputLote = document.querySelector('input[name*="lote"], input[id*="lote"], input[placeholder*="Lote"]');
+        if (inputLote) {
+            inputLote.value = r.lote || '';
+            inputLote.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+
+        // Renderizar granos
+        var listaGranos = r.granos || r.maltas || [];
+        var totalKg = listaGranos.reduce(function(acc, curr) { return acc + Number(curr.cantidad || 0); }, 0);
+
+        var elementoTotales = null;
+        document.querySelectorAll('div, span, p').forEach(function(el) {
+            if (el.textContent.includes('TOTALES DE KG')) {
+                elementoTotales = el;
+            }
+        });
+
+        if (elementoTotales) {
+            var containerGranosDinamico = document.getElementById('granos-inyectados-dinamicos');
+            if (!containerGranosDinamico) {
+                containerGranosDinamico = document.createElement('div');
+                containerGranosDinamico.id = 'granos-inyectados-dinamicos';
+                containerGranosDinamico.className = 'mt-4 space-y-2 p-4 bg-slate-900/50 rounded-lg border border-slate-800';
+                elementoTotales.parentElement.insertAdjacentElement('afterend', containerGranosDinamico);
+            }
+
+            containerGranosDinamico.innerHTML = '<h3 class="text-sm font-bold text-amber-400 mb-2">GRANOS / MOLIENDA (Cargados Automáticamente)</h3>';
+
+            listaGranos.forEach(function(g) {
+                var nombreGrano = g.nombre || g.item || 'Malta';
+                var cantGrano = g.cantidad || 0;
+
+                var fila = document.createElement('div');
+                fila.className = 'flex items-center gap-2 w-full mb-1';
+                fila.innerHTML = `
+                    <input type="text" value="${nombreGrano}" class="flex-1 bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-sm text-white focus:outline-none">
+                    <input type="number" value="${cantGrano}" class="w-24 bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-sm text-amber-300 font-bold focus:outline-none">
+                    <button type="button" onclick="this.parentElement.remove()" class="text-red-400 hover:text-red-300 px-2 font-bold">×</button>
+                `;
+                containerGranosDinamico.appendChild(fila);
+            });
+
+            elementoTotales.textContent = "TOTALES DE KG: " + totalKg.toFixed(1) + " kg";
+        }
+
+        // Renderizar lúpulos
+        var listaLupulos = r.lupulos || [];
+        if (listaLupulos.length > 0) {
+            var textoAyudaLup = null;
+            document.querySelectorAll('p, span, div').forEach(function(el) {
+                if (el.textContent.includes('Seleccione una receta para autocompletar adiciones de lúpulo')) {
+                    textoAyudaLup = el;
+                }
+            });
+
+            if (textoAyudaLup) {
+                var contenedorPadreLup = textoAyudaLup.parentElement;
+                var containerLupulosDinamico = document.getElementById('lupulos-inyectados-dinamicos');
+                if (!containerLupulosDinamico) {
+                    containerLupulosDinamico = document.createElement('div');
+                    containerLupulosDinamico.id = 'lupulos-inyectados-dinamicos';
+                    containerLupulosDinamico.className = 'mt-3 space-y-2';
+                    contenedorPadreLup.appendChild(containerLupulosDinamico);
+                }
+
+                textoAyudaLup.style.display = 'none';
+                containerLupulosDinamico.innerHTML = '';
+
+                listaLupulos.forEach(function(l) {
+                    var nombreLupulo = l.nombre || l.item || 'Lúpulo';
+                    var cantLupulo = l.cantidad || l.gramos || 0;
+                    var minLupulo = l.minutos || l.tiempo || 0;
+
+                    var filaLup = document.createElement('div');
+                    filaLup.className = 'flex items-center gap-2 w-full mb-1';
+                    filaLup.innerHTML = `
+                        <input type="text" value="${nombreLupulo}" class="flex-1 bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-sm text-white focus:outline-none">
+                        <input type="number" value="${cantLupulo}" placeholder="grs" class="w-24 bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-sm text-amber-300 font-bold focus:outline-none" title="Gramos">
+                        <input type="number" value="${minLupulo}" placeholder="min" class="w-20 bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-sm text-blue-300 font-bold focus:outline-none" title="Minutos">
+                        <button type="button" onclick="this.parentElement.remove()" class="text-red-400 hover:text-red-300 px-2 font-bold">×</button>
+                    `;
+                    containerLupulosDinamico.appendChild(filaLup);
+                });
+            }
+        }
+    }, 300);
+};
+
+window.usarRecetaEnCoccion = function(clave) {
+    window.cargarRecetaEnCoccion(clave);
+};
 })();
 </script>
