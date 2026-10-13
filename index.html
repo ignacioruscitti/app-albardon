@@ -3191,8 +3191,73 @@ window.usarRecetaEnCoccion = function(clave) {
     window.cargarRecetaEnCoccion(clave);
 };
     window.guardarCoccion = function() {
-    // Función de respaldo para evitar el error en la consola
-    console.log("Botón de guardar presionado");
+    // 1. Capturar los datos de la pantalla de cocción
+    var inputs = document.querySelectorAll('input');
+    var estilo = "APA 2026";
+    var fecha = "05/09/2026";
+    var lote = "L-2026-09";
+
+    inputs.forEach(function(inp) {
+        var val = inp.value ? inp.value.trim() : '';
+        if (val && (val.includes('APA') || val.includes('Pilsen') || val.includes('Stout') || val.includes('Scottish'))) {
+            estilo = val;
+        }
+        if (val && val.includes('L-2026')) {
+            lote = val;
+        }
+        if (val && (val.includes('/') || val.includes('-')) && val.length >= 8 && val.length <= 10) {
+            fecha = val;
+        }
+    });
+
+    var registroCoccion = {
+        id: 'LOTE-' + lote,
+        estilo: estilo,
+        lote: lote,
+        fecha: fecha,
+        recetaBase: window.recetaPendienteCoccion || {}
+    };
+
+    // 2. Guardar en el historial general de la app (Biblioteca / Lista guardada)
+    try {
+        var listaGuardada = JSON.parse(localStorage.getItem('fermentaciones_albardon') || '[]');
+        listaGuardada.push(registroCoccion);
+        localStorage.setItem('fermentaciones_albardon', JSON.stringify(listaGuardada));
+        localStorage.setItem('lote_activo_fermentacion', JSON.stringify(registroCoccion));
+    } catch(e) {
+        console.error("Error al guardar en el historial:", e);
+    }
+
+    // 3. Cambiar a la pestaña de Fermentación
+    var botonesTab = document.querySelectorAll('button, a, [data-tab]');
+    botonesTab.forEach(function(el) {
+        var textoBtn = (el.textContent || '').trim().toLowerCase();
+        var attrTab = (el.getAttribute('data-tab') || '').toLowerCase();
+        if (textoBtn.includes('fermentaci') || attrTab.includes('fermentacion')) {
+            el.click();
+        }
+    });
+
+    // 4. Inyectar los datos en la vista de Fermentación
+    setTimeout(function() {
+        var inputEstiloFerm = document.querySelector('#ferm-estilo');
+        if (inputEstiloFerm) {
+            inputEstiloFerm.value = estilo;
+            inputEstiloFerm.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+
+        document.querySelectorAll('input').forEach(function(inp) {
+            var ph = (inp.placeholder || '').toLowerCase();
+            if (ph.includes('lote') || inp.value.includes('L-2026')) {
+                inp.value = lote;
+                inp.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+            if (ph.includes('fecha') || inp.type === 'date' || inp.value.includes('/')) {
+                inp.value = fecha;
+                inp.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        });
+    }, 300);
 };
 })();
 </script>
