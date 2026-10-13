@@ -3067,15 +3067,15 @@ window.ejecutarGuardadoYPasarAFermentacion = function() {
     var lote = document.querySelector('input[name*="lote"], input[id*="lote"], input[placeholder*="Lote"]');
     var volumen = document.querySelector('input[name*="volumen"], input[name*="batch"], input[placeholder*="280L"]');
     var diReceta = document.querySelector('input[name*="di"], input[placeholder*="1.052"]');
+    
+    // Capturar la fecha exacta escrita en la planilla de cocción
+    var inputFechaCoccion = document.querySelector('input[type="date"], input[id*="fecha"], input[name*="fecha"]');
+    var fechaElegida = inputFechaCoccion ? inputFechaCoccion.value : new Date().toISOString().split('T')[0];
 
     var nombreEstilo = estilo ? estilo.value : (window.recetaPendienteCoccion ? window.recetaPendienteCoccion.nombre : 'Estilo Desconocido');
     var numeroLote = lote ? lote.value : 'L-2026-01';
     var valorVolumen = volumen ? volumen.value : '280L';
     var valorDI = diReceta ? diReceta.value : '1.052';
-    
-    // Obtener la fecha actual en formato YYYY-MM-DD que es el que exigen los inputs date nativos
-    var fechaHoyISO = new Date().toISOString().split('T')[0];
-    var fechaHoyLocal = new Date().toLocaleDateString();
 
     var granos = [];
     var inputsGranos = document.querySelectorAll('#granos-inyectados-dinamicos input');
@@ -3107,7 +3107,7 @@ window.ejecutarGuardadoYPasarAFermentacion = function() {
         lote: numeroLote,
         volumen: valorVolumen,
         di: valorDI,
-        fecha: fechaHoyLocal,
+        fecha: fechaElegida,
         granos: granos,
         lupulos: lupulos,
         recetaBase: window.recetaPendienteCoccion || {}
@@ -3140,7 +3140,7 @@ window.ejecutarGuardadoYPasarAFermentacion = function() {
             inputEstiloFerm.dispatchEvent(new Event('input', { bubbles: true }));
         }
 
-        // Asignar Fecha de Elaboración (Buscando el input de tipo date o el que esté junto a la etiqueta FECHA ELABORACIÓN)
+        // Asignar la Fecha de Elaboración exacta que se eligió en cocción
         var labelFecha = null;
         document.querySelectorAll('span, label, div').forEach(function(el) {
             if (el.textContent.trim() === 'FECHA ELABORACIÓN') {
@@ -3153,24 +3153,22 @@ window.ejecutarGuardadoYPasarAFermentacion = function() {
             if (contenedorFecha) {
                 var inputFechaReal = contenedorFecha.querySelector('input');
                 if (inputFechaReal) {
-                    inputFechaReal.value = fechaHoyISO;
+                    inputFechaReal.value = fechaElegida;
                     inputFechaReal.dispatchEvent(new Event('input', { bubbles: true }));
                     inputFechaReal.dispatchEvent(new Event('change', { bubbles: true }));
                 }
             }
         }
 
-        // Inyectar filas en la TABLA DE SEGUIMIENTO DIARIO
-        var elementos = document.querySelectorAll('div, span, h3, section');
-        var contenedorTabla = null;
-
-        elementos.forEach(function(el) {
-            if (el.textContent.trim() === 'TABLA DE SEGUIMIENTO DIARIO') {
-                contenedorTabla = el.parentElement;
+        // Inyectar filas en la TABLA DE SEGUIMIENTO DIARIO respetando la fecha de elaboración
+        var cabeceraTabla = null;
+        document.querySelectorAll('div').forEach(function(el) {
+            if (el.textContent.includes('DÍA') && el.textContent.includes('DENSIDAD') && el.textContent.includes('TEMPERATURA')) {
+                cabeceraTabla = el;
             }
         });
 
-        if (contenedorTabla) {
+        if (cabeceraTabla) {
             var tablaIncr = document.getElementById('tabla-seguimiento-incrustada');
             if (tablaIncr) {
                 tablaIncr.remove();
@@ -3178,14 +3176,14 @@ window.ejecutarGuardadoYPasarAFermentacion = function() {
 
             var nuevaIncr = document.createElement('div');
             nuevaIncr.id = 'tabla-seguimiento-incrustada';
-            nuevaIncr.className = 'mt-3 space-y-2 p-3 bg-slate-900/80 rounded-lg border border-slate-700';
+            nuevaIncr.className = 'mt-2 space-y-2 p-2 bg-slate-900/40 rounded';
 
             for (var d = 1; d <= 7; d++) {
                 var fila = document.createElement('div');
                 fila.className = 'grid grid-cols-7 gap-2 items-center mb-1.5';
                 fila.innerHTML = `
                     <span class="text-white text-xs font-bold text-center bg-slate-800 py-1.5 rounded">Día ${d}</span>
-                    <input type="text" value="${fechaHoyLocal}" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-1 text-white text-xs text-center">
+                    <input type="text" value="${fechaElegida}" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-1 text-white text-xs text-center">
                     <input type="text" placeholder="1.010" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-1 text-amber-300 font-bold text-xs text-center">
                     <input type="text" placeholder="18°C" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-1 text-blue-300 font-bold text-xs text-center">
                     <input type="text" placeholder="-" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-1 text-white text-xs text-center">
@@ -3195,7 +3193,7 @@ window.ejecutarGuardadoYPasarAFermentacion = function() {
                 nuevaIncr.appendChild(fila);
             }
 
-            contenedorTabla.appendChild(nuevaIncr);
+            cabeceraTabla.insertAdjacentElement('afterend', nuevaIncr);
         }
     }, 300);
 
