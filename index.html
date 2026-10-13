@@ -3063,17 +3063,19 @@ window.guardarCoccion = function(clave) {
 };
 
 window.ejecutarGuardadoYPasarAFermentacion = function() {
-    // 1. Obtener los elementos de la planilla de cocción
     var estilo = document.querySelector('#ferm-estilo, input[name*="estilo"], input[id*="estilo"]');
     var lote = document.querySelector('input[name*="lote"], input[id*="lote"], input[placeholder*="Lote"]');
     var volumen = document.querySelector('input[name*="volumen"], input[name*="batch"], input[placeholder*="280L"]');
     var diReceta = document.querySelector('input[name*="di"], input[placeholder*="1.052"]');
 
     var nombreEstilo = estilo ? estilo.value : (window.recetaPendienteCoccion ? window.recetaPendienteCoccion.nombre : 'Estilo Desconocido');
-    var numeroLote = lote ? lote.value : (window.recetaPendienteCoccion ? window.recetaPendienteCoccion.lote : 'L-2026-01');
+    var numeroLote = lote ? lote.value : 'L-2026-01';
     var valorVolumen = volumen ? volumen.value : '280L';
     var valorDI = diReceta ? diReceta.value : '1.052';
-    var fechaHoy = new Date().toLocaleDateString();
+    
+    // Obtener la fecha actual en formato YYYY-MM-DD que es el que exigen los inputs date nativos
+    var fechaHoyISO = new Date().toISOString().split('T')[0];
+    var fechaHoyLocal = new Date().toLocaleDateString();
 
     var granos = [];
     var inputsGranos = document.querySelectorAll('#granos-inyectados-dinamicos input');
@@ -3105,7 +3107,7 @@ window.ejecutarGuardadoYPasarAFermentacion = function() {
         lote: numeroLote,
         volumen: valorVolumen,
         di: valorDI,
-        fecha: fechaHoy,
+        fecha: fechaHoyLocal,
         granos: granos,
         lupulos: lupulos,
         recetaBase: window.recetaPendienteCoccion || {}
@@ -3131,25 +3133,34 @@ window.ejecutarGuardadoYPasarAFermentacion = function() {
     });
 
     setTimeout(function() {
-        // --- 2. Sincronizar todos los campos de la sección ENCABEZADO ---
-        var selectorCampos = function(id, selectors, valor) {
-            var input = document.getElementById(id) || document.querySelector(selectors);
-            if (input) {
-                input.value = valor;
-                input.dispatchEvent(new Event('input', { bubbles: true }));
-                input.dispatchEvent(new Event('change', { bubbles: true }));
+        // Asignar Estilo
+        var inputEstiloFerm = document.querySelector('#ferm-estilo');
+        if (inputEstiloFerm) {
+            inputEstiloFerm.value = nombreEstilo;
+            inputEstiloFerm.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+
+        // Asignar Fecha de Elaboración (Buscando el input de tipo date o el que esté junto a la etiqueta FECHA ELABORACIÓN)
+        var labelFecha = null;
+        document.querySelectorAll('span, label, div').forEach(function(el) {
+            if (el.textContent.trim() === 'FECHA ELABORACIÓN') {
+                labelFecha = el;
             }
-        };
+        });
 
-        // Asignación de valores al módulo Fermentación
-        selectorCampos('ferm-estilo', 'input[name="ferm-estilo"]', nombreEstilo);
-        selectorCampos('ferm-lote', 'input[name*="lote"], input[id*="ferm-lote"]', numeroLote);
-        selectorCampos('ferm-fecha', 'input[type="date"], input[id*="ferm-fecha"]', fechaHoy);
-        selectorCampos('ferm-batch', 'input[id*="ferm-batch"], input[id*="ferm-volumen"]', valorVolumen);
-        selectorCampos('ferm-di-receta', 'input[id*="ferm-di-receta"]', valorDI);
-        selectorCampos('ferm-di-real', 'input[id*="ferm-di-real"]', valorDI);
+        if (labelFecha) {
+            var contenedorFecha = labelFecha.closest('div');
+            if (contenedorFecha) {
+                var inputFechaReal = contenedorFecha.querySelector('input');
+                if (inputFechaReal) {
+                    inputFechaReal.value = fechaHoyISO;
+                    inputFechaReal.dispatchEvent(new Event('input', { bubbles: true }));
+                    inputFechaReal.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            }
+        }
 
-        // --- 3. Inyectar filas en la TABLA DE SEGUIMIENTO DIARIO ---
+        // Inyectar filas en la TABLA DE SEGUIMIENTO DIARIO
         var elementos = document.querySelectorAll('div, span, h3, section');
         var contenedorTabla = null;
 
@@ -3174,7 +3185,7 @@ window.ejecutarGuardadoYPasarAFermentacion = function() {
                 fila.className = 'grid grid-cols-7 gap-2 items-center mb-1.5';
                 fila.innerHTML = `
                     <span class="text-white text-xs font-bold text-center bg-slate-800 py-1.5 rounded">Día ${d}</span>
-                    <input type="text" value="${fechaHoy}" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-1 text-white text-xs text-center">
+                    <input type="text" value="${fechaHoyLocal}" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-1 text-white text-xs text-center">
                     <input type="text" placeholder="1.010" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-1 text-amber-300 font-bold text-xs text-center">
                     <input type="text" placeholder="18°C" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-1 text-blue-300 font-bold text-xs text-center">
                     <input type="text" placeholder="-" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-1 text-white text-xs text-center">
