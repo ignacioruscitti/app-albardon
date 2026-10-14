@@ -6,9 +6,16 @@
 <meta name="google" content="notranslate" />
 <title>Cervecería Albardón - Sistema de Gestión Integral</title>
 <link rel="icon" href="logo.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0f172a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="logo.png">
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
     body { background-color: #0f172a; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
     .tab-btn.active { background-color: #f59e0b; color: #020617; font-weight: bold; }
@@ -21,6 +28,24 @@
 </style>
 </head>
 <body class="pb-12">
+
+<!-- ==================== ACCESO ==================== -->
+<div id="pantalla-login" class="fixed inset-0 z-[100] bg-slate-950 flex items-center justify-center p-4 no-print">
+    <div class="card p-8 w-full max-w-sm space-y-5">
+        <div class="text-center space-y-2">
+            <img src="logo.png" alt="Logo" class="h-16 w-16 object-contain rounded-full bg-slate-900 border border-slate-700 mx-auto">
+            <h1 class="text-xl font-bold tracking-wider text-white">ALBARDÓN</h1>
+            <p class="text-xs text-slate-400">Ingresá para acceder al sistema de gestión</p>
+        </div>
+        <div class="space-y-3 text-sm">
+            <input type="email" id="login-email" autocomplete="username" placeholder="Correo electrónico" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3">
+            <input type="password" id="login-pass" autocomplete="current-password" placeholder="Contraseña" onkeydown="if(event.key==='Enter')iniciarSesion()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3">
+            <button onclick="iniciarSesion()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3 rounded-lg">Ingresar</button>
+            <p id="login-msg" class="text-xs text-red-400 min-h-[1rem]"></p>
+            <button onclick="olvidePass()" class="text-xs text-slate-400 hover:text-amber-400 underline">Olvidé mi contraseña</button>
+        </div>
+    </div>
+</div>
 
 <!-- ==================== HEADER ==================== -->
 <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-40 shadow-lg no-print">
@@ -37,9 +62,17 @@
             <button onclick="switchTab('coccion')" id="btn-coccion" class="tab-btn px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700 transition-colors flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-clipboard-list"></i> Cocción</button>
             <button onclick="switchTab('fermentacion')" id="btn-fermentacion" class="tab-btn px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700 transition-colors flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-temperature-half"></i> Fermentación</button>
             <button onclick="switchTab('stock')" id="btn-stock" class="tab-btn px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700 transition-colors flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-boxes-stacked"></i> Barriles en stock</button>
+            <button onclick="switchTab('insumos')" id="btn-insumos" class="tab-btn px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700 transition-colors flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-warehouse"></i> Insumos <span id="badge-insumos" class="hidden bg-red-500 text-white rounded-full text-[10px] px-1.5 py-0.5 font-bold">0</span></button>
             <button onclick="switchTab('cc')" id="btn-cc" class="tab-btn px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700 transition-colors flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-users"></i> Cuentas Corrientes</button>
             <button onclick="switchTab('biblioteca')" id="btn-biblioteca" class="tab-btn px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700 transition-colors flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-book-bookmark"></i> Biblioteca</button>
         </nav>
+        <div class="flex items-center gap-2 mt-4 sm:mt-0 text-xs">
+            <span id="pill-offline" class="hidden px-2 py-1 rounded-full bg-red-500/20 text-red-300 border border-red-500/30"><i class="fa-solid fa-wifi"></i> Sin conexión</span>
+            <button id="btn-instalar" onclick="instalarApp()" class="hidden px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold"><i class="fa-solid fa-download"></i> Instalar</button>
+            <button id="btn-datos" onclick="abrirModalDatos()" class="px-2.5 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold"><i class="fa-solid fa-database"></i> Datos</button>
+            <span id="usuario-actual" class="hidden md:inline text-slate-400"></span>
+            <button id="btn-salir" onclick="cerrarSesion()" title="Cerrar sesión" class="hidden px-2.5 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold"><i class="fa-solid fa-right-from-bracket"></i></button>
+        </div>
     </div>
 </header>
 
@@ -56,7 +89,7 @@
 
     <!-- Panel de alta de receta -->
     <div id="form-receta-panel" class="card p-6 space-y-6 hidden border-amber-500/50 no-print">
-        <h3 class="text-base font-bold text-amber-400 uppercase tracking-wider border-b border-slate-700 pb-2 flex items-center gap-2"><i class="fa-solid fa-sliders"></i> Configuración Técnica de Receta</h3>
+        <h3 class="text-base font-bold text-amber-400 uppercase tracking-wider border-b border-slate-700 pb-2 flex items-center gap-2"><i class="fa-solid fa-sliders"></i> <span id="titulo-form-receta">Configuración Técnica de Receta</span></h3>
 
         <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-3 text-xs bg-slate-900/60 p-4 rounded-xl border border-slate-700/80">
             <div class="col-span-2"><label class="text-slate-400 block mb-1">Nombre / Estilo</label><input type="text" id="rec-nombre" placeholder="ej. APA Pilsen 280" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-bold text-slate-200"></div>
@@ -127,7 +160,7 @@
 
         <div class="flex justify-end gap-3 pt-2 border-t border-slate-700">
             <button onclick="ocultarFormularioReceta()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-bold px-4 py-2 rounded-lg">Cancelar</button>
-            <button onclick="guardarReceta()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold px-4 py-2 rounded-lg">Guardar Receta Completa</button>
+            <button id="btn-guardar-receta" onclick="guardarReceta()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold px-4 py-2 rounded-lg">Guardar Receta Completa</button>
         </div>
     </div>
 
@@ -143,6 +176,11 @@
             <select id="select-receta" onchange="cargarRecetaEnCoccion()" class="bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-lg p-2 focus:ring-1 focus:ring-amber-500 outline-none"></select>
             <button onclick="descargarCoccionPDF()" title="Descargar Planilla en PDF" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-2 rounded-lg text-xs flex items-center gap-1 transition-colors"><i class="fa-solid fa-file-pdf"></i> Generar PDF</button>
         </div>
+    </div>
+
+    <div id="banner-edicion-coccion" class="hidden card p-3 border-amber-500/60 bg-amber-500/10 flex flex-wrap justify-between items-center gap-3 no-print">
+        <span class="text-sm text-amber-300"><i class="fa-solid fa-pen-to-square"></i> <span id="banner-edicion-coccion-txt"></span></span>
+        <button onclick="cancelarEdicionCoccion()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-bold px-3 py-1.5 rounded-lg">Cancelar edición</button>
     </div>
 
     <div id="area-impresion-coccion" class="space-y-6">
@@ -267,8 +305,8 @@
         </div>
     </div>
 
-    <button onclick="guardarCoccion()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg transition-colors no-print mt-6">
-        <i class="fa-solid fa-floppy-disk"></i> Guardar Cocción y Pasar a Fermentación
+    <button id="btn-guardar-coccion" onclick="guardarCoccion()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg transition-colors no-print mt-6">
+        <i class="fa-solid fa-floppy-disk"></i> <span id="btn-guardar-coccion-txt">Guardar Cocción y Pasar a Fermentación</span>
     </button>
 </section>
 
@@ -277,9 +315,17 @@
     <div class="card p-4 flex flex-wrap justify-between items-center gap-4 no-print">
         <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2"><i class="fa-solid fa-temperature-half"></i> Control de Fermentación</h2>
         <div class="flex items-center gap-3">
-            <span class="text-xs font-mono bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/20">Fermentador #1 (Activo)</span>
+            <span class="text-xs font-mono bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/20"><span id="ferm-activo-label">Fermentador</span> (activo)</span>
             <button onclick="descargarFermentacionPDF()" title="Descargar Planilla de Fermentación en PDF" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-2 rounded-lg text-xs flex items-center gap-1"><i class="fa-solid fa-file-pdf"></i> Generar PDF</button>
         </div>
+    </div>
+
+    <div id="selector-fermentadores" class="flex flex-wrap items-stretch gap-2 no-print"></div>
+    <div id="aviso-fin-ferm" class="hidden card p-3 border-emerald-500/60 bg-emerald-500/10 text-sm text-emerald-300 flex flex-wrap items-center gap-3 no-print"></div>
+
+    <div id="banner-edicion-fermentacion" class="hidden card p-3 border-amber-500/60 bg-amber-500/10 flex flex-wrap justify-between items-center gap-3 no-print">
+        <span class="text-sm text-amber-300"><i class="fa-solid fa-pen-to-square"></i> <span id="banner-edicion-fermentacion-txt"></span></span>
+        <button onclick="cancelarEdicionFerm()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-bold px-3 py-1.5 rounded-lg">Cancelar edición</button>
     </div>
 
     <div id="area-impresion-fermentacion" class="space-y-6">
@@ -313,6 +359,8 @@
             </table>
         </div>
 
+        <div class="card p-4 space-y-3"><h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Curva de Fermentación</h3><div id="grafico-fermentacion"></div></div>
+
         <div class="card p-4 space-y-4">
             <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Cierre de Fermentación</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
@@ -330,7 +378,7 @@
                     <h4 class="text-xs font-semibold text-slate-300 uppercase">Finalizar Lote</h4>
                     <p class="text-xs text-slate-400">Al finalizar se guarda la planilla en la <strong>Biblioteca</strong> y se abre el alta de barril con este lote ya cargado como <strong>Lleno en fábrica</strong>.</p>
                     <button onclick="guardarFermentacion()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-lg text-sm flex items-center justify-center gap-2 transition-colors">
-                        <i class="fa-solid fa-boxes-stacked"></i> Guardar Fermentación y Pasar a Barriles
+                        <i class="fa-solid fa-boxes-stacked"></i> <span id="btn-guardar-ferm-txt">Guardar Fermentación y Pasar a Barriles</span>
                     </button>
                 </div>
             </div>
@@ -380,6 +428,22 @@
         </div>
     </div>
     <div id="grilla-clientes" class="space-y-4"></div>
+</section>
+
+<!-- ==================== INSUMOS ==================== -->
+<section id="tab-insumos" class="space-y-6 hidden">
+    <div class="card p-4 flex flex-wrap justify-between items-center gap-4 no-print">
+        <div>
+            <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2"><i class="fa-solid fa-warehouse"></i> Stock de Insumos</h2>
+            <p class="text-xs text-slate-400">Maltas, lúpulos, levadura y sales. Se descuentan solos al guardar una cocción (el nombre tiene que coincidir con el de la receta).</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+            <input type="text" id="buscar-insumo" oninput="renderInsumos()" placeholder="Buscar..." class="bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs w-32">
+            <button onclick="importarInsumosDesdeRecetas()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold px-3 py-2 rounded-lg text-xs flex items-center gap-1"><i class="fa-solid fa-file-import"></i> Importar desde recetas</button>
+            <button onclick="mostrarModalInsumo()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-2 rounded-lg text-xs flex items-center gap-1"><i class="fa-solid fa-plus"></i> Nuevo insumo</button>
+        </div>
+    </div>
+    <div id="grilla-insumos"></div>
 </section>
 
 <!-- ==================== BIBLIOTECA ==================== -->
@@ -466,6 +530,72 @@
     </div>
 </div>
 
+<!-- MODAL INSUMO -->
+<div id="modal-insumo" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden no-print">
+    <div class="card p-6 w-full max-w-md space-y-4">
+        <h3 id="modal-insumo-titulo" class="font-bold text-amber-400 text-base border-b border-slate-700 pb-2">Nuevo insumo</h3>
+        <input type="hidden" id="ins-id">
+        <div class="space-y-3 text-xs">
+            <div><label class="text-slate-400 block mb-1">Nombre (igual que en las recetas)</label><input type="text" id="ins-nombre" placeholder="ej. Pilsner US Cargill" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm"></div>
+            <div class="grid grid-cols-2 gap-4">
+                <div><label class="text-slate-400 block mb-1">Tipo</label>
+                    <select id="ins-tipo" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+                        <option value="malta">Malta / Grano</option><option value="lupulo">Lúpulo</option><option value="levadura">Levadura</option><option value="sal">Sal / Aditivo</option><option value="otro">Otro</option>
+                    </select></div>
+                <div><label class="text-slate-400 block mb-1">Unidad</label>
+                    <select id="ins-unidad" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+                        <option value="kg">Kilogramos (kg)</option><option value="g">Gramos (g)</option><option value="u">Unidades</option>
+                    </select></div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div><label class="text-slate-400 block mb-1">Stock actual</label><input type="number" step="any" id="ins-stock" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-mono text-amber-400"></div>
+                <div><label class="text-slate-400 block mb-1">Stock mínimo (aviso)</label><input type="number" step="any" id="ins-minimo" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-mono"></div>
+            </div>
+        </div>
+        <div class="flex justify-end gap-3 pt-3 border-t border-slate-700">
+            <button onclick="cerrarModalInsumo()" class="bg-slate-700 text-slate-300 text-xs font-bold px-4 py-2 rounded-lg">Cancelar</button>
+            <button onclick="guardarInsumo()" class="bg-amber-500 text-slate-950 text-xs font-bold px-4 py-2 rounded-lg">Guardar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DESTINO FERMENTADOR -->
+<div id="modal-destino-ferm" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden no-print">
+    <div class="card p-6 w-full max-w-md space-y-4">
+        <h3 class="font-bold text-amber-400 text-base border-b border-slate-700 pb-2">¿A qué fermentador va este lote?</h3>
+        <div id="lista-destino-ferm" class="space-y-2"></div>
+        <div class="flex justify-between gap-3 pt-3 border-t border-slate-700">
+            <button onclick="destinoNuevoFermentador()" class="text-xs font-bold text-amber-400 hover:underline"><i class="fa-solid fa-plus"></i> Crear fermentador nuevo</button>
+            <button onclick="cerrarModalDestino()" class="bg-slate-700 text-slate-300 text-xs font-bold px-4 py-2 rounded-lg">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DATOS (respaldo / exportación) -->
+<div id="modal-datos" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden no-print">
+    <div class="card p-6 w-full max-w-md space-y-4">
+        <h3 class="font-bold text-amber-400 text-base border-b border-slate-700 pb-2"><i class="fa-solid fa-database"></i> Datos: respaldo y exportación</h3>
+        <div class="space-y-4 text-xs">
+            <div class="space-y-2">
+                <p class="text-slate-300 font-semibold">Respaldo completo (.json)</p>
+                <p class="text-slate-400">Incluye recetas, planillas, fermentadores, barriles, clientes, movimientos e insumos. Último respaldo: <strong id="ultimo-respaldo" class="text-slate-200">nunca</strong></p>
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="descargarRespaldoJSON()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-2 rounded-lg"><i class="fa-solid fa-download"></i> Descargar respaldo</button>
+                    <label class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold px-3 py-2 rounded-lg cursor-pointer"><i class="fa-solid fa-upload"></i> Restaurar respaldo<input type="file" accept=".json,application/json" class="hidden" onchange="restaurarRespaldoJSON(this)"></label>
+                </div>
+            </div>
+            <div class="space-y-2 border-t border-slate-700 pt-3">
+                <p class="text-slate-300 font-semibold">Exportar a Excel (.xlsx)</p>
+                <p class="text-slate-400">Una hoja por tema: recetas, barriles, clientes, movimientos, remitos, cocciones, fermentaciones e insumos. Es solo para consultar o imprimir; para volver a cargar datos usá el respaldo .json.</p>
+                <button onclick="exportarExcel()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-2 rounded-lg"><i class="fa-solid fa-file-excel"></i> Exportar a Excel</button>
+            </div>
+        </div>
+        <div class="flex justify-end pt-3 border-t border-slate-700">
+            <button onclick="cerrarModalDatos()" class="bg-slate-700 text-slate-300 text-xs font-bold px-4 py-2 rounded-lg">Cerrar</button>
+        </div>
+    </div>
+</div>
+
 <!-- MODAL CLIENTE -->
 <div id="modal-cliente" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden no-print">
     <div class="card p-6 w-full max-w-md space-y-4">
@@ -489,12 +619,13 @@
         <h3 class="font-bold text-amber-400 text-base border-b border-slate-700 pb-2">Registrar Movimiento / Remito</h3>
         <div class="space-y-4 text-xs">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div><label class="text-slate-400 block mb-1">Cliente</label><select id="mov-cliente-select" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm"></select></div>
+                <div><label class="text-slate-400 block mb-1">Cliente</label><select id="mov-cliente-select" onchange="actualizarListasBarrilesMov()" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm"></select></div>
                 <div>
                     <label class="text-slate-400 block mb-1">Tipo de Movimiento</label>
                     <select id="mov-tipo" onchange="toggleFormularioRemito()" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
                         <option value="entrega">Entrega de Cerveza (Generar Remito / Débito)</option>
                         <option value="cobro">Cobro / Pago Recibido (Abono a CC)</option>
+                        <option value="devolucion">Devolución de barriles vacíos</option>
                     </select>
                 </div>
             </div>
@@ -508,6 +639,14 @@
                     <button type="button" onclick="agregarFilaRemito()" class="text-amber-400 hover:text-amber-300 text-xs font-bold flex items-center gap-1"><i class="fa-solid fa-plus"></i> Agregar Presentación</button>
                 </div>
                 <div class="space-y-2" id="contenedor-filas-remito"></div>
+            </div>
+            <div id="seccion-barriles-entrega" class="space-y-2 bg-slate-900/50 p-3 rounded-lg border border-slate-700">
+                <span class="font-semibold text-slate-300">BARRILES ENTREGADOS (opcional: pasan a "Entregado en cliente")</span>
+                <div id="lista-barriles-entrega" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
+            </div>
+            <div id="seccion-devolucion" class="hidden space-y-2 bg-slate-900/50 p-3 rounded-lg border border-slate-700">
+                <span class="font-semibold text-slate-300">BARRILES DEVUELTOS POR EL CLIENTE (pasan a "Vacío - Sucio")</span>
+                <div id="lista-barriles-devolucion" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
             </div>
             <div id="seccion-cobro-directo" class="space-y-3 hidden">
                 <div><label class="text-slate-400 block mb-1">Concepto / Detalle de Pago</label><input type="text" id="mov-concepto-cobro" placeholder="ej. Pago en efectivo / Transferencia recibida" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm"></div>
@@ -528,6 +667,7 @@
 <!-- ==================== LÓGICA ==================== -->
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 <script>
 /* =========================================================
    0. UTILIDADES
@@ -563,8 +703,11 @@ try {
     if (typeof firebase !== 'undefined') {
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         db = firebase.firestore();
+        db.enablePersistence({ synchronizeTabs: true }).catch(() => {}); // permite trabajar sin conexión
     }
 } catch (e) { console.error('Firebase no disponible, se trabaja solo en local:', e); }
+let auth = null;
+try { if (typeof firebase !== 'undefined' && typeof firebase.auth === 'function') auth = firebase.auth(); } catch (e) { console.error(e); }
 
 /* =========================================================
    2. ESTADO ÚNICO (una sola fuente de verdad)
@@ -603,6 +746,12 @@ var clientes     = leer('alb_clientes', clientesIniciales);
 var lotesCoccion = leer('alb_lotes_coccion', []);
 var lotesFerm    = leer('alb_lotes_ferm', []);
 var barrilEditandoIdx = null;
+var recetaEditandoId = null;
+var editandoCoccionId = null, editandoFermId = null, stashCoccion = null, stashFerm = null;
+var insumos = leer('alb_insumos', []);
+var fermentadores = leer('alb_fermentadores', null);
+var fermActivoId = localStorage.getItem('alb_ferm_activo') || null;
+if (!Array.isArray(insumos)) insumos = [];
 var filtroBarriles = 'TODOS';
 if (!Array.isArray(barriles)) barriles = barrilesIniciales;
 if (!Array.isArray(clientes)) clientes = clientesIniciales;
@@ -648,6 +797,7 @@ function guardarLocalSolo() {
         localStorage.setItem('alb_recetas', JSON.stringify(recetas));
         localStorage.setItem('alb_barriles', JSON.stringify(barriles));
         localStorage.setItem('alb_clientes', JSON.stringify(clientes));
+        localStorage.setItem('alb_insumos', JSON.stringify(insumos));
     } catch (e) {}
 }
 function iniciarSincronizacion() {
@@ -669,12 +819,58 @@ function iniciarSincronizacion() {
         guardarLotesLocal();
         renderBiblioteca(); renderBibliotecaFermentacion();
     }, console.error);
+
+    // Borrador en curso: al abrir, si la nube tiene uno más nuevo que el de este equipo, se usa ese
+    let primeraBorrador = true;
+    db.collection('albardon_app').doc('borrador').onSnapshot(doc => {
+        if (!primeraBorrador) return;
+        primeraBorrador = false;
+        if (!doc.exists) return;
+        const rem = doc.data(), loc = leer('alb_borrador', {});
+        if ((rem.actualizado || 0) <= (loc.actualizado || 0)) return;
+        try { localStorage.setItem('alb_borrador', JSON.stringify(rem)); } catch (e) {}
+        if (rem.coccion) aplicarBorrador({ coccion: rem.coccion }); else if (loc.coccion && !editandoCoccionId) { limpiarCoccion(); }
+    }, console.error);
+
+    escuchar('insumos', 'lista', () => insumos, x => { insumos = Array.isArray(x) ? x : []; }, () => { renderInsumos(); actualizarBadgeInsumos(); });
+
+    // Fermentadores: un documento por fermentador
+    let primeraF = true;
+    db.collection('albardon_fermentadores').onSnapshot(snap => {
+        const idsRemotos = new Set(snap.docs.map(d => d.id));
+        snap.docChanges().forEach(ch => {
+            if (ch.doc.metadata.hasPendingWrites) return;
+            const d = ch.doc.data();
+            const idx = fermentadores.findIndex(f => f.id === d.id);
+            if (ch.type === 'removed') {
+                if (idx >= 0 && fermentadores.length > 1) {
+                    fermentadores.splice(idx, 1);
+                    if (d.id === fermActivoId && !editandoFermId) { fermActivoId = fermentadores[0].id; cargarFermActivoEnPantalla(); }
+                }
+                return;
+            }
+            if (idx < 0) { fermentadores.push(d); return; }
+            if ((d.actualizado || 0) > (fermentadores[idx].actualizado || 0)) {
+                const esActivo = d.id === fermActivoId;
+                if (esActivo && (editandoFermId || document.querySelector('#area-impresion-fermentacion :focus'))) return;
+                fermentadores[idx] = d;
+                if (esActivo) cargarFermActivoEnPantalla();
+            }
+        });
+        if (primeraF) {
+            primeraF = false;
+            fermentadores.forEach(f => { if (!idsRemotos.has(f.id)) db.collection('albardon_fermentadores').doc(f.id).set(limpio(f)).catch(console.error); });
+        }
+        fermentadores.sort((a, b) => (a.creado || 0) - (b.creado || 0));
+        guardarFermentadoresLocal();
+        renderSelectorFermentadores();
+    }, console.error);
 }
 
 /* =========================================================
    4. NAVEGACIÓN
    ========================================================= */
-const TABS = ['recetas', 'coccion', 'fermentacion', 'stock', 'cc', 'biblioteca'];
+const TABS = ['recetas', 'coccion', 'fermentacion', 'stock', 'insumos', 'cc', 'biblioteca'];
 function switchTab(id) {
     TABS.forEach(t => {
         document.getElementById('tab-' + t)?.classList.toggle('hidden', t !== id);
@@ -683,6 +879,7 @@ function switchTab(id) {
     if (id === 'recetas') renderRecetas();
     else if (id === 'stock') renderBarriles();
     else if (id === 'cc') renderClientes();
+    else if (id === 'insumos') renderInsumos();
     else if (id === 'biblioteca') cambiarSubTabBiblioteca('coccion');
     window.scrollTo(0, 0);
 }
@@ -744,6 +941,7 @@ function renderRecetas() {
             <div class="pt-3 border-t border-slate-700 flex justify-between items-center no-print">
                 <div class="flex gap-2">
                     <button onclick="eliminarReceta('${esc(key)}')" title="Eliminar Receta" class="text-red-400 hover:text-red-300 text-xs p-1"><i class="fa-solid fa-trash"></i></button>
+                    <button onclick="editarReceta('${esc(key)}')" title="Editar Receta" class="text-slate-300 hover:text-white text-xs font-bold flex items-center gap-1 p-1"><i class="fa-solid fa-pen-to-square"></i> Editar</button>
                     <button onclick="descargarRecetaPDF('${esc(key)}')" title="Descargar PDF Técnico" class="text-amber-400 hover:text-amber-300 text-xs font-bold flex items-center gap-1 p-1"><i class="fa-solid fa-file-pdf"></i> PDF</button>
                 </div>
                 <button onclick="usarRecetaEnCoccion('${esc(key)}')" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1"><i class="fa-solid fa-beer-mug-empty"></i> Cocinar esta Receta</button>
@@ -762,39 +960,77 @@ function actualizarSelectRecetas() {
     if (recetas[actual]) sel.value = actual;
 }
 
-function mostrarFormularioReceta() {
+function prepararFormularioReceta(titulo, textoBoton) {
     document.querySelectorAll('#form-receta-panel input').forEach(i => { i.value = ''; });
     ['rec-sales-mac-inputs', 'rec-sales-lav-inputs', 'rec-granos-inputs', 'rec-lupulos-inputs'].forEach(id => { document.getElementById(id).innerHTML = ''; });
-    agregarFilaSal('macerado'); agregarFilaSal('lavado'); agregarFilaGrano(); agregarFilaLupulo();
-    document.getElementById('form-receta-panel').classList.remove('hidden');
-    document.getElementById('form-receta-panel').scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('titulo-form-receta').innerText = titulo;
+    document.getElementById('btn-guardar-receta').innerText = textoBoton;
 }
-function ocultarFormularioReceta() { document.getElementById('form-receta-panel').classList.add('hidden'); }
+function abrirPanelReceta() {
+    const p = document.getElementById('form-receta-panel');
+    p.classList.remove('hidden');
+    p.scrollIntoView({ behavior: 'smooth' });
+}
+function mostrarFormularioReceta() {
+    recetaEditandoId = null;
+    prepararFormularioReceta('Configuración Técnica de Receta', 'Guardar Receta Completa');
+    agregarFilaSal('macerado'); agregarFilaSal('lavado'); agregarFilaGrano(); agregarFilaLupulo();
+    abrirPanelReceta();
+}
+function editarReceta(key) {
+    const r = recetas[key];
+    if (!r) return;
+    recetaEditandoId = key;
+    prepararFormularioReceta('Editando receta: ' + r.nombre, 'Guardar Cambios');
+    setV('rec-nombre', r.nombre); setV('rec-batch', r.lote); setV('rec-di', r.diTeorica); setV('rec-df', r.dfTeorica);
+    setV('rec-abv', r.abv); setV('rec-ibu', r.ibu); setV('rec-srm', r.srm); setV('rec-eficiencia', r.eficiencia); setV('rec-levadura', r.levadura);
+    setV('rec-agua-ini', r.aguaIni); setV('rec-temp-agua-ini', r.tempAguaIni); setV('rec-temp-mac', r.tempMac);
+    setV('rec-agua-lav', r.aguaLav); setV('rec-temp-lav', r.tempLav);
+    setV('rec-dens-pre', r.densPre); setV('rec-lts-pre', r.ltsPre); setV('rec-tiempo-hervor', r.tiempoHervor);
+    setV('rec-evaporacion', r.evaporacion); setV('rec-trub', r.trub); setV('rec-tiempo-enfriado', r.tiempoEnfriado);
+    const conFilas = (arr, agregar) => { if (arr && arr.length) arr.forEach(x => agregar(x)); else agregar({}); };
+    conFilas(r.salesMac, s => agregarFilaSal('macerado', s.nombre, s.cantidad));
+    conFilas(r.salesLav, s => agregarFilaSal('lavado', s.nombre, s.cantidad));
+    conFilas(r.granos, g => agregarFilaGrano(g.nombre, g.cantidad));
+    conFilas(r.lupulos, l => agregarFilaLupulo(l.nombre, l.cantidad, l.momento));
+    abrirPanelReceta();
+}
+function ocultarFormularioReceta() {
+    recetaEditandoId = null;
+    document.getElementById('form-receta-panel').classList.add('hidden');
+}
 
-function agregarFilaSal(tipo) {
+function agregarFilaSal(tipo, nombre, cant) {
     const cont = document.getElementById(tipo === 'macerado' ? 'rec-sales-mac-inputs' : 'rec-sales-lav-inputs');
     const div = document.createElement('div');
     div.className = 'flex gap-2 item-sal-' + tipo;
     div.innerHTML = `<input type="text" placeholder="ej. Gypsum" class="sal-nombre flex-1 bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-slate-100">
         <input type="number" step="any" placeholder="Grs" class="sal-cant w-20 bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-amber-400 font-bold">
         <button type="button" onclick="this.parentElement.remove()" class="text-red-400 font-bold px-1 hover:text-red-300">×</button>`;
+    div.querySelector('.sal-nombre').value = nombre ?? '';
+    div.querySelector('.sal-cant').value = cant ?? '';
     cont.appendChild(div);
 }
-function agregarFilaGrano() {
+function agregarFilaGrano(nombre, cant) {
     const div = document.createElement('div');
     div.className = 'flex gap-2 item-grano';
     div.innerHTML = `<input type="text" placeholder="Malta" class="grano-nombre flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-slate-100">
         <input type="number" step="any" placeholder="Kg" class="grano-cant w-20 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-amber-300 font-bold">
         <button type="button" onclick="this.parentElement.remove()" class="text-red-400 font-bold px-1 hover:text-red-300">×</button>`;
+    div.querySelector('.grano-nombre').value = nombre ?? '';
+    div.querySelector('.grano-cant').value = cant ?? '';
     document.getElementById('rec-granos-inputs').appendChild(div);
 }
-function agregarFilaLupulo() {
+function agregarFilaLupulo(nombre, cant, momento) {
     const div = document.createElement('div');
     div.className = 'flex gap-2 item-lupulo';
     div.innerHTML = `<input type="text" placeholder="Lúpulo" class="lup-nombre flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-slate-100">
         <input type="number" step="any" placeholder="Grs" class="lup-cant w-20 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-amber-300 font-bold">
         <input type="text" placeholder="Momento" class="lup-momento w-28 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-slate-300">
         <button type="button" onclick="this.parentElement.remove()" class="text-red-400 font-bold px-1 hover:text-red-300">×</button>`;
+    div.querySelector('.lup-nombre').value = nombre ?? '';
+    div.querySelector('.lup-cant').value = cant ?? '';
+    div.querySelector('.lup-momento').value = momento ?? '';
     document.getElementById('rec-lupulos-inputs').appendChild(div);
 }
 
@@ -813,8 +1049,9 @@ function guardarReceta() {
         momento: f.querySelector('.lup-momento').value.trim() || '60 min'
     })).filter(l => l.nombre);
 
-    const id = 'rec_' + Date.now();
+    const id = (recetaEditandoId && recetas[recetaEditandoId]) ? recetaEditandoId : 'rec_' + Date.now();
     recetas[id] = {
+        ...(recetas[id] || {}),
         id, nombre, lote: num('rec-batch') || 280,
         diTeorica: v('rec-di') || '1.050', dfTeorica: v('rec-df') || '1.010', abv: v('rec-abv') || '5.0',
         ibu: v('rec-ibu') || '30', srm: v('rec-srm') || '6.0', eficiencia: v('rec-eficiencia') || '70',
@@ -854,6 +1091,7 @@ function limpiarCoccion() {
     document.getElementById('contenedor-lupulos').innerHTML = '<p class="text-xs text-slate-500 italic">Seleccione una receta para autocompletar adiciones de lúpulo.</p>';
     document.getElementById('total-granos').innerText = 'TOTALES DE KG: 0 kg';
     window.recetaActual = null;
+    window.recetaActualKey = '';
 }
 
 function usarRecetaEnCoccion(key) {
@@ -863,11 +1101,17 @@ function usarRecetaEnCoccion(key) {
 }
 
 function cargarRecetaEnCoccion() {
-    const key = document.getElementById('select-receta').value;
+    const sel = document.getElementById('select-receta');
+    const key = sel.value;
+    if (v('coc-estilo') && !confirm('La planilla de cocción ya tiene datos cargados. Si cargás una receta se borran. ¿Continuar?')) {
+        sel.value = window.recetaActualKey || '';
+        return;
+    }
     limpiarCoccion();
     const r = recetas[key];
-    if (!r) return;
+    if (!r) { guardarBorrador(); return; }
     window.recetaActual = r;
+    window.recetaActualKey = key;
 
     setV('coc-estilo', r.nombre);
     if (r.aguaIni) setV('coc-agua-lts', r.aguaIni);
@@ -897,6 +1141,7 @@ function cargarRecetaEnCoccion() {
             <input type="text" value="${esc(l.momento)}" readonly class="col-span-3 bg-slate-900/50 border border-slate-700 rounded p-2 text-slate-400">
             <input type="time" class="col-span-2 bg-slate-900 border border-slate-700 rounded p-2 text-slate-200">
         </div>`).join('');
+    guardarBorrador();
 }
 
 function calcularTotalGranos() {
@@ -910,24 +1155,36 @@ function snapshotHTML(el) {
     const orig = el.querySelectorAll('input,select,textarea');
     const c = el.cloneNode(true);
     c.querySelectorAll('input,select,textarea').forEach((x, i) => { if (orig[i]) x.setAttribute('value', orig[i].value); });
-    c.querySelectorAll('[id]').forEach(x => x.removeAttribute('id'));
-    c.querySelectorAll('[oninput],[onchange]').forEach(x => { x.removeAttribute('oninput'); x.removeAttribute('onchange'); });
+    c.querySelectorAll('[id]').forEach(x => { x.setAttribute('data-fid', x.id); x.removeAttribute('id'); });
     c.classList.remove('pdf-export-mode');
     return c.innerHTML;
 }
 
 function guardarCoccion() {
     if (!v('coc-estilo')) return alert('Seleccioná una receta primero.');
+    if (editandoCoccionId) return guardarEdicionCoccion();
+    if (editandoFermId) return alert('Primero terminá o cancelá la edición de la planilla de fermentación.');
+    pedirDestinoFerm(fid => completarGuardadoCoccion(fid));
+}
+
+function completarGuardadoCoccion(fid) {
+    const consumo = calcularConsumo();
+    const f = fermentadores.find(x => x.id === fid);
     const lote = {
-        id: 'coc_' + Date.now(), tipo: 'coccion', creado: Date.now(),
+        id: 'coc_' + Date.now(), tipo: 'coccion', creado: Date.now(), v: 2,
         fecha: v('coc-fecha') || hoy(), numeroLote: v('coc-lote') || 'Sin número',
         estilo: v('coc-estilo'), densidadInicial: v('di-real-coccion') || '-',
+        fermentador: f ? f.nombre : '', consumo,
         html: snapshotHTML(document.getElementById('area-impresion-coccion'))
     };
     lotesCoccion.unshift(lote);
     guardarLotesLocal(); subirLote(lote);
+    avisoConsumo(aplicarConsumo(consumo, -1), 'Stock descontado');
 
-    // Volcar datos a la planilla de fermentación
+    // Pasar los datos al fermentador elegido (lo que había en pantalla se guarda en su fermentador)
+    guardarFermActivo();
+    fermActivoId = fid;
+    localStorage.setItem('alb_ferm_activo', fid);
     const r = window.recetaActual || {};
     renderTablaFermentacion();
     setV('ferm-df', '');
@@ -942,6 +1199,9 @@ function guardarCoccion() {
     document.getElementById('select-receta').value = '';
     limpiarCoccion();
     switchTab('fermentacion');
+    actualizarGrafico();
+    guardarBorrador();
+    renderSelectorFermentadores();
 }
 
 function descargarCoccionPDF() { exportarPDF('area-impresion-coccion', 'Planilla_Coccion_' + (v('coc-lote') || '') + '.pdf'); }
@@ -980,8 +1240,10 @@ function calcularABV() {
 function guardarFermentacion() {
     if (!v('ferm-df')) return alert('Cargá la densidad final (DF) antes de cerrar la fermentación.');
     if (!v('ferm-estilo')) return alert('La planilla de fermentación no tiene estilo. Primero guardá una cocción.');
+    if (editandoFermId) return guardarEdicionFerm();
     const lote = {
-        id: 'fer_' + Date.now(), tipo: 'ferm', creado: Date.now(),
+        id: 'fer_' + Date.now(), tipo: 'ferm', creado: Date.now(), v: 2,
+        fermentador: (fermentadores.find(f => f.id === fermActivoId) || {}).nombre || '',
         fecha: v('ferm-fecha') || hoy(), numeroLote: v('ferm-lote'), estilo: v('ferm-estilo'),
         di: v('ferm-di-real'), df: v('ferm-df'), abv: document.getElementById('resultado-abv').innerText,
         html: snapshotHTML(document.getElementById('area-impresion-fermentacion'))
@@ -989,6 +1251,8 @@ function guardarFermentacion() {
     lotesFerm.unshift(lote);
     guardarLotesLocal(); subirLote(lote);
 
+    limpiarFermentacion();
+    guardarBorrador();
     switchTab('stock');
     mostrarModalBarril();
     setV('barril-estado', 'lleno_fabrica');
@@ -1026,10 +1290,11 @@ function renderBibliotecaLista(tipo) {
         lista.map((l, i) => `<tr class="hover:bg-slate-800/40">
             <td class="p-3 text-slate-300">${esc(fmtFecha(l.fecha))}</td>
             <td class="p-3 font-mono text-amber-400 font-bold">${esc(l.numeroLote)}</td>
-            <td class="p-3 text-slate-100 font-semibold">${esc(l.estilo)}</td>
+            <td class="p-3 text-slate-100 font-semibold">${esc(l.estilo)}${l.fermentador ? `<span class="block text-[10px] text-slate-500 font-normal">${esc(l.fermentador)}</span>` : ''}</td>
             <td class="p-3 font-mono text-slate-300">${esC ? esc(l.densidadInicial) : `${esc(l.di)} → ${esc(l.df)} / ${esc(l.abv)}`}</td>
             <td class="p-3 text-right space-x-2 whitespace-nowrap">
                 <button onclick="verPlanilla('${tipo}',${i})" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs"><i class="fa-solid fa-eye"></i> Ver Planilla</button>
+                <button onclick="editarPlanilla('${tipo}',${i})" class="bg-slate-700 hover:bg-slate-600 text-amber-400 font-bold px-3 py-1.5 rounded-lg text-xs"><i class="fa-solid fa-pen-to-square"></i> Editar</button>
                 <button onclick="eliminarPlanilla('${tipo}',${i})" class="bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white border border-red-500/30 px-2.5 py-1.5 rounded-lg text-xs" title="Eliminar registro"><i class="fa-solid fa-trash-can"></i></button>
             </td></tr>`).join('') + '</tbody></table></div>';
 }
@@ -1057,9 +1322,261 @@ function eliminarPlanilla(tipo, i) {
     const lista = tipo === 'coccion' ? lotesCoccion : lotesFerm;
     const l = lista[i];
     if (!l || !confirm(`¿Eliminar el registro del lote ${l.numeroLote} (${l.estilo})?`)) return;
+    if (tipo === 'coccion' && l.consumo && l.consumo.length && insumos.length && confirm('¿Devolver al stock los insumos que se descontaron con esta cocción?')) {
+        avisoConsumo(aplicarConsumo(l.consumo, +1), 'Stock devuelto');
+    }
     lista.splice(i, 1);
     guardarLotesLocal(); borrarLoteNube(l.id);
     renderBibliotecaLista(tipo);
+}
+
+
+/* =========================================================
+   8b. EDICIÓN DE PLANILLAS GUARDADAS
+   ========================================================= */
+function restaurarArea(idArea, html) {
+    document.getElementById(idArea).innerHTML = (html || '').replace(/ data-fid="/g, ' id="');
+    if (idArea === 'area-impresion-fermentacion') { asegurarGrafico(); actualizarGrafico(); }
+}
+function mostrarBanner(tipo, texto) {
+    const b = document.getElementById('banner-edicion-' + tipo);
+    document.getElementById('banner-edicion-' + tipo + '-txt').innerText = texto || '';
+    b.classList.toggle('hidden', !texto);
+}
+
+function editarPlanilla(tipo, i) {
+    const l = (tipo === 'coccion' ? lotesCoccion : lotesFerm)[i];
+    if (!l) return;
+    if (l.v !== 2 || !l.html) {
+        return alert('Esta planilla se guardó con una versión anterior de la app y no se puede editar. Podés verla con "Ver Planilla".');
+    }
+    if (tipo === 'coccion') iniciarEdicionCoccion(l); else iniciarEdicionFerm(l);
+}
+
+/* ---- Cocción ---- */
+function iniciarEdicionCoccion(l) {
+    if (editandoCoccionId) return alert('Ya estás editando una planilla de cocción. Guardá o cancelá esa edición primero.');
+    const sel = document.getElementById('select-receta');
+    // Se guarda lo que había en pantalla para devolverlo al terminar
+    stashCoccion = { html: snapshotHTML(document.getElementById('area-impresion-coccion')), receta: window.recetaActual || null, select: sel.value };
+    editandoCoccionId = l.id;
+    restaurarArea('area-impresion-coccion', l.html);
+    sel.value = ''; sel.disabled = true;
+    document.getElementById('btn-guardar-coccion-txt').innerText = 'Guardar Cambios de la Cocción';
+    mostrarBanner('coccion', `Editando la cocción del lote ${l.numeroLote} (${l.estilo}). Los cambios reemplazan lo guardado.`);
+    switchTab('coccion');
+    calcularTotalGranos();
+}
+function terminarEdicionCoccion() {
+    const sel = document.getElementById('select-receta');
+    editandoCoccionId = null;
+    if (stashCoccion) {
+        restaurarArea('area-impresion-coccion', stashCoccion.html);
+        window.recetaActual = stashCoccion.receta;
+        window.recetaActualKey = stashCoccion.select;
+        sel.value = stashCoccion.select;
+    } else limpiarCoccion();
+    stashCoccion = null;
+    sel.disabled = false;
+    document.getElementById('btn-guardar-coccion-txt').innerText = 'Guardar Cocción y Pasar a Fermentación';
+    mostrarBanner('coccion', '');
+    calcularTotalGranos();
+}
+function cancelarEdicionCoccion() { terminarEdicionCoccion(); }
+function guardarEdicionCoccion() {
+    const l = lotesCoccion.find(x => x.id === editandoCoccionId);
+    if (!l) { terminarEdicionCoccion(); return alert('No se encontró la planilla que se estaba editando (puede haberse eliminado desde otro dispositivo).'); }
+    l.fecha = v('coc-fecha') || l.fecha;
+    l.numeroLote = v('coc-lote') || l.numeroLote;
+    l.estilo = v('coc-estilo');
+    l.densidadInicial = v('di-real-coccion') || '-';
+    l.html = snapshotHTML(document.getElementById('area-impresion-coccion'));
+    l.editado = Date.now();
+    if (l.consumo !== undefined) { // ajusta el stock según lo que cambió en la planilla
+        const nuevo = calcularConsumo(l.consumo);
+        aplicarConsumo(l.consumo, +1);
+        avisoConsumo(aplicarConsumo(nuevo, -1), 'Stock ajustado');
+        l.consumo = nuevo;
+    }
+    guardarLotesLocal(); subirLote(l);
+    terminarEdicionCoccion();
+    switchTab('biblioteca');
+}
+
+/* ---- Fermentación ---- */
+function setTextoBotonFerm(edicion) {
+    const e = document.getElementById('btn-guardar-ferm-txt');
+    if (e) e.textContent = edicion ? 'Guardar Cambios de la Fermentación' : 'Guardar Fermentación y Pasar a Barriles';
+}
+function iniciarEdicionFerm(l) {
+    if (editandoFermId) return alert('Ya estás editando una planilla de fermentación. Guardá o cancelá esa edición primero.');
+    stashFerm = snapshotHTML(document.getElementById('area-impresion-fermentacion'));
+    editandoFermId = l.id;
+    restaurarArea('area-impresion-fermentacion', l.html);
+    setTextoBotonFerm(true);
+    mostrarBanner('fermentacion', `Editando la fermentación del lote ${l.numeroLote} (${l.estilo}). Los cambios reemplazan lo guardado.`);
+    switchTab('fermentacion');
+    calcularABV();
+}
+function terminarEdicionFerm() {
+    editandoFermId = null;
+    if (stashFerm) restaurarArea('area-impresion-fermentacion', stashFerm);
+    else { renderTablaFermentacion(); }
+    stashFerm = null;
+    setTextoBotonFerm(false);
+    mostrarBanner('fermentacion', '');
+    calcularABV();
+}
+function cancelarEdicionFerm() { terminarEdicionFerm(); }
+function guardarEdicionFerm() {
+    const l = lotesFerm.find(x => x.id === editandoFermId);
+    if (!l) { terminarEdicionFerm(); return alert('No se encontró la planilla que se estaba editando (puede haberse eliminado desde otro dispositivo).'); }
+    setTextoBotonFerm(false);
+    l.fecha = v('ferm-fecha') || l.fecha;
+    l.numeroLote = v('ferm-lote');
+    l.estilo = v('ferm-estilo');
+    l.di = v('ferm-di-real');
+    l.df = v('ferm-df');
+    l.abv = document.getElementById('resultado-abv').innerText;
+    l.html = snapshotHTML(document.getElementById('area-impresion-fermentacion'));
+    l.editado = Date.now();
+    guardarLotesLocal(); subirLote(l);
+    terminarEdicionFerm();
+    switchTab('biblioteca');
+    cambiarSubTabBiblioteca('fermentacion');
+}
+
+
+/* =========================================================
+   8c. BORRADOR AUTOMÁTICO Y GRÁFICO DE FERMENTACIÓN
+   ========================================================= */
+const BLOQUE_GRAFICO = '<div class="card p-4 space-y-3"><h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Curva de Fermentación</h3><div id="grafico-fermentacion"></div></div>';
+function asegurarGrafico() {
+    if (document.getElementById('grafico-fermentacion')) return;
+    const card = document.getElementById('tabla-dias-fermentacion')?.closest('.card');
+    if (card) card.insertAdjacentHTML('afterend', BLOQUE_GRAFICO);
+}
+
+function limpiarFermentacion() {
+    renderTablaFermentacion();
+    ['ferm-estilo', 'ferm-lote', 'ferm-batch', 'ferm-di-receta', 'ferm-di-real', 'ferm-df'].forEach(id => setV(id, ''));
+    setV('ferm-fecha', hoy());
+    calcularABV();
+    actualizarGrafico();
+}
+
+function guardarBorrador() {
+    const b = leer('alb_borrador', {});
+    delete b.ferm; // las fermentaciones en curso ahora viven en cada fermentador
+    if (!editandoCoccionId) {
+        if (v('coc-estilo')) b.coccion = { html: snapshotHTML(document.getElementById('area-impresion-coccion')), receta: document.getElementById('select-receta').value, ts: Date.now() };
+        else delete b.coccion;
+    }
+    b.actualizado = Date.now();
+    try { localStorage.setItem('alb_borrador', JSON.stringify(b)); } catch (e) { console.error(e); }
+    if (db) db.collection('albardon_app').doc('borrador').set(limpio(b)).catch(console.error);
+    guardarFermActivo();
+}
+
+function aplicarBorrador(b) {
+    if (!b) return;
+    if (b.coccion && b.coccion.html && !editandoCoccionId) {
+        restaurarArea('area-impresion-coccion', b.coccion.html);
+        const sel = document.getElementById('select-receta');
+        sel.value = b.coccion.receta || '';
+        window.recetaActualKey = sel.value;
+        window.recetaActual = recetas[sel.value] || null;
+        calcularTotalGranos();
+    }
+}
+
+let _temporizadorBorrador = null;
+document.addEventListener('input', e => {
+    const t = e.target;
+    if (!t || !t.closest) return;
+    const enFerm = t.closest('#area-impresion-fermentacion');
+    if (enFerm) actualizarGrafico();
+    if (enFerm || t.closest('#area-impresion-coccion')) {
+        clearTimeout(_temporizadorBorrador);
+        _temporizadorBorrador = setTimeout(guardarBorrador, 800);
+    }
+});
+
+function actualizarGrafico() {
+    revisarAvisoFin();
+    const cont = document.getElementById('grafico-fermentacion');
+    if (!cont) return;
+    const num = t => { const n = parseFloat(String(t || '').replace(',', '.')); return isNaN(n) ? null : n; };
+    const dens = t => { const n = num(t); return n === null ? null : (n > 100 ? n / 1000 : n); };
+    const D = [], T = [], S = [];
+    let maxDia = 0;
+    const di = dens(v('ferm-di-real'));
+    const df = dens(v('ferm-df'));
+    if (di !== null) D.push([0, di]);
+    document.querySelectorAll('#tabla-dias-fermentacion tr').forEach((tr, i) => {
+        const ins = tr.querySelectorAll('input');
+        if (ins.length < 4) return;
+        const dia = i + 1, d = dens(ins[1].value), t = num(ins[2].value), s = num(ins[3].value);
+        if (d !== null) D.push([dia, d]);
+        if (t !== null) T.push([dia, t]);
+        if (s !== null) S.push([dia, s]);
+        if (d !== null || t !== null || s !== null) maxDia = dia;
+    });
+    if (!maxDia) {
+        cont.innerHTML = '<p class="text-xs text-slate-500 italic">El gráfico aparece cuando cargás densidad o temperatura en la tabla.</p>';
+        return;
+    }
+    const W = 720, H = 300, ml = 58, mr = 58, mt = 36, mb = 40, pw = W - ml - mr, ph = H - mt - mb;
+    const xmax = Math.max(7, maxDia);
+    const X = d => ml + (d / xmax) * pw;
+    const rango = (vals, spanMin) => {
+        let mn = Math.min(...vals), mx = Math.max(...vals);
+        if (mx - mn < spanMin) { const c = (mx + mn) / 2; mn = c - spanMin / 2; mx = c + spanMin / 2; }
+        const pad = (mx - mn) * 0.08;
+        return [mn - pad, mx + pad];
+    };
+    const dv = D.map(p => p[1]).concat(df !== null ? [df] : []);
+    const tv = T.concat(S).map(p => p[1]);
+    const [dmin, dmax] = dv.length ? rango(dv, 0.01) : [0, 1];
+    const [tmin, tmax] = tv.length ? rango(tv, 4) : [0, 1];
+    const YD = x => mt + ph - ((x - dmin) / (dmax - dmin)) * ph;
+    const YT = x => mt + ph - ((x - tmin) / (tmax - tmin)) * ph;
+
+    let g = '';
+    for (let i = 0; i <= 4; i++) {
+        const y = mt + ph - (i / 4) * ph;
+        g += `<line x1="${ml}" x2="${W - mr}" y1="${y}" y2="${y}" stroke="#64748b" stroke-opacity=".25"/>`;
+        if (dv.length) g += `<text x="${ml - 8}" y="${y + 4}" text-anchor="end" font-size="11" fill="#f59e0b">${(dmin + (dmax - dmin) * i / 4).toFixed(3)}</text>`;
+        if (tv.length) g += `<text x="${W - mr + 8}" y="${y + 4}" font-size="11" fill="#38bdf8">${(tmin + (tmax - tmin) * i / 4).toFixed(1)}°</text>`;
+    }
+    const paso = xmax > 14 ? 2 : 1;
+    for (let d = 0; d <= xmax; d += paso) {
+        if (d === 0 && di === null) continue;
+        g += `<text x="${X(d)}" y="${H - mb + 18}" text-anchor="middle" font-size="11" fill="#94a3b8">${d === 0 ? 'DI' : d}</text>`;
+    }
+    g += `<text x="${ml + pw / 2}" y="${H - 6}" text-anchor="middle" font-size="11" fill="#94a3b8">Día de fermentación</text>`;
+    if (df !== null) {
+        g += `<line x1="${ml}" x2="${W - mr}" y1="${YD(df)}" y2="${YD(df)}" stroke="#10b981" stroke-width="1.5" stroke-dasharray="3 4"/>`;
+        g += `<text x="${ml + 6}" y="${YD(df) - 5}" font-size="10" fill="#10b981">DF ${df.toFixed(3)}</text>`;
+    }
+    const linea = (pts, Y, color, dash) => {
+        if (!pts.length) return '';
+        const path = pts.map((p, i) => `${i ? 'L' : 'M'}${X(p[0]).toFixed(1)} ${Y(p[1]).toFixed(1)}`).join(' ');
+        return `<path d="${path}" fill="none" stroke="${color}" stroke-width="2.2"${dash ? ' stroke-dasharray="6 4"' : ''}/>` +
+            pts.map(p => `<circle cx="${X(p[0]).toFixed(1)}" cy="${Y(p[1]).toFixed(1)}" r="3.5" fill="${color}"/>`).join('');
+    };
+    g += linea(S, YT, '#a78bfa', true) + linea(T, YT, '#38bdf8', false) + linea(D, YD, '#f59e0b', false);
+
+    const leyenda = [];
+    if (D.length) leyenda.push(['Densidad', '#f59e0b', false]);
+    if (T.length) leyenda.push(['Temperatura', '#38bdf8', false]);
+    if (S.length) leyenda.push(['Punto de ajuste', '#a78bfa', true]);
+    let lx = ml;
+    leyenda.forEach(([n, c, dash]) => {
+        g += `<line x1="${lx}" x2="${lx + 22}" y1="16" y2="16" stroke="${c}" stroke-width="2.2"${dash ? ' stroke-dasharray="6 4"' : ''}/><text x="${lx + 28}" y="20" font-size="12" fill="#94a3b8">${n}</text>`;
+        lx += 44 + n.length * 7;
+    });
+    cont.innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto" role="img" aria-label="Gráfico de densidad y temperatura por día">${g}</svg>`;
 }
 
 /* =========================================================
@@ -1118,7 +1635,7 @@ function renderBarriles() {
 
 function llenarSelectClientesBarril() {
     document.getElementById('barril-cliente-select').innerHTML =
-        '<option value="">-- Seleccionar cliente --</option>' + clientes.map(c => `<option value="${esc(c.nombre)}">${esc(c.nombre)}</option>`).join('');
+        '<option value="">-- Seleccionar cliente --</option>' + clientes.map(c => `<option value="${esc(c.id)}">${esc(c.nombre)}</option>`).join('');
 }
 
 function toggleCamposEstadoBarril(autocompletar) {
@@ -1151,7 +1668,7 @@ function editarBarril(idx) {
     llenarSelectClientesBarril();
     setV('barril-codigo', b.codigo); setV('barril-capacidad', normCap(b.capacidad)); setV('barril-conector', b.conector || 'G');
     setV('barril-estado', normEstado(b.estado)); setV('barril-cerveza', b.cerveza); setV('barril-lote', b.lote);
-    setV('barril-fecha', b.fechaEmbarrilado); setV('barril-ubicacion', b.ubicacion); setV('barril-cliente-select', b.cliente);
+    setV('barril-fecha', b.fechaEmbarrilado); setV('barril-ubicacion', b.ubicacion); setV('barril-cliente-select', (clientes.find(c => c.id === b.clienteId || c.nombre === b.cliente) || {}).id || '');
     document.getElementById('modal-barril-titulo').innerText = 'Editar Barril ' + (b.codigo || '');
     toggleCamposEstadoBarril(true);
     document.getElementById('modal-barril').classList.remove('hidden');
@@ -1162,12 +1679,13 @@ function guardarBarril() {
     if (!codigo) return alert('Ingrese el código del barril.');
     const estado = document.getElementById('barril-estado').value;
     const conCerveza = estado === 'lleno_fabrica' || estado === 'entregado_cliente';
-    const cliente = estado === 'entregado_cliente' ? v('barril-cliente-select') : '';
-    if (estado === 'entregado_cliente' && !cliente) return alert('Seleccioná el cliente al que se entregó el barril.');
+    const cl = estado === 'entregado_cliente' ? clientes.find(c => c.id === v('barril-cliente-select')) : null;
+    if (estado === 'entregado_cliente' && !cl) return alert('Seleccioná el cliente al que se entregó el barril.');
+    const cliente = cl ? cl.nombre : '', clienteId = cl ? cl.id : '';
     const obj = {
         codigo, capacidad: v('barril-capacidad'), conector: v('barril-conector'), estado,
         cerveza: conCerveza ? v('barril-cerveza') : '', lote: conCerveza ? v('barril-lote') : '',
-        fechaEmbarrilado: conCerveza ? v('barril-fecha') : '', ubicacion: v('barril-ubicacion'), cliente
+        fechaEmbarrilado: conCerveza ? v('barril-fecha') : '', ubicacion: v('barril-ubicacion'), cliente, clienteId
     };
     if (barrilEditandoIdx !== null && barriles[barrilEditandoIdx]) barriles[barrilEditandoIdx] = obj;
     else barriles.push(obj);
@@ -1209,13 +1727,14 @@ function renderClientes() {
                     <span class="text-xl font-mono font-bold ${c.saldo < 0 ? 'text-red-400' : 'text-emerald-400'}">$ ${fmt(c.saldo)}</span>
                 </div>
             </div>
+            ${(() => { const bs = barriles.filter(b => normEstado(b.estado) === 'entregado_cliente' && perteneceA(b, c)); return bs.length ? `<p class="text-xs text-blue-300">🍺 Barriles en su poder (${bs.length}): <span class="font-mono">${bs.map(b => esc(b.codigo)).join(', ')}</span></p>` : ''; })()}
             <div class="space-y-1 text-xs">
                 <span class="text-slate-400 font-semibold block">ÚLTIMOS MOVIMIENTOS & REMITOS:</span>
                 ${(c.movimientos && c.movimientos.length) ? c.movimientos.map((m, mi) => `
                     <div class="flex justify-between items-center py-1.5 border-b border-slate-800 text-slate-300 gap-2">
-                        <div><span class="font-semibold text-slate-200">${esc(fmtFecha(m.fecha))}</span> - <span>${esc(m.concepto)}</span>${m.observaciones ? `<span class="text-slate-500"> (${esc(m.observaciones)})</span>` : ''}</div>
+                        <div><span class="font-semibold text-slate-200">${esc(fmtFecha(m.fecha))}</span> - <span>${esc(m.concepto)}</span>${(m.barriles && m.barriles.length) ? `<span class="text-blue-300 font-mono"> [${m.barriles.map(esc).join(', ')}]</span>` : ''}${m.observaciones ? `<span class="text-slate-500"> (${esc(m.observaciones)})</span>` : ''}</div>
                         <div class="flex items-center gap-2 shrink-0">
-                            <span class="font-mono font-bold ${m.monto < 0 ? 'text-red-400' : 'text-emerald-400'}">$ ${fmt(m.monto)}</span>
+                            <span class="font-mono font-bold ${m.monto === 0 ? 'text-slate-400' : (m.monto < 0 ? 'text-red-400' : 'text-emerald-400')}">$ ${fmt(m.monto)}</span>
                             ${(m.items && m.items.length) ? `<button onclick="descargarRemitoPDF('${esc(c.id)}',${mi})" title="Descargar Remito PDF" class="bg-amber-500 hover:bg-amber-600 text-slate-950 text-[10px] px-2 py-1 rounded font-bold flex items-center gap-1 no-print"><i class="fa-solid fa-file-pdf"></i> PDF</button>` : ''}
                             <button onclick="eliminarMovimiento('${esc(c.id)}',${mi})" title="Eliminar movimiento" class="bg-red-500/20 hover:bg-red-500/40 text-red-400 text-[10px] px-2 py-1 rounded font-bold no-print"><i class="fa-solid fa-xmark"></i></button>
                         </div>
@@ -1258,7 +1777,7 @@ function guardarCliente() {
     if (!nombre) return alert('Ingrese el nombre del cliente.');
     if (editId) {
         const c = clientes.find(x => x.id === editId);
-        if (c) { c.nombre = nombre; c.telefono = v('cli-telefono'); c.direccion = v('cli-direccion'); }
+        if (c) { c.nombre = nombre; c.telefono = v('cli-telefono'); c.direccion = v('cli-direccion'); barriles.forEach(b => { if (b.clienteId === c.id) b.cliente = nombre; }); }
     } else {
         clientes.push({ id: 'c_' + Date.now(), nombre, telefono: v('cli-telefono'), direccion: v('cli-direccion'), saldo: 0, movimientos: [] });
     }
@@ -1286,10 +1805,26 @@ function mostrarModalMovimiento() {
 function cerrarModalMovimiento() { document.getElementById('modal-movimiento').classList.add('hidden'); }
 
 function toggleFormularioRemito() {
-    const entrega = document.getElementById('mov-tipo').value === 'entrega';
-    document.getElementById('seccion-remito-items').classList.toggle('hidden', !entrega);
-    document.getElementById('seccion-cobro-directo').classList.toggle('hidden', entrega);
+    const tipo = document.getElementById('mov-tipo').value;
+    const ver = (id, si) => document.getElementById(id).classList.toggle('hidden', !si);
+    ver('seccion-remito-items', tipo === 'entrega');
+    ver('seccion-barriles-entrega', tipo === 'entrega');
+    ver('seccion-cobro-directo', tipo === 'cobro');
+    ver('seccion-devolucion', tipo === 'devolucion');
+    actualizarListasBarrilesMov();
     calcularTotalMovimiento();
+}
+
+function actualizarListasBarrilesMov() {
+    const cli = clientes.find(c => c.id === document.getElementById('mov-cliente-select').value);
+    const caja = (b, clase) => `<label class="flex items-center gap-2 bg-slate-900 border border-slate-700 rounded p-2 cursor-pointer">
+        <input type="checkbox" class="${clase}" value="${esc(b.codigo)}">
+        <span class="font-mono text-amber-400 font-bold">${esc(b.codigo)}</span>
+        <span class="text-slate-300">${esc(b.cerveza || 'sin cerveza')}${b.lote ? ' · ' + esc(b.lote) : ''} · ${esc(normCap(b.capacidad))}</span></label>`;
+    const llenos = barriles.filter(b => normEstado(b.estado) === 'lleno_fabrica');
+    document.getElementById('lista-barriles-entrega').innerHTML = llenos.length ? llenos.map(b => caja(b, 'chk-barril-entrega')).join('') : '<p class="text-slate-500 italic">No hay barriles llenos en fábrica.</p>';
+    const enCliente = cli ? barriles.filter(b => normEstado(b.estado) === 'entregado_cliente' && perteneceA(b, cli)) : [];
+    document.getElementById('lista-barriles-devolucion').innerHTML = enCliente.length ? enCliente.map(b => caja(b, 'chk-barril-devol')).join('') : '<p class="text-slate-500 italic">Este cliente no tiene barriles registrados en su poder.</p>';
 }
 
 function agregarFilaRemito() {
@@ -1311,7 +1846,7 @@ function calcularTotalMovimiento() {
         document.querySelectorAll('.fila-remito-item').forEach(f => {
             total += (parseFloat(f.querySelector('.item-cant').value) || 0) * (parseFloat(f.querySelector('.item-precio').value) || 0);
         });
-    } else total = parseFloat(document.getElementById('mov-monto-cobro').value) || 0;
+    } else if (document.getElementById('mov-tipo').value === 'cobro') total = parseFloat(document.getElementById('mov-monto-cobro').value) || 0;
     document.getElementById('mov-total-acumulado').innerText = '$ ' + fmt(total);
 }
 
@@ -1320,7 +1855,7 @@ function guardarMovimiento() {
     if (!cli) return;
     const tipo = document.getElementById('mov-tipo').value;
     const fecha = v('mov-fecha') || hoy(), observaciones = v('mov-observaciones');
-    let concepto = '', items = [], monto = 0;
+    let concepto = '', items = [], monto = 0, codigos = [];
 
     if (tipo === 'entrega') {
         document.querySelectorAll('.fila-remito-item').forEach(f => {
@@ -1333,26 +1868,54 @@ function guardarMovimiento() {
             }
         });
         if (!items.length) return alert('Agregue al menos un ítem al remito.');
+        codigos = [...document.querySelectorAll('.chk-barril-entrega:checked')].map(c => c.value);
         concepto = `Entrega de Cerveza (${items.length} ${items.length === 1 ? 'ítem' : 'ítems'})`;
         monto = -Math.abs(monto);
-    } else {
+    } else if (tipo === 'cobro') {
         concepto = v('mov-concepto-cobro') || 'Cobro / Pago recibido';
         monto = Math.abs(parseFloat(document.getElementById('mov-monto-cobro').value) || 0);
         if (monto <= 0) return alert('Ingrese un monto de cobro válido.');
+    } else {
+        codigos = [...document.querySelectorAll('.chk-barril-devol:checked')].map(c => c.value);
+        if (!codigos.length) return alert('Seleccioná al menos un barril devuelto.');
+        concepto = `Devolución de ${codigos.length} barril${codigos.length === 1 ? '' : 'es'}`;
+        monto = 0;
     }
+
     cli.saldo = (parseFloat(cli.saldo) || 0) + monto;
+    if (tipo === 'entrega') {
+        codigos.forEach(cod => {
+            const b = barriles.find(x => x.codigo === cod && normEstado(x.estado) === 'lleno_fabrica');
+            if (b) { b.estado = 'entregado_cliente'; b.cliente = cli.nombre; b.clienteId = cli.id; }
+        });
+    } else if (tipo === 'devolucion') {
+        codigos.forEach(cod => {
+            const b = barriles.find(x => x.codigo === cod && normEstado(x.estado) === 'entregado_cliente' && perteneceA(x, cli));
+            if (b) { b.estado = 'vacio_sucio'; b.cliente = ''; b.clienteId = ''; b.cerveza = ''; b.lote = ''; b.fechaEmbarrilado = ''; }
+        });
+    }
     if (!cli.movimientos) cli.movimientos = [];
-    cli.movimientos.unshift({ fecha, concepto, monto, items, observaciones });
-    guardarStorage(); cerrarModalMovimiento(); renderClientes();
+    cli.movimientos.unshift({ fecha, concepto, monto, items, observaciones, barriles: codigos, tipo });
+    guardarStorage(); cerrarModalMovimiento(); renderClientes(); renderBarriles();
 }
 
 function eliminarMovimiento(clienteId, mi) {
-    if (!confirm('¿Eliminar este movimiento? Se ajustará automáticamente el saldo de la cuenta corriente.')) return;
+    if (!confirm('¿Eliminar este movimiento? Se ajustará el saldo de la cuenta corriente y, si incluía barriles, vuelven a su estado anterior.')) return;
     const c = clientes.find(x => x.id === clienteId);
     if (!c || !c.movimientos || !c.movimientos[mi]) return;
-    c.saldo = (parseFloat(c.saldo) || 0) - c.movimientos[mi].monto;
+    const m = c.movimientos[mi];
+    c.saldo = (parseFloat(c.saldo) || 0) - m.monto;
+    (m.barriles || []).forEach(cod => {
+        if (m.tipo === 'devolucion') {
+            const b = barriles.find(x => x.codigo === cod && normEstado(x.estado) === 'vacio_sucio');
+            if (b) { b.estado = 'entregado_cliente'; b.cliente = c.nombre; b.clienteId = c.id; }
+        } else {
+            const b = barriles.find(x => x.codigo === cod && normEstado(x.estado) === 'entregado_cliente' && perteneceA(x, c));
+            if (b) { b.estado = 'lleno_fabrica'; b.cliente = ''; b.clienteId = ''; }
+        }
+    });
     c.movimientos.splice(mi, 1);
-    guardarStorage(); renderClientes();
+    guardarStorage(); renderClientes(); renderBarriles();
 }
 
 /* =========================================================
@@ -1367,6 +1930,7 @@ function enviarWhatsapp(clienteId) {
     t += `----------------------------------------------\n`;
     if (u.items && u.items.length) u.items.forEach(it => { t += `• ${it.cantidad}x ${it.presentacion} (${it.estilo}) - $${fmt(it.precioUnitario)} c/u = $${fmt(it.subtotal)}\n`; });
     else t += `*Detalle:* ${u.concepto}\n*Importe:* $${fmt(Math.abs(u.monto))}\n`;
+    if (u.barriles && u.barriles.length) t += `*Barriles:* ${u.barriles.join(', ')}\n`;
     t += `----------------------------------------------\n*TOTAL:* $${fmt(Math.abs(u.monto))}\n*SALDO ACUMULADO CC:* $${fmt(c.saldo)}\n\n¡Muchas gracias por elegir Albardón!`;
     window.open(`https://wa.me/${(c.telefono || '').replace(/\D/g, '')}?text=${encodeURIComponent(t)}`, '_blank');
 }
@@ -1442,6 +2006,7 @@ function descargarRemitoPDF(clienteId, mi) {
         <p><b>CLIENTE:</b> ${esc(c.nombre)}<br><b>DIRECCIÓN:</b> ${esc(c.direccion || 'N/A')}<br><b>TELÉFONO:</b> ${esc(c.telefono || 'N/A')}
         ${m.observaciones ? `<br><b>Observaciones:</b> ${esc(m.observaciones)}` : ''}</p>
         <table><tr><th>Presentación</th><th>Estilo</th><th class="n">Cant.</th><th class="n">Precio U.</th><th class="n">Subtotal</th></tr>${filas}</table>
+        ${(m.barriles && m.barriles.length) ? `<p><b>Barriles entregados:</b> ${m.barriles.map(cod => { const b = barriles.find(x => x.codigo === cod); return esc(cod) + (b && b.cerveza ? ' (' + esc(b.cerveza) + (b.lote ? ', ' + esc(b.lote) : '') + ')' : ''); }).join(', ')}</p>` : ''}
         <table class="tot"><tr><td>Entrega actual:</td><td class="n">$ ${fmt(importe)}</td></tr>
         <tr><td>Saldo anterior:</td><td class="n">$ ${fmt(anterior)}</td></tr>
         <tr class="g"><td>Saldo total acumulado:</td><td class="n">$ ${fmt(posterior)}</td></tr></table>
@@ -1462,6 +2027,583 @@ function descargarEstadoCuentaPDF(clienteId) {
 }
 
 /* =========================================================
+   12b. MÓDULOS NUEVOS: avisos, fermentadores, insumos, respaldo, PWA y acceso
+   ========================================================= */
+const normNombre = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim();
+const fmtNum = n => Number(Math.round((Number(n) || 0) * 1000) / 1000).toLocaleString('es-AR');
+const perteneceA = (b, c) => b.clienteId ? b.clienteId === c.id : b.cliente === c.nombre;
+function parseNum(t) { const n = parseFloat(String(t || '').replace(',', '.')); return isNaN(n) ? null : n; }
+function parseDens(t) { const n = parseNum(t); return n === null ? null : (n > 100 ? n / 1000 : n); }
+
+function toast(msg, tipo) {
+    let c = document.getElementById('toasts');
+    if (!c) {
+        c = document.createElement('div');
+        c.id = 'toasts';
+        c.className = 'fixed bottom-4 right-4 z-[90] space-y-2 max-w-sm no-print';
+        document.body.appendChild(c);
+    }
+    const d = document.createElement('div');
+    d.className = 'px-4 py-3 rounded-lg shadow-lg text-sm border ' + (tipo === 'warn' ? 'bg-amber-900/95 border-amber-500 text-amber-100' : 'bg-slate-800 border-slate-600 text-slate-100');
+    d.textContent = msg;
+    c.appendChild(d);
+    setTimeout(() => d.remove(), 7000);
+}
+
+/* ---------- FERMENTADORES (varios en paralelo) ---------- */
+function guardarFermentadoresLocal() { try { localStorage.setItem('alb_fermentadores', JSON.stringify(fermentadores)); } catch (e) {} }
+function persistirFermentador(f) {
+    guardarFermentadoresLocal();
+    if (db) db.collection('albardon_fermentadores').doc(f.id).set(limpio(f)).catch(console.error);
+    renderSelectorFermentadores();
+}
+function inicializarFermentadores() {
+    if (!Array.isArray(fermentadores) || !fermentadores.length) {
+        fermentadores = [{ id: 'f_1', nombre: 'Fermentador 1', ferm: null, creado: 1, actualizado: 1 }];
+        const b = leer('alb_borrador', {});
+        if (b.ferm) { // migra la fermentación en curso de la versión anterior
+            fermentadores[0].ferm = b.ferm; fermentadores[0].actualizado = Date.now();
+            delete b.ferm;
+            try { localStorage.setItem('alb_borrador', JSON.stringify(b)); } catch (e) {}
+        }
+        guardarFermentadoresLocal();
+    }
+    if (!fermentadores.find(f => f.id === fermActivoId)) fermActivoId = fermentadores[0].id;
+    localStorage.setItem('alb_ferm_activo', fermActivoId);
+}
+
+function resumenLive() {
+    const dens = [];
+    document.querySelectorAll('#tabla-dias-fermentacion tr').forEach(tr => {
+        const ins = tr.querySelectorAll('input');
+        const d = ins[1] ? parseDens(ins[1].value) : null;
+        if (d !== null) dens.push(d);
+    });
+    return { estilo: v('ferm-estilo'), lote: v('ferm-lote'), fecha: v('ferm-fecha'), di: parseDens(v('ferm-di-real')), dens };
+}
+function resumenDesdeHTML(html) {
+    if (!html) return { estilo: '', lote: '', fecha: '', di: null, dens: [] };
+    const doc = new DOMParser().parseFromString('<div>' + html + '</div>', 'text/html');
+    const val = fid => { const e = doc.querySelector(`[data-fid="${fid}"]`); return e ? (e.getAttribute('value') || '') : ''; };
+    const dens = [];
+    doc.querySelectorAll('[data-fid="tabla-dias-fermentacion"] tr').forEach(tr => {
+        const ins = tr.querySelectorAll('input');
+        const d = ins[1] ? parseDens(ins[1].getAttribute('value')) : null;
+        if (d !== null) dens.push(d);
+    });
+    return { estilo: val('ferm-estilo').trim(), lote: val('ferm-lote'), fecha: val('ferm-fecha'), di: parseDens(val('ferm-di-real')), dens };
+}
+// La densidad se considera estable si las últimas 3 lecturas varían menos de ~1 punto
+function estable(dens) {
+    if (dens.length < 3) return false;
+    const u = dens.slice(-3);
+    return Math.max(...u) - Math.min(...u) <= 0.0011;
+}
+function resumenFerm(f) {
+    let base;
+    if (f.id === fermActivoId && !editandoFermId) base = resumenLive();
+    else if (f.id === fermActivoId && stashFerm) base = resumenDesdeHTML(stashFerm);
+    else base = resumenDesdeHTML(f.ferm && f.ferm.html);
+    const libre = !base.estilo;
+    let dia = 0;
+    if (!libre && /^\d{4}-\d{2}-\d{2}$/.test(base.fecha)) dia = Math.max(1, Math.floor((new Date(hoy()) - new Date(base.fecha)) / 864e5) + 1);
+    const ult = base.dens[base.dens.length - 1];
+    const listo = !libre && estable(base.dens) && (base.di === null || ult < base.di - 0.005);
+    return { libre, estilo: base.estilo, lote: base.lote, dia, listo };
+}
+
+function renderSelectorFermentadores() {
+    const cont = document.getElementById('selector-fermentadores');
+    if (!cont || !Array.isArray(fermentadores)) return;
+    const act = fermentadores.find(f => f.id === fermActivoId);
+    const lbl = document.getElementById('ferm-activo-label');
+    if (lbl && act) lbl.textContent = act.nombre;
+    cont.innerHTML = fermentadores.map(f => {
+        const r = resumenFerm(f), esAct = f.id === fermActivoId;
+        const estado = r.libre ? 'Libre' : `${esc(r.estilo)} · ${esc(r.lote)}${r.dia ? ' · día ' + r.dia : ''}${r.listo ? ' · ✔ lista para cerrar' : ''}`;
+        return `<button onclick="seleccionarFermentador('${esc(f.id)}')" class="px-3 py-2 rounded-lg text-xs text-left border ${esAct ? 'border-amber-500 bg-amber-500/10' : 'border-slate-700 bg-slate-900 hover:bg-slate-800'}">
+            <span class="font-bold ${esAct ? 'text-amber-400' : 'text-slate-200'}">${esc(f.nombre)}</span>
+            <span class="block text-[11px] ${r.libre ? 'text-emerald-400' : (r.listo ? 'text-emerald-300 font-bold' : 'text-slate-400')}">${estado}</span></button>`;
+    }).join('') + `
+        <button onclick="agregarFermentador()" class="px-3 py-2 rounded-lg text-xs border border-dashed border-slate-600 text-amber-400 hover:bg-slate-800"><i class="fa-solid fa-plus"></i> Fermentador</button>
+        <button onclick="renombrarFermentador()" title="Renombrar el fermentador activo" class="px-2.5 rounded-lg text-xs bg-slate-800 border border-slate-700 text-slate-300 hover:bg-slate-700"><i class="fa-solid fa-pen"></i></button>
+        <button onclick="vaciarFermentador()" title="Vaciar la planilla del fermentador activo" class="px-2.5 rounded-lg text-xs bg-slate-800 border border-slate-700 text-slate-300 hover:bg-slate-700"><i class="fa-solid fa-broom"></i></button>
+        <button onclick="eliminarFermentador()" title="Eliminar el fermentador activo" class="px-2.5 rounded-lg text-xs bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20"><i class="fa-solid fa-trash"></i></button>`;
+}
+
+function guardarFermActivo() {
+    if (editandoFermId || !Array.isArray(fermentadores)) return;
+    const f = fermentadores.find(x => x.id === fermActivoId);
+    if (!f) return;
+    f.ferm = v('ferm-estilo') ? { html: snapshotHTML(document.getElementById('area-impresion-fermentacion')), ts: Date.now() } : null;
+    f.actualizado = Date.now();
+    persistirFermentador(f);
+}
+function cargarFermActivoEnPantalla() {
+    const f = fermentadores.find(x => x.id === fermActivoId);
+    if (f && f.ferm && f.ferm.html) { restaurarArea('area-impresion-fermentacion', f.ferm.html); calcularABV(); }
+    else limpiarFermentacion();
+}
+function seleccionarFermentador(id) {
+    if (id === fermActivoId) return;
+    if (editandoFermId) return alert('Primero terminá o cancelá la edición de la planilla de fermentación.');
+    guardarFermActivo();
+    fermActivoId = id;
+    localStorage.setItem('alb_ferm_activo', id);
+    cargarFermActivoEnPantalla();
+    renderSelectorFermentadores();
+}
+function crearFermentador(nombre) {
+    const f = { id: 'f_' + Date.now(), nombre, ferm: null, creado: Date.now(), actualizado: Date.now() };
+    fermentadores.push(f);
+    persistirFermentador(f);
+    return f;
+}
+function agregarFermentador() {
+    if (editandoFermId) return alert('Primero terminá o cancelá la edición de la planilla de fermentación.');
+    const nombre = (prompt('Nombre del nuevo fermentador:', 'Fermentador ' + (fermentadores.length + 1)) || '').trim();
+    if (!nombre) return;
+    const f = crearFermentador(nombre);
+    seleccionarFermentador(f.id);
+}
+function renombrarFermentador() {
+    const f = fermentadores.find(x => x.id === fermActivoId);
+    if (!f) return;
+    const nombre = (prompt('Nuevo nombre:', f.nombre) || '').trim();
+    if (!nombre) return;
+    f.nombre = nombre; f.actualizado = Date.now();
+    persistirFermentador(f);
+}
+function vaciarFermentador() {
+    if (editandoFermId) return alert('Primero terminá o cancelá la edición de la planilla de fermentación.');
+    const f = fermentadores.find(x => x.id === fermActivoId);
+    const r = resumenFerm(f);
+    if (r.libre) return toast(`${f.nombre} ya está libre.`);
+    if (!confirm(`Se borra la planilla en curso de ${f.nombre} (${r.estilo}, lote ${r.lote}) sin guardarla en la Biblioteca. ¿Continuar?`)) return;
+    limpiarFermentacion();
+    guardarFermActivo();
+}
+function eliminarFermentador() {
+    if (editandoFermId) return alert('Primero terminá o cancelá la edición de la planilla de fermentación.');
+    if (fermentadores.length <= 1) return alert('Tiene que quedar al menos un fermentador.');
+    const f = fermentadores.find(x => x.id === fermActivoId);
+    const r = resumenFerm(f);
+    const msg = r.libre ? `¿Eliminar "${f.nombre}"?` : `"${f.nombre}" tiene una fermentación en curso (${r.estilo}, lote ${r.lote}). Si lo eliminás se pierde esa planilla. ¿Eliminar igual?`;
+    if (!confirm(msg)) return;
+    fermentadores = fermentadores.filter(x => x.id !== f.id);
+    if (db) db.collection('albardon_fermentadores').doc(f.id).delete().catch(console.error);
+    fermActivoId = fermentadores[0].id;
+    localStorage.setItem('alb_ferm_activo', fermActivoId);
+    guardarFermentadoresLocal();
+    cargarFermActivoEnPantalla();
+    renderSelectorFermentadores();
+}
+
+// Elección del fermentador de destino al guardar una cocción
+var _cbDestino = null;
+function pedirDestinoFerm(cb) {
+    if (fermentadores.length === 1) {
+        const f = fermentadores[0], r = resumenFerm(f);
+        if (r.libre || confirm(`${f.nombre} tiene una fermentación en curso (${r.estilo}, lote ${r.lote}). Si seguís, se reemplaza por esta nueva. ¿Continuar?`)) cb(f.id);
+        return;
+    }
+    _cbDestino = cb;
+    document.getElementById('lista-destino-ferm').innerHTML = fermentadores.map(f => {
+        const r = resumenFerm(f);
+        return `<button onclick="elegirDestino('${esc(f.id)}')" class="w-full text-left px-3 py-2.5 rounded-lg border ${r.libre ? 'border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/20' : 'border-red-500/30 bg-red-500/5 hover:bg-red-500/10'}">
+            <span class="font-bold text-slate-100">${esc(f.nombre)}</span>
+            <span class="block text-xs ${r.libre ? 'text-emerald-400' : 'text-red-300'}">${r.libre ? 'Libre' : 'Ocupado: ' + esc(r.estilo) + ' (' + esc(r.lote) + ') — se reemplazaría'}</span></button>`;
+    }).join('');
+    document.getElementById('modal-destino-ferm').classList.remove('hidden');
+}
+function cerrarModalDestino() { _cbDestino = null; document.getElementById('modal-destino-ferm').classList.add('hidden'); }
+function elegirDestino(id) {
+    const f = fermentadores.find(x => x.id === id);
+    if (!f) return;
+    const r = resumenFerm(f);
+    if (!r.libre && !confirm(`${f.nombre} está ocupado (${r.estilo}, lote ${r.lote}). Se reemplazará esa fermentación. ¿Continuar?`)) return;
+    const cb = _cbDestino;
+    cerrarModalDestino();
+    if (cb) cb(id);
+}
+function destinoNuevoFermentador() {
+    const nombre = (prompt('Nombre del nuevo fermentador:', 'Fermentador ' + (fermentadores.length + 1)) || '').trim();
+    if (!nombre) return;
+    const f = crearFermentador(nombre);
+    const cb = _cbDestino;
+    cerrarModalDestino();
+    if (cb) cb(f.id);
+}
+
+// Aviso de fermentación terminada
+function revisarAvisoFin() {
+    const box = document.getElementById('aviso-fin-ferm');
+    if (!box) return;
+    const r = resumenLive();
+    if (editandoFermId || v('ferm-df') || !r.estilo || !estable(r.dens) || (r.di !== null && r.dens[r.dens.length - 1] >= r.di - 0.005)) {
+        box.classList.add('hidden'); box.innerHTML = ''; return;
+    }
+    const ult = r.dens[r.dens.length - 1];
+    const abv = (r.di !== null && r.di > ult) ? ((r.di - ult) * 131.25).toFixed(1) : null;
+    box.innerHTML = `<span>✔ La densidad se mantuvo en <strong>${ult.toFixed(3)}</strong> en las últimas 3 lecturas${abv ? ` (ABV estimado ${abv}%)` : ''}. Es probable que la fermentación haya terminado.</span>
+        <button onclick="usarDensidadComoDF()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-lg text-xs">Usar ${ult.toFixed(3)} como DF</button>`;
+    box.classList.remove('hidden');
+}
+function usarDensidadComoDF() {
+    const r = resumenLive();
+    if (!r.dens.length) return;
+    setV('ferm-df', r.dens[r.dens.length - 1].toFixed(3));
+    calcularABV();
+    actualizarGrafico();
+    guardarBorrador();
+}
+
+/* ---------- INSUMOS ---------- */
+const TIPOS_INSUMO = { malta: 'Malta / Grano', lupulo: 'Lúpulo', levadura: 'Levadura', sal: 'Sal / Aditivo', otro: 'Otro' };
+function guardarInsumos() {
+    try { localStorage.setItem('alb_insumos', JSON.stringify(insumos)); } catch (e) {}
+    if (db) db.collection('albardon_app').doc('insumos').set({ lista: limpio(insumos) }).catch(console.error);
+    actualizarBadgeInsumos();
+    const tab = document.getElementById('tab-insumos');
+    if (tab && !tab.classList.contains('hidden')) renderInsumos();
+}
+function estadoInsumo(i) {
+    const s = parseFloat(i.stock) || 0, m = parseFloat(i.minimo) || 0;
+    if (s <= 0) return 'sin';
+    if (m > 0 && s <= m) return 'bajo';
+    return 'ok';
+}
+function actualizarBadgeInsumos() {
+    const n = insumos.filter(i => estadoInsumo(i) !== 'ok' && ((parseFloat(i.minimo) || 0) > 0 || (parseFloat(i.stock) || 0) < 0)).length;
+    const b = document.getElementById('badge-insumos');
+    if (!b) return;
+    b.textContent = n;
+    b.classList.toggle('hidden', n === 0);
+}
+function renderInsumos() {
+    const cont = document.getElementById('grilla-insumos');
+    if (!cont) return;
+    if (!insumos.length) {
+        cont.innerHTML = '<div class="card p-6 text-center text-slate-400 space-y-2"><p>Todavía no cargaste insumos.</p><p class="text-xs">Tocá "Importar desde recetas" para crear la lista con las maltas, lúpulos, levadura y sales de tus recetas, y después cargá el stock de cada uno con "+ Ingreso".</p></div>';
+        return;
+    }
+    const q = normNombre((document.getElementById('buscar-insumo') || {}).value || '');
+    const lista = insumos.filter(i => !q || normNombre(i.nombre).includes(q))
+        .sort((a, b) => String(a.tipo).localeCompare(String(b.tipo)) || String(a.nombre).localeCompare(String(b.nombre)));
+    if (!lista.length) { cont.innerHTML = '<p class="text-slate-500 italic">Sin resultados.</p>'; return; }
+    const etq = {
+        ok: '<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/20 text-emerald-400">OK</span>',
+        bajo: '<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-500/20 text-amber-300">Stock bajo</span>',
+        sin: '<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-red-500/20 text-red-400">Sin stock</span>'
+    };
+    cont.innerHTML = `<div class="overflow-x-auto bg-slate-900 border border-slate-700 rounded-xl"><table class="w-full text-left text-sm">
+        <thead class="text-xs text-slate-400 uppercase bg-slate-800/50"><tr><th class="p-3">Insumo</th><th class="p-3">Tipo</th><th class="p-3 text-right">Stock</th><th class="p-3 text-right">Mínimo</th><th class="p-3">Estado</th><th class="p-3 text-right">Acciones</th></tr></thead>
+        <tbody class="divide-y divide-slate-800">` + lista.map(i => `<tr class="hover:bg-slate-800/40">
+            <td class="p-3 text-slate-100 font-semibold">${esc(i.nombre)}</td>
+            <td class="p-3 text-slate-400 text-xs">${esc(TIPOS_INSUMO[i.tipo] || 'Otro')}</td>
+            <td class="p-3 text-right font-mono ${(parseFloat(i.stock) || 0) <= 0 ? 'text-red-400' : 'text-amber-300'} font-bold">${fmtNum(i.stock)} ${esc(i.unidad)}</td>
+            <td class="p-3 text-right font-mono text-slate-400">${(parseFloat(i.minimo) || 0) ? fmtNum(i.minimo) + ' ' + esc(i.unidad) : '—'}</td>
+            <td class="p-3">${etq[estadoInsumo(i)]}</td>
+            <td class="p-3 text-right whitespace-nowrap space-x-1">
+                <button onclick="ingresoInsumo('${esc(i.id)}')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-2.5 py-1.5 rounded-lg text-xs">+ Ingreso</button>
+                <button onclick="ajustarInsumo('${esc(i.id)}')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-2.5 py-1.5 rounded-lg text-xs">Ajustar</button>
+                <button onclick="mostrarModalInsumo('${esc(i.id)}')" title="Editar" class="bg-slate-700 hover:bg-slate-600 text-amber-400 px-2 py-1.5 rounded-lg text-xs"><i class="fa-solid fa-pen-to-square"></i></button>
+                <button onclick="eliminarInsumo('${esc(i.id)}')" title="Eliminar" class="bg-red-500/20 hover:bg-red-500/40 text-red-400 px-2 py-1.5 rounded-lg text-xs"><i class="fa-solid fa-trash"></i></button>
+            </td></tr>`).join('') + '</tbody></table></div>';
+}
+function mostrarModalInsumo(id) {
+    const i = insumos.find(x => x.id === id);
+    document.getElementById('modal-insumo-titulo').innerText = i ? 'Editar insumo' : 'Nuevo insumo';
+    setV('ins-id', i ? i.id : ''); setV('ins-nombre', i ? i.nombre : ''); setV('ins-tipo', i ? i.tipo : 'malta');
+    setV('ins-unidad', i ? i.unidad : 'kg'); setV('ins-stock', i ? i.stock : ''); setV('ins-minimo', i ? i.minimo : '');
+    document.getElementById('modal-insumo').classList.remove('hidden');
+}
+function cerrarModalInsumo() { document.getElementById('modal-insumo').classList.add('hidden'); }
+function guardarInsumo() {
+    const nombre = v('ins-nombre');
+    if (!nombre) return alert('Ingresá el nombre del insumo.');
+    const id = v('ins-id');
+    if (insumos.some(x => x.id !== id && normNombre(x.nombre) === normNombre(nombre))) return alert('Ya existe un insumo con ese nombre.');
+    const datos = { nombre, tipo: v('ins-tipo'), unidad: v('ins-unidad'), stock: parseNum(v('ins-stock')) || 0, minimo: parseNum(v('ins-minimo')) || 0 };
+    const i = insumos.find(x => x.id === id);
+    if (i) Object.assign(i, datos); else insumos.push({ id: 'i_' + Date.now(), ...datos });
+    guardarInsumos(); cerrarModalInsumo(); renderInsumos();
+}
+function eliminarInsumo(id) {
+    const i = insumos.find(x => x.id === id);
+    if (!i || !confirm(`¿Eliminar "${i.nombre}" del stock?`)) return;
+    insumos = insumos.filter(x => x.id !== id);
+    guardarInsumos(); renderInsumos();
+}
+function ingresoInsumo(id) {
+    const i = insumos.find(x => x.id === id);
+    if (!i) return;
+    const n = parseNum(prompt(`Cantidad que ingresa de "${i.nombre}" (${i.unidad}):`));
+    if (n === null || n <= 0) return;
+    i.stock = Math.round(((parseFloat(i.stock) || 0) + n) * 1000) / 1000;
+    guardarInsumos(); renderInsumos();
+    toast(`${i.nombre}: stock ${fmtNum(i.stock)} ${i.unidad}`);
+}
+function ajustarInsumo(id) {
+    const i = insumos.find(x => x.id === id);
+    if (!i) return;
+    const n = parseNum(prompt(`Stock real de "${i.nombre}" (${i.unidad}). Reemplaza el valor actual (${fmtNum(i.stock)}):`));
+    if (n === null || n < 0) return;
+    i.stock = n;
+    guardarInsumos(); renderInsumos();
+}
+function parseLevadura(txt) {
+    const m = String(txt || '').match(/^\s*(.*?)\s*\(\s*(\d+(?:[.,]\d+)?)\s*(?:g|gr|grs|gramos)?[^)]*\)/i);
+    return (m && m[1]) ? { nombre: m[1].trim(), cantidad: parseFloat(m[2].replace(',', '.')) } : null;
+}
+function importarInsumosDesdeRecetas() {
+    const nuevos = [];
+    const agregar = (nombre, tipo, unidad) => {
+        nombre = String(nombre || '').trim();
+        if (!nombre) return;
+        const n = normNombre(nombre);
+        if (insumos.some(i => normNombre(i.nombre) === n) || nuevos.some(i => normNombre(i.nombre) === n)) return;
+        nuevos.push({ id: 'i_' + Date.now() + '_' + nuevos.length, nombre, tipo, unidad, stock: 0, minimo: 0 });
+    };
+    Object.values(recetas).forEach(r => {
+        (r.granos || []).forEach(g => agregar(g.nombre, 'malta', 'kg'));
+        (r.lupulos || []).forEach(l => agregar(l.nombre, 'lupulo', 'g'));
+        [...(r.salesMac || []), ...(r.salesLav || [])].forEach(s => agregar(s.nombre, 'sal', 'g'));
+        const lev = parseLevadura(r.levadura);
+        if (lev) agregar(lev.nombre, 'levadura', 'g');
+    });
+    if (!nuevos.length) return toast('No hay insumos nuevos para importar.');
+    insumos.push(...nuevos);
+    guardarInsumos(); renderInsumos();
+    toast(`Se agregaron ${nuevos.length} insumos con stock 0. Cargá el stock de cada uno con "+ Ingreso".`);
+}
+
+// Lo que se usó en la cocción: granos y lúpulos según lo escrito en la planilla; sales y levadura según la receta
+function calcularConsumo(conservar) {
+    const out = [];
+    document.querySelectorAll('#contenedor-granos .input-grano').forEach(inp => {
+        const nombre = (inp.parentElement.parentElement.querySelector('input') || {}).value || '';
+        const c = parseFloat(inp.value) || 0;
+        if (nombre.trim() && c > 0) out.push({ nombre: nombre.trim(), cantidad: c, unidad: 'kg', fuente: 'planilla' });
+    });
+    document.querySelectorAll('#contenedor-lupulos > div').forEach(row => {
+        const ins = row.querySelectorAll('input');
+        const c = ins[1] ? parseFloat(ins[1].value) || 0 : 0;
+        if (ins[0] && ins[0].value.trim() && c > 0) out.push({ nombre: ins[0].value.trim(), cantidad: c, unidad: 'g', fuente: 'planilla' });
+    });
+    const r = window.recetaActual;
+    if (r) {
+        [...(r.salesMac || []), ...(r.salesLav || [])].forEach(s => { if (s.nombre && s.cantidad > 0) out.push({ nombre: s.nombre, cantidad: s.cantidad, unidad: 'g', fuente: 'receta' }); });
+        const lev = parseLevadura(r.levadura);
+        if (lev && lev.cantidad > 0) out.push({ nombre: lev.nombre, cantidad: lev.cantidad, unidad: 'g', fuente: 'receta' });
+    } else if (conservar) {
+        conservar.filter(c => c.fuente === 'receta').forEach(c => out.push(c));
+    }
+    return out;
+}
+function convertirUnidad(cant, desde, hacia) {
+    if (desde === hacia) return cant;
+    if (desde === 'g' && hacia === 'kg') return cant / 1000;
+    if (desde === 'kg' && hacia === 'g') return cant * 1000;
+    return cant;
+}
+// signo -1 descuenta, +1 devuelve
+function aplicarConsumo(lista, signo) {
+    const res = { ok: [], sin: [], bajos: [] };
+    if (!insumos.length || !lista || !lista.length) return res;
+    lista.forEach(it => {
+        const ins = insumos.find(i => normNombre(i.nombre) === normNombre(it.nombre));
+        if (!ins) { res.sin.push(it.nombre); return; }
+        const c = convertirUnidad(it.cantidad, it.unidad, ins.unidad);
+        ins.stock = Math.round(((parseFloat(ins.stock) || 0) + signo * c) * 1000) / 1000;
+        res.ok.push(`${it.nombre} ${signo < 0 ? '−' : '+'}${fmtNum(c)} ${ins.unidad}`);
+        if (signo < 0 && ins.stock <= (parseFloat(ins.minimo) || 0)) res.bajos.push(ins.nombre);
+    });
+    guardarInsumos();
+    return res;
+}
+function avisoConsumo(res, accion) {
+    if (!insumos.length) return;
+    const partes = [];
+    if (res.ok.length) partes.push(`${accion}: ${res.ok.join(', ')}.`);
+    if (res.sin.length) partes.push(`Sin insumo cargado para: ${[...new Set(res.sin)].join(', ')}.`);
+    if (res.bajos.length) partes.push(`⚠ Stock bajo: ${[...new Set(res.bajos)].join(', ')}.`);
+    if (partes.length) toast(partes.join(' '), res.bajos.length ? 'warn' : '');
+}
+
+/* ---------- RESPALDO Y EXPORTACIÓN ---------- */
+function renderTodo() {
+    renderRecetas(); renderBarriles(); renderClientes(); renderInsumos(); actualizarBadgeInsumos();
+    renderBiblioteca(); renderBibliotecaFermentacion(); renderSelectorFermentadores();
+}
+function abrirModalDatos() {
+    const u = localStorage.getItem('alb_ultimo_respaldo');
+    document.getElementById('ultimo-respaldo').textContent = u ? fmtFecha(u) : 'nunca';
+    document.getElementById('modal-datos').classList.remove('hidden');
+}
+function cerrarModalDatos() { document.getElementById('modal-datos').classList.add('hidden'); }
+function descargarArchivo(nombre, contenido, tipo) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([contenido], { type: tipo }));
+    a.download = nombre;
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+function descargarRespaldoJSON() {
+    guardarFermActivo();
+    const datos = { app: 'albardon', version: 2, fecha: new Date().toISOString(), recetas, barriles, clientes, insumos, lotesCoccion, lotesFerm, fermentadores };
+    descargarArchivo('Albardon_respaldo_' + hoy() + '.json', JSON.stringify(datos), 'application/json');
+    localStorage.setItem('alb_ultimo_respaldo', hoy());
+    document.getElementById('ultimo-respaldo').textContent = fmtFecha(hoy());
+    toast('Respaldo descargado. Guardalo en un lugar seguro (Drive, correo, pendrive).');
+}
+function reemplazarColeccion(nombre, lista) {
+    if (!db) return;
+    const col = db.collection(nombre);
+    col.get().then(snap => {
+        const ids = new Set(lista.map(x => x.id));
+        const ops = [];
+        snap.docs.forEach(d => { if (!ids.has(d.id)) ops.push(b => b.delete(d.ref)); });
+        lista.forEach(x => ops.push(b => b.set(col.doc(x.id), limpio(x))));
+        for (let i = 0; i < ops.length; i += 400) {
+            const b = db.batch();
+            ops.slice(i, i + 400).forEach(f => f(b));
+            b.commit().catch(console.error);
+        }
+    }).catch(console.error);
+}
+function restaurarRespaldoJSON(input) {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    const rd = new FileReader();
+    rd.onload = () => {
+        try {
+            const d = JSON.parse(rd.result);
+            if (d.app !== 'albardon') throw new Error('El archivo no es un respaldo de Albardón.');
+            if (!confirm(`Vas a REEMPLAZAR todos los datos actuales por los del respaldo del ${fmtFecha((d.fecha || '').slice(0, 10))}. No se puede deshacer. ¿Continuar?`)) return;
+            recetas = normRecetas(d.recetas); barriles = d.barriles || []; clientes = d.clientes || []; insumos = d.insumos || [];
+            lotesCoccion = d.lotesCoccion || []; lotesFerm = d.lotesFerm || [];
+            fermentadores = (d.fermentadores && d.fermentadores.length) ? d.fermentadores : null;
+            inicializarFermentadores();
+            guardarStorage(); guardarInsumos(); guardarLotesLocal(); guardarFermentadoresLocal();
+            reemplazarColeccion('albardon_lotes', [...lotesCoccion, ...lotesFerm]);
+            reemplazarColeccion('albardon_fermentadores', fermentadores);
+            cargarFermActivoEnPantalla();
+            renderTodo();
+            cerrarModalDatos();
+            toast('Respaldo restaurado.');
+        } catch (e) { alert('No se pudo restaurar: ' + e.message); }
+    };
+    rd.readAsText(file);
+    input.value = '';
+}
+function exportarExcel() {
+    if (typeof XLSX === 'undefined') return alert('No se pudo cargar la librería de Excel. Revisá la conexión y recargá la página.');
+    const wb = XLSX.utils.book_new();
+    const hoja = (nombre, filas) => XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(filas.length ? filas : [{ '(sin datos)': '' }]), nombre);
+    hoja('Recetas', Object.values(recetas).map(r => ({ Nombre: r.nombre, 'Lote (L)': r.lote, DI: r.diTeorica, DF: r.dfTeorica, 'ABV %': r.abv, IBU: r.ibu, SRM: r.srm, 'Eficiencia %': r.eficiencia, Levadura: r.levadura })));
+    hoja('Barriles', barriles.map(b => ({ Código: b.codigo, Capacidad: normCap(b.capacidad), Conector: b.conector, Estado: (etiquetasEstado[normEstado(b.estado)] || {}).texto || b.estado, Cerveza: b.cerveza, Lote: b.lote, Embarrilado: b.fechaEmbarrilado, Cliente: b.cliente, Ubicación: b.ubicacion })));
+    hoja('Clientes', clientes.map(c => ({ Nombre: c.nombre, Teléfono: c.telefono, Dirección: c.direccion, Saldo: c.saldo })));
+    const mov = [], det = [];
+    clientes.forEach(c => (c.movimientos || []).forEach(m => {
+        mov.push({ Cliente: c.nombre, Fecha: m.fecha, Concepto: m.concepto, Monto: m.monto, Observaciones: m.observaciones || '', Barriles: (m.barriles || []).join(', ') });
+        (m.items || []).forEach(it => det.push({ Cliente: c.nombre, Fecha: m.fecha, Presentación: it.presentacion, Estilo: it.estilo, Cantidad: it.cantidad, 'Precio unitario': it.precioUnitario, Subtotal: it.subtotal }));
+    }));
+    hoja('Movimientos', mov);
+    hoja('Remitos (detalle)', det);
+    hoja('Cocciones', lotesCoccion.map(l => ({ Fecha: l.fecha, Lote: l.numeroLote, Estilo: l.estilo, 'DI real': l.densidadInicial, Fermentador: l.fermentador || '' })));
+    hoja('Fermentaciones', lotesFerm.map(l => ({ Fecha: l.fecha, Lote: l.numeroLote, Estilo: l.estilo, DI: l.di, DF: l.df, ABV: l.abv, Fermentador: l.fermentador || '' })));
+    hoja('Insumos', insumos.map(i => ({ Insumo: i.nombre, Tipo: TIPOS_INSUMO[i.tipo] || 'Otro', Unidad: i.unidad, Stock: i.stock, Mínimo: i.minimo })));
+    XLSX.writeFile(wb, 'Albardon_' + hoy() + '.xlsx');
+}
+function recordarRespaldo() {
+    setTimeout(() => {
+        const u = localStorage.getItem('alb_ultimo_respaldo');
+        const dias = u ? (new Date(hoy()) - new Date(u)) / 864e5 : 999;
+        if (dias > 14) toast(`${u ? 'Hace ' + Math.floor(dias) + ' días' : 'Todavía'} no descargás un respaldo. Podés hacerlo desde el botón "Datos".`, 'warn');
+    }, 4000);
+}
+
+/* ---------- APP INSTALABLE Y USO SIN CONEXIÓN ---------- */
+var _promptInstalar = null;
+window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    _promptInstalar = e;
+    const b = document.getElementById('btn-instalar');
+    if (b) b.classList.remove('hidden');
+});
+window.addEventListener('appinstalled', () => { _promptInstalar = null; document.getElementById('btn-instalar')?.classList.add('hidden'); });
+function instalarApp() {
+    if (!_promptInstalar) return toast('Para instalarla: en Chrome, menú ⋮ → "Instalar app". En iPhone: Compartir → "Agregar a inicio".');
+    _promptInstalar.prompt();
+    _promptInstalar.userChoice.finally(() => { _promptInstalar = null; document.getElementById('btn-instalar')?.classList.add('hidden'); });
+}
+function actualizarEstadoConexion(aviso) {
+    const off = !navigator.onLine;
+    document.getElementById('pill-offline')?.classList.toggle('hidden', !off);
+    if (aviso) toast(off ? 'Sin conexión: podés seguir trabajando, los cambios se sincronizan al volver internet.' : 'Conexión recuperada: sincronizando.', off ? 'warn' : '');
+}
+function registrarPWA() {
+    if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+        navigator.serviceWorker.register('sw.js').catch(e => console.warn('No se pudo registrar el service worker:', e));
+    }
+    window.addEventListener('online', () => actualizarEstadoConexion(true));
+    window.addEventListener('offline', () => actualizarEstadoConexion(true));
+    actualizarEstadoConexion(false);
+}
+
+/* ---------- ACCESO (inicio de sesión) ---------- */
+var syncIniciada = false;
+function msgLogin(t, ok) {
+    const e = document.getElementById('login-msg');
+    e.textContent = t || '';
+    e.className = 'text-xs min-h-[1rem] ' + (ok ? 'text-emerald-400' : 'text-red-400');
+}
+function mensajeErrorAuth(e) {
+    switch (e && e.code) {
+        case 'auth/invalid-credential': case 'auth/wrong-password': case 'auth/user-not-found': case 'auth/invalid-login-credentials':
+            return 'Correo o contraseña incorrectos.';
+        case 'auth/invalid-email': return 'El correo no es válido.';
+        case 'auth/too-many-requests': return 'Demasiados intentos. Esperá unos minutos o restablecé la contraseña.';
+        case 'auth/operation-not-allowed': return 'El acceso con correo y contraseña no está habilitado en Firebase (Authentication → Método de acceso).';
+        case 'auth/network-request-failed': return 'Sin conexión. Reintentá cuando tengas internet.';
+        default: return 'No se pudo ingresar (' + ((e && (e.code || e.message)) || 'error') + ').';
+    }
+}
+function iniciarSesion() {
+    const email = v('login-email'), pass = document.getElementById('login-pass').value;
+    if (!email || !pass) return msgLogin('Ingresá tu correo y contraseña.');
+    msgLogin('Ingresando...', true);
+    auth.signInWithEmailAndPassword(email, pass).then(() => msgLogin('')).catch(e => msgLogin(mensajeErrorAuth(e)));
+}
+function olvidePass() {
+    const email = v('login-email');
+    if (!email) return msgLogin('Escribí tu correo arriba y volvé a tocar "Olvidé mi contraseña".');
+    auth.sendPasswordResetEmail(email).then(() => msgLogin('Te enviamos un correo para restablecer la contraseña.', true)).catch(e => msgLogin(mensajeErrorAuth(e)));
+}
+function cerrarSesion() {
+    if (!auth) return;
+    guardarFermActivo();
+    auth.signOut().then(() => location.reload());
+}
+function iniciarAuth() {
+    const overlay = document.getElementById('pantalla-login');
+    if (!auth) { overlay.classList.add('hidden'); iniciarSincronizacion(); return; }
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            overlay.classList.add('hidden');
+            const u = document.getElementById('usuario-actual');
+            u.textContent = user.email || ''; u.classList.remove('hidden');
+            document.getElementById('btn-salir').classList.remove('hidden');
+            if (!syncIniciada) { syncIniciada = true; iniciarSincronizacion(); recordarRespaldo(); }
+        } else {
+            overlay.classList.remove('hidden');
+        }
+    });
+}
+
+
+/* =========================================================
    13. ARRANQUE
    ========================================================= */
 document.addEventListener('DOMContentLoaded', () => {
@@ -1471,8 +2613,16 @@ document.addEventListener('DOMContentLoaded', () => {
     renderRecetas();
     renderBarriles();
     renderClientes();
+    renderInsumos();
+    actualizarBadgeInsumos();
+    inicializarFermentadores();
+    cargarFermActivoEnPantalla();
+    renderSelectorFermentadores();
+    aplicarBorrador(leer('alb_borrador', {}));
+    actualizarGrafico();
     switchTab('recetas');
-    iniciarSincronizacion();
+    registrarPWA();
+    iniciarAuth();
 });
 </script>
 </body>
