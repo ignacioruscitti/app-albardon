@@ -1727,7 +1727,7 @@ function renderClientes() {
                 <span class="text-slate-400 font-semibold block">ÚLTIMOS MOVIMIENTOS & REMITOS:</span>
                 ${(c.movimientos && c.movimientos.length) ? c.movimientos.map((m, mi) => `
                     <div class="flex justify-between items-center py-1.5 border-b border-slate-800 text-slate-300 gap-2">
-                        <div><span class="font-semibold text-slate-200">${esc(fmtFecha(m.fecha))}</span> - <span>${esc(m.concepto)}</span>${(m.barriles && m.barriles.length) ? `<span class="text-blue-300 font-mono"> [${m.barriles.map(esc).join(', ')}]</span>` : ''}${m.observaciones ? `<span class="text-slate-500"> (${esc(m.observaciones)})</span>` : ''}</div>
+                        <div><span class="font-semibold text-slate-200">${esc(fmtFecha(m.fecha))}</span> - <span>${esc(descripcionMovimiento(m))}</span>${(m.barriles && m.barriles.length) ? `<span class="text-blue-300 font-mono"> [${m.barriles.map(esc).join(', ')}]</span>` : ''}${m.observaciones ? `<span class="text-slate-500"> (${esc(m.observaciones)})</span>` : ''}</div>
                         <div class="flex items-center gap-2 shrink-0">
                             <span class="font-mono font-bold ${m.monto === 0 ? 'text-slate-400' : (m.monto < 0 ? 'text-red-400' : 'text-emerald-400')}">$ ${fmt(m.monto)}</span>
                             ${(m.items && m.items.length) ? `<button onclick="descargarRemitoPDF('${esc(c.id)}',${mi})" title="Descargar Remito PDF" class="bg-amber-500 hover:bg-amber-600 text-slate-950 text-[10px] px-2 py-1 rounded font-bold flex items-center gap-1 no-print"><i class="fa-solid fa-file-pdf"></i> PDF</button>` : ''}
@@ -1865,7 +1865,7 @@ function guardarMovimiento() {
         });
         if (!items.length) return alert('Agregue al menos un ítem al remito.');
         codigos = [...document.querySelectorAll('.chk-barril-entrega:checked')].map(c => c.value);
-        concepto = `Entrega de Cerveza (${items.length} ${items.length === 1 ? 'ítem' : 'ítems'})`;
+        concepto = descripcionMovimiento({ items });
         monto = -Math.abs(monto);
     } else if (tipo === 'cobro') {
         concepto = v('mov-concepto-cobro') || 'Cobro / Pago recibido';
@@ -1933,7 +1933,8 @@ function enviarWhatsapp(clienteId) {
 function enviarEstadoCuentaWhatsApp(clienteId) {
     const c = clientes.find(x => x.id === clienteId);
     if (!c) return alert('No se encontró al cliente.');
-    const t = `*ESTADO DE CUENTA - CERVECERÍA ALBARDÓN*\n-----------------------------------\nCliente: ${c.nombre}\nSaldo Actual: $${fmt(c.saldo)}\n-----------------------------------\n¡Gracias por elegirnos!`;
+    const ult = (c.movimientos || []).slice(0, 5).map(m => `• ${fmtFecha(m.fecha)} — ${descripcionMovimiento(m)} — $${fmt(m.monto)}`).join('\n');
+    const t = `*ESTADO DE CUENTA - CERVECERÍA ALBARDÓN*\n-----------------------------------\nCliente: ${c.nombre}\n${ult ? '*Últimos movimientos:*\n' + ult + '\n-----------------------------------\n' : ''}Saldo Actual: $${fmt(c.saldo)}\n-----------------------------------\n¡Gracias por elegirnos!`;
     window.open(`https://api.whatsapp.com/send?phone=${(c.telefono || '').replace(/\D/g, '')}&text=${encodeURIComponent(t)}`, '_blank');
 }
 
@@ -1983,6 +1984,13 @@ function descargarRecetaPDF(clave) {
         <p><b>Levadura:</b> ${esc(r.levadura || 'N/A')}</p>`);
 }
 
+function descripcionMovimiento(m) {
+    if (m.items && m.items.length) {
+        return 'Entrega: ' + m.items.map(it => `${it.cantidad} × ${it.presentacion}${it.estilo && it.estilo !== 'Varios' ? ' (' + it.estilo + ')' : ''}`).join(', ');
+    }
+    return m.concepto;
+}
+
 function saldoPosteriorA(c, mi) { // saldo de la cuenta inmediatamente después del movimiento mi (los movimientos están del más nuevo al más viejo)
     let s = parseFloat(c.saldo) || 0;
     for (let j = 0; j < mi; j++) s -= c.movimientos[j].monto;
@@ -2012,12 +2020,24 @@ function descargarRemitoPDF(clienteId, mi) {
 function descargarEstadoCuentaPDF(clienteId) {
     const c = clientes.find(x => x.id === clienteId);
     if (!c) return;
-    const filas = (c.movimientos || []).map(m => `<tr><td>${esc(fmtFecha(m.fecha))}</td><td>${esc(m.concepto)}${m.observaciones ? ' - ' + esc(m.observaciones) : ''}</td>
-        <td class="n" style="color:${m.monto < 0 ? '#b91c1c' : '#047857'}">$ ${fmt(m.monto)}</td></tr>`).join('') || '<tr><td colspan="3"><i>Sin movimientos.</i></td></tr>';
+    const chico = 'font-size:11px;padding-left:8px;color:#334155';
+    const detalle = m => {
+        let h = '';
+        if (m.items && m.items.length) {
+            h += '<b>Entrega de cerveza</b>' + m.items.map(it =>
+                `<div style="${chico}">• ${esc(it.cantidad)} × ${esc(it.presentacion)}${it.estilo && it.estilo !== 'Varios' ? ' — ' + esc(it.estilo) : ''} · $${fmt(it.precioUnitario)} c/u = $${fmt(it.subtotal)}</div>`).join('');
+        } else h += esc(m.concepto);
+        if (m.barriles && m.barriles.length) h += `<div style="${chico}">Barriles: ${m.barriles.map(esc).join(', ')}</div>`;
+        if (m.observaciones) h += `<div style="${chico}">Obs.: ${esc(m.observaciones)}</div>`;
+        return h;
+    };
+    const filas = (c.movimientos || []).map((m, i) => `<tr><td style="vertical-align:top">${esc(fmtFecha(m.fecha))}</td><td>${detalle(m)}</td>
+        <td class="n" style="vertical-align:top;color:${m.monto < 0 ? '#b91c1c' : (m.monto > 0 ? '#047857' : '#475569')}">$ ${fmt(m.monto)}</td>
+        <td class="n" style="vertical-align:top">$ ${fmt(saldoPosteriorA(c, i))}</td></tr>`).join('') || '<tr><td colspan="4"><i>Sin movimientos.</i></td></tr>';
     abrirImpresion('Estado de cuenta - ' + c.nombre, `
         ${cabeceraPDF(`<h2>ESTADO DE CUENTA</h2><small>Emitido: ${esc(fmtFecha(hoy()))}</small>`)}
         <p><b>CLIENTE:</b> ${esc(c.nombre)}<br><b>DIRECCIÓN:</b> ${esc(c.direccion || 'N/A')}<br><b>TELÉFONO:</b> ${esc(c.telefono || 'N/A')}</p>
-        <table><tr><th>Fecha</th><th>Concepto</th><th class="n">Importe</th></tr>${filas}</table>
+        <table><tr><th>Fecha</th><th>Detalle</th><th class="n">Importe</th><th class="n">Saldo</th></tr>${filas}</table>
         <table class="tot"><tr class="g"><td>Saldo actual:</td><td class="n">$ ${fmt(c.saldo)}</td></tr></table>
         <p><small>Saldo negativo = el cliente debe ese importe.</small></p>`);
 }
