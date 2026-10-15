@@ -63,6 +63,7 @@
             <button onclick="switchTab('fermentacion')" id="btn-fermentacion" class="tab-btn px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700 transition-colors flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-temperature-half"></i> Fermentación</button>
             <button onclick="switchTab('stock')" id="btn-stock" class="tab-btn px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700 transition-colors flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-boxes-stacked"></i> Barriles en stock</button>
             <button onclick="switchTab('insumos')" id="btn-insumos" class="tab-btn px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700 transition-colors flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-warehouse"></i> Insumos <span id="badge-insumos" class="hidden bg-red-500 text-white rounded-full text-[10px] px-1.5 py-0.5 font-bold">0</span></button>
+            <button onclick="switchTab('costos')" id="btn-costos" class="tab-btn px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700 transition-colors flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-coins"></i> Costos</button>
             <button onclick="switchTab('cc')" id="btn-cc" class="tab-btn px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700 transition-colors flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-users"></i> Cuentas Corrientes</button>
             <button onclick="switchTab('biblioteca')" id="btn-biblioteca" class="tab-btn px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700 transition-colors flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-book-bookmark"></i> Biblioteca</button>
         </nav>
@@ -142,6 +143,9 @@
                 <div><label class="text-slate-400">EVAPORACIÓN (%)</label><input type="number" id="rec-evaporacion" placeholder="6" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
                 <div><label class="text-slate-400">PÉRDIDA TRUB (LTS)</label><input type="number" id="rec-trub" placeholder="10" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
                 <div><label class="text-slate-400">TIEMPO ENFRIADO (MIN)</label><input type="number" id="rec-tiempo-enfriado" placeholder="30" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
+                <div><label class="text-slate-400">LTS POST-HERVOR</label><input type="number" id="rec-lts-post" placeholder="290" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1 font-mono"></div>
+                <div><label class="text-slate-400">IRISH MOSS (GRS)</label><input type="number" id="rec-moss" placeholder="45" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
+                <div><label class="text-slate-400">NUTRIENTE LEVA (GRS)</label><input type="number" id="rec-nutriente" placeholder="3" class="w-full bg-slate-900 border border-slate-700 rounded p-2 mt-1"></div>
             </div>
         </div>
 
@@ -186,122 +190,53 @@
     <div id="area-impresion-coccion" class="space-y-6">
         <div class="card p-4 space-y-3">
             <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Encabezado</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div><label class="text-xs text-slate-400">ESTILO</label><input type="text" id="coc-estilo" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                <div><label class="text-xs text-slate-400">FECHA</label><input type="date" id="coc-fecha" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                <div><label class="text-xs text-slate-400">N° LOTE</label><input type="text" id="coc-lote" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-mono text-amber-400 mt-1"></div>
-            </div>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-3"><div><label class="text-xs text-slate-400">FECHA</label><input type="date" id="coc-fecha" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">ESTILO</label><input type="text" id="coc-estilo" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">N° LOTE</label><input type="text" id="coc-lote" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 font-mono text-amber-400"></div><div><label class="text-xs text-slate-400">BATCH</label><input type="text" id="coc-batch" placeholder="280 LTS" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">HORA INICIO</label><input type="time" id="coc-hora-inicio" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">HORA FIN</label><input type="time" id="coc-hora-fin" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div></div>
         </div>
-
         <div class="card p-4 space-y-3">
-            <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Olla de Agua</h3>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
-                <div><label class="text-slate-400">INICIO LLENADO</label><input type="time" id="coc-agua-inicio" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                <div><label class="text-slate-400">FIN LLENADO</label><input type="time" id="coc-agua-fin" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                <div><label class="text-slate-400">LITROS</label><input type="number" id="coc-agua-lts" placeholder="Lts" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                <div><label class="text-slate-400">T° AGUA</label><input type="text" id="coc-agua-temp" placeholder="°C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                <div><label class="text-slate-400">T° OBJETIVO</label><input type="text" id="coc-agua-obj" placeholder="°C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                <div><label class="text-slate-400">PH AGUA</label><input type="text" id="coc-agua-ph" placeholder="pH" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                <div class="col-span-2"><label class="text-slate-400">SALES AGREGADAS (grs)</label><input type="text" id="coc-sales" placeholder="Gypsum, CaCl2, etc." class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-            </div>
+            <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Llenado olla (agua de macerado)</h3>
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-3"><div><label class="text-xs text-slate-400">INICIO</label><input type="time" id="coc-agua-inicio" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">FIN</label><input type="time" id="coc-agua-fin" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">LITROS</label><input type="number" id="coc-agua-lts" step="any" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">Tº AGUA</label><input type="text" id="coc-agua-temp" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">PH</label><input type="text" id="coc-agua-ph" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div></div><div class="grid grid-cols-2 md:grid-cols-4 gap-3"><div><label class="text-xs text-slate-400">ENCENDIDO OLLA LICOR</label><input type="time" id="coc-licor-enc" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">APAGADO OLLA LICOR</label><input type="time" id="coc-licor-apag" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">Tº OBJETIVO</label><input type="text" id="coc-agua-obj" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">PH</label><input type="text" id="coc-licor-ph" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div></div><div><span class="text-xs text-slate-400 block mb-1">AGREGADO SALES (nombre · cantidad · unidad)</span><div id="contenedor-sales-mac" class="space-y-2"></div></div>
         </div>
-
         <div class="card p-4 space-y-3">
-            <div class="flex justify-between items-center border-b border-slate-700 pb-1">
-                <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Granos / Molienda</h3>
-                <span id="total-granos" class="text-sm font-mono text-amber-400 bg-slate-900 px-3 py-1 rounded border border-slate-700">TOTALES DE KG: 0 kg</span>
-            </div>
+            <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Granos</h3>
             <div id="contenedor-granos" class="space-y-2"></div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="card p-4 space-y-3">
-                <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Macerado / Recirculado</h3>
-                <div class="grid grid-cols-2 gap-3 text-xs">
-                    <div><label class="text-slate-400">COMIENZO LLENADO + MALTAS</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                    <div><label class="text-slate-400">FIN LLENADO + MALTAS</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                    <div><label class="text-slate-400">COMIENZO MACERADO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                    <div><label class="text-slate-400">FIN MACERADO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                    <div><label class="text-slate-400">PH MÍN. 15</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                    <div><label class="text-slate-400">PH MÍN. 60</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                    <div class="col-span-2"><label class="text-slate-400">1° MOSTO (DENSIDAD)</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 font-mono text-amber-400"></div>
-                    <div><label class="text-slate-400">RECIRCULADO COMIENZO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                    <div><label class="text-slate-400">RECIRCULADO FIN</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                </div>
-            </div>
-            <div class="card p-4 space-y-3">
-                <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Lavado</h3>
-                <div class="grid grid-cols-3 gap-3 text-xs">
-                    <div><label class="text-slate-400">LLENADO INICIO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                    <div><label class="text-slate-400">LLENADO FIN</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                    <div><label class="text-slate-400">LITROS</label><input type="number" id="coc-agua-lav-lts" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                    <div><label class="text-slate-400">T° AGUA</label><input type="text" id="coc-temp-lav" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                    <div><label class="text-slate-400">T° OBJETIVO</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                    <div><label class="text-slate-400">PH</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                    <div><label class="text-slate-400">COMIENZO LAVADO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                    <div><label class="text-slate-400">FIN LAVADO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                    <div><label class="text-slate-400">SALES (grs)</label><input type="text" id="coc-sales-lav" placeholder="grs" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                </div>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-3 border-t border-slate-700 pt-3">
+                <div class="col-span-2 md:col-span-3 text-xs font-bold text-slate-300 uppercase">Molienda</div>
+                <div><label class="text-xs text-slate-400">INICIO</label><input type="time" id="coc-molienda-ini" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">FIN</label><input type="time" id="coc-molienda-fin" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div>
+                <div><label class="text-xs text-slate-400">KGS TOTALES</label><div id="total-granos" class="mt-1 bg-slate-900 border border-slate-700 rounded p-2 text-sm font-mono text-amber-400 font-bold">0 kg</div></div>
             </div>
         </div>
-
+        <div class="card p-4 space-y-3">
+            <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Macerado</h3>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-3"><div><label class="text-xs text-slate-400">COMIENZO LLENADO OLLA + MALTAS</label><input type="time" id="coc-mac-llen-ini" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">FIN LLENADO OLLA + MALTAS</label><input type="time" id="coc-mac-llen-fin" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">COMIENZO MACERADO</label><input type="time" id="coc-mac-ini" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "><span id="obj-temp-mac" class="obj-hint block text-[10px] text-slate-500"></span></div><div><label class="text-xs text-slate-400">FIN MACERADO</label><input type="time" id="coc-mac-fin" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">PH MÍN. 15</label><input type="text" id="coc-mac-ph15" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">PH MÍN. 60</label><input type="text" id="coc-mac-ph60" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">1º MOSTO (densidad)</label><input type="text" id="coc-mosto1" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 font-mono text-amber-400"></div><div><label class="text-xs text-slate-400">RECIRCULADO COMIENZO</label><input type="time" id="coc-recirc-ini" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">RECIRCULADO FIN</label><input type="time" id="coc-recirc-fin" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div></div>
+        </div>
+        <div class="card p-4 space-y-3">
+            <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Lavado</h3>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-3"><div><label class="text-xs text-slate-400">LLENADO OLLA INICIO</label><input type="time" id="coc-lav-llen-ini" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">LLENADO OLLA FIN</label><input type="time" id="coc-lav-llen-fin" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">LITROS</label><input type="number" id="coc-agua-lav-lts" step="any" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">Tº AGUA</label><input type="text" id="coc-temp-lav" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">Tº OBJETIVO</label><input type="text" id="coc-lav-obj" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">PH</label><input type="text" id="coc-lav-ph" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div></div><div><span class="text-xs text-slate-400 block mb-1">AGREGADO SALES (nombre · cantidad · unidad)</span><div id="contenedor-sales-lav" class="space-y-2"></div></div><div class="grid grid-cols-2 gap-3 gap-3"><div><label class="text-xs text-slate-400">COMIENZO LAVADO</label><input type="time" id="coc-lav-ini" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">FIN LAVADO</label><input type="time" id="coc-lav-fin" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div></div>
+        </div>
         <div class="card p-4 space-y-3">
             <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Hervido</h3>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
-                <div><label class="text-slate-400">ENCENDIDO OLLA</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                <div><label class="text-slate-400">LTS ANTES HERVOR</label><input type="number" id="coc-lts-pre" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 font-mono"></div>
-                <div><label class="text-slate-400">PH ANTES HERVOR</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                <div><label class="text-slate-400">DENS. ANTES HERVOR</label><input type="text" id="coc-dens-pre" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 font-mono"></div>
-                <div><label class="text-slate-400">COMIENZO HERVOR</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                <div><label class="text-slate-400">LTS DESPUÉS DE HERVOR</label><input type="number" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                <div><label class="text-slate-400">PH DESPUÉS DE HERVOR</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                <div><label class="text-amber-400 font-bold">DI REAL (DESPUÉS HERVOR)</label><input type="text" id="di-real-coccion" placeholder="ej. 1.048" class="w-full bg-slate-900 border border-amber-500/50 rounded p-2 text-sm mt-1 font-mono text-amber-400 font-bold"></div>
-            </div>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-3"><div><label class="text-xs text-slate-400">ENCENDIDO OLLA</label><input type="time" id="coc-hervor-enc" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">LITROS ANTES HERVOR</label><input type="number" id="coc-lts-pre" step="any" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 font-mono"><span id="obj-lts-pre" class="obj-hint block text-[10px] text-slate-500"></span></div><div><label class="text-xs text-slate-400">PH (antes)</label><input type="text" id="coc-ph-pre" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">Tº MOSTO OLLA LLENA</label><input type="text" id="coc-mosto-llena" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">DENSIDAD ANTES HERVOR</label><input type="text" id="coc-dens-pre" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 font-mono"><span id="obj-dens-pre" class="obj-hint block text-[10px] text-slate-500"></span></div><div><label class="text-xs text-slate-400">COMIENZO HERVOR</label><input type="time" id="coc-hervor-ini" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">LITROS DESPUÉS HERVOR</label><input type="number" id="coc-lts-post-real" step="any" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 font-mono"><span id="obj-lts-post" class="obj-hint block text-[10px] text-slate-500"></span></div><div><label class="text-xs text-slate-400">PH (después)</label><input type="text" id="coc-ph-post" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">FIN HERVOR</label><input type="time" id="coc-hervor-fin" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div></div><div class="max-w-xs"><div><label class="text-xs text-amber-400 font-bold">DENSIDAD DESPUÉS HERVOR (DI REAL)</label><input type="text" id="di-real-coccion" placeholder="ej. 1.048" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 border-amber-500/50 font-mono text-amber-400 font-bold"><span id="obj-di" class="obj-hint block text-[10px] text-slate-500"></span></div></div>
         </div>
-
         <div class="card p-4 space-y-3">
             <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Lúpulos</h3>
+            <div class="grid grid-cols-12 gap-3 text-[11px] text-slate-500 uppercase"><span class="col-span-4">Lúpulo</span><span class="col-span-3">Cantidad</span><span class="col-span-3">Momento adición</span><span class="col-span-2">Hora</span></div>
             <div id="contenedor-lupulos" class="space-y-2"></div>
         </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="space-y-6">
-                <div class="card p-4 space-y-3">
-                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Varios</h3>
-                    <div class="grid grid-cols-2 gap-3 text-xs">
-                        <div><label class="text-slate-400">MUSGO IRLANDÉS (CANT)</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-slate-400">MUSGO IRLANDÉS (HORA)</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-slate-400">NUTRIENTE LEVA (CANT)</label><input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-slate-400">NUTRIENTE LEVA (HORA)</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                    </div>
-                </div>
-                <div class="card p-4 space-y-3">
-                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Whirlpool y Reposo</h3>
-                    <div class="grid grid-cols-2 gap-3 text-xs">
-                        <div><label class="text-slate-400">WP COMIENZO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-slate-400">WP T° / VELOC</label><input type="text" placeholder="T° / RPM" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-slate-400">REPOSO COMIENZO</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-slate-400">REPOSO FIN</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="space-y-6">
-                <div class="card p-4 space-y-3">
-                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Enfriado</h3>
-                    <div class="grid grid-cols-2 gap-3 text-xs">
-                        <div><label class="text-slate-400">COMIENZO / FIN</label><input type="text" placeholder="00:00 - 00:00" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-slate-400">T° ENTRADA / SALIDA</label><input type="text" placeholder="Entrada / Salida °C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                    </div>
-                </div>
-                <div class="card p-4 space-y-3">
-                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Inoculación</h3>
-                    <div class="grid grid-cols-2 gap-3 text-xs">
-                        <div><label class="text-slate-400">HORA DE INOCULACIÓN</label><input type="time" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div><label class="text-slate-400">T° MOSTO</label><input type="text" placeholder="°C" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                        <div class="col-span-2"><label class="text-slate-400">CANTIDAD / LEVADURA</label><input type="text" id="coc-levadura" placeholder="Cepa y Gramos añadidos" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1"></div>
-                    </div>
-                </div>
-            </div>
+        <div class="card p-4 space-y-3">
+            <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Irish Moss y nutriente</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3"><div><label class="text-xs text-slate-400">IRISH MOSS · CANTIDAD</label><input type="text" id="coc-moss-cant" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">HORA</label><input type="time" id="coc-moss-hora" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">NUTRIENTE LEVA · CANTIDAD</label><input type="text" id="coc-nutr-cant" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">HORA</label><input type="time" id="coc-nutr-hora" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div></div>
+        </div>
+        <div class="card p-4 space-y-3">
+            <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Whirlpool y reposo</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3"><div><label class="text-xs text-slate-400">WHIRLPOOL COMIENZO</label><input type="time" id="coc-wp-ini" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">FIN</label><input type="time" id="coc-wp-fin" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">Tº</label><input type="text" id="coc-wp-temp" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">VELOC</label><input type="text" id="coc-wp-vel" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">REPOSO COMIENZO</label><input type="time" id="coc-rep-ini" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">REPOSO FIN</label><input type="time" id="coc-rep-fin" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div></div>
+        </div>
+        <div class="card p-4 space-y-3">
+            <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Enfriado</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3"><div><label class="text-xs text-slate-400">COMIENZO</label><input type="time" id="coc-enf-ini" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">FIN</label><input type="time" id="coc-enf-fin" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">Tº ENTRADA</label><input type="text" id="coc-enf-te" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">Tº SALIDA</label><input type="text" id="coc-enf-ts" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div></div>
+        </div>
+        <div class="card p-4 space-y-3">
+            <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 pb-1">Inoculación</h3>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-3"><div><label class="text-xs text-slate-400">HORA</label><input type="time" id="coc-inoc-hora" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">Tº MOSTO</label><input type="text" id="coc-inoc-temp" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div><div><label class="text-xs text-slate-400">CANTIDAD (levadura)</label><input type="text" id="coc-levadura" placeholder="" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mt-1 "></div></div>
         </div>
     </div>
 
@@ -446,6 +381,9 @@
     <div id="grilla-insumos"></div>
 </section>
 
+<!-- ==================== COSTOS ==================== -->
+<section id="tab-costos" class="space-y-6 hidden"><div id="contenido-costos" class="space-y-6"></div></section>
+
 <!-- ==================== BIBLIOTECA ==================== -->
 <section id="tab-biblioteca" class="space-y-6 hidden">
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-700 pb-3 gap-4">
@@ -544,13 +482,14 @@
                     </select></div>
                 <div><label class="text-slate-400 block mb-1">Unidad</label>
                     <select id="ins-unidad" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
-                        <option value="kg">Kilogramos (kg)</option><option value="g">Gramos (g)</option><option value="u">Unidades</option>
+                        <option value="kg">Kilogramos (kg)</option><option value="g">Gramos (g)</option><option value="ml">Mililitros (ml)</option><option value="u">Unidades</option>
                     </select></div>
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <div><label class="text-slate-400 block mb-1">Stock actual</label><input type="number" step="any" id="ins-stock" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-mono text-amber-400"></div>
                 <div><label class="text-slate-400 block mb-1">Stock mínimo (aviso)</label><input type="number" step="any" id="ins-minimo" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-mono"></div>
             </div>
+            <div><label class="text-slate-400 block mb-1">Costo por unidad ($ por kg / g / ml / unidad, según la unidad elegida)</label><input type="number" step="any" id="ins-precio" placeholder="ej. 1800 ($ por kg)" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-mono text-emerald-400"></div>
         </div>
         <div class="flex justify-end gap-3 pt-3 border-t border-slate-700">
             <button onclick="cerrarModalInsumo()" class="bg-slate-700 text-slate-300 text-xs font-bold px-4 py-2 rounded-lg">Cancelar</button>
@@ -751,6 +690,7 @@ var editandoCoccionId = null, editandoFermId = null, stashCoccion = null, stashF
 var insumos = leer('alb_insumos', []);
 var fermentadores = leer('alb_fermentadores', null);
 var fermActivoId = localStorage.getItem('alb_ferm_activo') || null;
+var costosCfg = null; // se inicializa al arrancar (normCostos)
 if (!Array.isArray(insumos)) insumos = [];
 var filtroBarriles = 'TODOS';
 if (!Array.isArray(barriles)) barriles = barrilesIniciales;
@@ -798,6 +738,7 @@ function guardarLocalSolo() {
         localStorage.setItem('alb_barriles', JSON.stringify(barriles));
         localStorage.setItem('alb_clientes', JSON.stringify(clientes));
         localStorage.setItem('alb_insumos', JSON.stringify(insumos));
+        if (costosCfg) localStorage.setItem('alb_costos', JSON.stringify(costosCfg));
     } catch (e) {}
 }
 function iniciarSincronizacion() {
@@ -833,6 +774,7 @@ function iniciarSincronizacion() {
     }, console.error);
 
     escuchar('insumos', 'lista', () => insumos, x => { insumos = Array.isArray(x) ? x : []; }, () => { renderInsumos(); actualizarBadgeInsumos(); });
+    escuchar('costos', 'cfg', () => costosCfg, x => { costosCfg = normCostos(x); }, renderCostos);
 
     // Fermentadores: un documento por fermentador
     let primeraF = true;
@@ -870,7 +812,7 @@ function iniciarSincronizacion() {
 /* =========================================================
    4. NAVEGACIÓN
    ========================================================= */
-const TABS = ['recetas', 'coccion', 'fermentacion', 'stock', 'insumos', 'cc', 'biblioteca'];
+const TABS = ['recetas', 'coccion', 'fermentacion', 'stock', 'insumos', 'costos', 'cc', 'biblioteca'];
 function switchTab(id) {
     TABS.forEach(t => {
         document.getElementById('tab-' + t)?.classList.toggle('hidden', t !== id);
@@ -880,6 +822,7 @@ function switchTab(id) {
     else if (id === 'stock') renderBarriles();
     else if (id === 'cc') renderClientes();
     else if (id === 'insumos') renderInsumos();
+    else if (id === 'costos') renderCostos();
     else if (id === 'biblioteca') cambiarSubTabBiblioteca('coccion');
     window.scrollTo(0, 0);
 }
@@ -897,7 +840,7 @@ function renderRecetas() {
     }
     cont.innerHTML = keys.map(key => {
         const r = recetas[key];
-        const sTxt = arr => (arr && arr.length) ? arr.map(s => `${esc(s.nombre)}: ${esc(s.cantidad)}g`).join(', ') : 'Ninguna';
+        const sTxt = arr => (arr && arr.length) ? arr.map(s => `${esc(s.nombre)}: ${esc(s.cantidad)}${s.unidad === 'ml' ? ' ml' : 'g'}`).join(', ') : 'Ninguna';
         return `
         <div class="card p-5 space-y-4 flex flex-col justify-between">
             <div>
@@ -974,6 +917,7 @@ function abrirPanelReceta() {
 function mostrarFormularioReceta() {
     recetaEditandoId = null;
     prepararFormularioReceta('Configuración Técnica de Receta', 'Guardar Receta Completa');
+    setV('rec-moss', 45); setV('rec-nutriente', 3);
     agregarFilaSal('macerado'); agregarFilaSal('lavado'); agregarFilaGrano(); agregarFilaLupulo();
     abrirPanelReceta();
 }
@@ -988,9 +932,10 @@ function editarReceta(key) {
     setV('rec-agua-lav', r.aguaLav); setV('rec-temp-lav', r.tempLav);
     setV('rec-dens-pre', r.densPre); setV('rec-lts-pre', r.ltsPre); setV('rec-tiempo-hervor', r.tiempoHervor);
     setV('rec-evaporacion', r.evaporacion); setV('rec-trub', r.trub); setV('rec-tiempo-enfriado', r.tiempoEnfriado);
+    setV('rec-lts-post', r.ltsPost); setV('rec-moss', r.irishMoss ?? 45); setV('rec-nutriente', r.nutriente ?? 3);
     const conFilas = (arr, agregar) => { if (arr && arr.length) arr.forEach(x => agregar(x)); else agregar({}); };
-    conFilas(r.salesMac, s => agregarFilaSal('macerado', s.nombre, s.cantidad));
-    conFilas(r.salesLav, s => agregarFilaSal('lavado', s.nombre, s.cantidad));
+    conFilas(r.salesMac, s => agregarFilaSal('macerado', s.nombre, s.cantidad, s.unidad));
+    conFilas(r.salesLav, s => agregarFilaSal('lavado', s.nombre, s.cantidad, s.unidad));
     conFilas(r.granos, g => agregarFilaGrano(g.nombre, g.cantidad));
     conFilas(r.lupulos, l => agregarFilaLupulo(l.nombre, l.cantidad, l.momento));
     abrirPanelReceta();
@@ -1000,15 +945,17 @@ function ocultarFormularioReceta() {
     document.getElementById('form-receta-panel').classList.add('hidden');
 }
 
-function agregarFilaSal(tipo, nombre, cant) {
+function agregarFilaSal(tipo, nombre, cant, unidad) {
     const cont = document.getElementById(tipo === 'macerado' ? 'rec-sales-mac-inputs' : 'rec-sales-lav-inputs');
     const div = document.createElement('div');
     div.className = 'flex gap-2 item-sal-' + tipo;
     div.innerHTML = `<input type="text" placeholder="ej. Gypsum" class="sal-nombre flex-1 bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-slate-100">
-        <input type="number" step="any" placeholder="Grs" class="sal-cant w-20 bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-amber-400 font-bold">
+        <input type="number" step="any" placeholder="Cant." class="sal-cant w-20 bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-amber-400 font-bold">
+        <input type="text" placeholder="grs" class="sal-unidad w-14 bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-slate-300">
         <button type="button" onclick="this.parentElement.remove()" class="text-red-400 font-bold px-1 hover:text-red-300">×</button>`;
     div.querySelector('.sal-nombre').value = nombre ?? '';
     div.querySelector('.sal-cant').value = cant ?? '';
+    div.querySelector('.sal-unidad').value = unidad === 'ml' ? 'ml' : 'grs';
     cont.appendChild(div);
 }
 function agregarFilaGrano(nombre, cant) {
@@ -1039,7 +986,8 @@ function guardarReceta() {
     if (!nombre) return alert('Ingrese el nombre de la receta.');
     const num = id => parseFloat(document.getElementById(id)?.value) || 0;
     const sales = tipo => [...document.querySelectorAll('.item-sal-' + tipo)].map(f => ({
-        nombre: f.querySelector('.sal-nombre').value.trim(), cantidad: parseFloat(f.querySelector('.sal-cant').value) || 0
+        nombre: f.querySelector('.sal-nombre').value.trim(), cantidad: parseFloat(f.querySelector('.sal-cant').value) || 0,
+        unidad: /ml/i.test(f.querySelector('.sal-unidad').value) ? 'ml' : 'g'
     })).filter(s => s.nombre);
     const granos = [...document.querySelectorAll('#rec-granos-inputs .item-grano')].map(f => ({
         nombre: f.querySelector('.grano-nombre').value.trim(), cantidad: parseFloat(f.querySelector('.grano-cant').value) || 0
@@ -1062,6 +1010,7 @@ function guardarReceta() {
         densPre: v('rec-dens-pre'), ltsPre: num('rec-lts-pre'),
         tiempoHervor: num('rec-tiempo-hervor') || 60, evaporacion: num('rec-evaporacion') || 6,
         trub: num('rec-trub'), tiempoEnfriado: num('rec-tiempo-enfriado') || 30,
+        ltsPost: num('rec-lts-post'), irishMoss: v('rec-moss') === '' ? 45 : num('rec-moss'), nutriente: v('rec-nutriente') === '' ? 3 : num('rec-nutriente'),
         granos, lupulos
     };
     guardarStorage();
@@ -1083,13 +1032,55 @@ function siguienteLote() {
     const anio = (v('coc-fecha') || hoy()).slice(0, 4);
     return `L-${anio}-${String(lotesCoccion.length + 1).padStart(2, '0')}`;
 }
+const CLS_FILA = 'bg-slate-900 border border-slate-700 rounded p-2 text-sm';
+function pintarSales(idCont, lista, minimo) {
+    const filas = (lista || []).map(x => ({ n: x.nombre, c: x.cantidad, u: x.unidad === 'ml' ? 'ml' : 'grs' }));
+    while (filas.length < minimo) filas.push({ n: '', c: '', u: '' });
+    document.getElementById(idCont).innerHTML = filas.map(f => `
+        <div class="grid grid-cols-12 gap-2 fila-sal">
+            <input type="text" value="${esc(f.n)}" placeholder="Sal / ácido" class="col-span-6 ${CLS_FILA}">
+            <input type="number" step="any" value="${esc(f.c)}" placeholder="Cant." class="col-span-4 ${CLS_FILA} font-bold text-amber-300">
+            <input type="text" value="${esc(f.u)}" placeholder="grs" class="col-span-2 ${CLS_FILA}">
+        </div>`).join('');
+}
+function pintarGranos(lista, minimo) {
+    const filas = (lista || []).map(g => ({ n: g.nombre, c: g.cantidad }));
+    while (filas.length < minimo) filas.push({ n: '', c: '' });
+    document.getElementById('contenedor-granos').innerHTML = filas.map(g => `
+        <div class="flex gap-4 items-center">
+            <input type="text" value="${esc(g.n)}" placeholder="Malta" class="flex-1 ${CLS_FILA}">
+            <div class="flex items-center gap-2">
+                <input type="number" step="any" value="${esc(g.c)}" oninput="calcularTotalGranos()" class="input-grano w-28 ${CLS_FILA} font-bold text-amber-400">
+                <span class="text-xs text-slate-400">KGS</span>
+            </div>
+        </div>`).join('');
+}
+function pintarLupulos(lista, minimo) {
+    const filas = (lista || []).map(l => ({ n: l.nombre, c: l.cantidad, m: l.momento }));
+    while (filas.length < minimo) filas.push({ n: '', c: '', m: '' });
+    document.getElementById('contenedor-lupulos').innerHTML = filas.map(l => `
+        <div class="grid grid-cols-12 gap-3 items-center text-xs">
+            <input type="text" value="${esc(l.n)}" placeholder="Lúpulo" class="col-span-4 ${CLS_FILA}">
+            <div class="col-span-3 flex items-center gap-1"><input type="number" step="any" value="${esc(l.c)}" class="w-full ${CLS_FILA} text-amber-400 font-bold"><span class="text-slate-500">grs</span></div>
+            <input type="text" value="${esc(l.m)}" placeholder="FWH / 30´ / DH..." class="col-span-3 ${CLS_FILA}">
+            <input type="time" class="col-span-2 ${CLS_FILA}">
+        </div>`).join('');
+}
+function hint(id, texto) {
+    const e = document.getElementById(id);
+    if (e) e.textContent = texto ? 'obj. ' + texto : '';
+}
+
 function limpiarCoccion() {
     document.querySelectorAll('#area-impresion-coccion input').forEach(i => { i.value = ''; });
+    document.querySelectorAll('#area-impresion-coccion .obj-hint').forEach(e => { e.textContent = ''; });
     setV('coc-fecha', hoy());
     setV('coc-lote', siguienteLote());
-    document.getElementById('contenedor-granos').innerHTML = '<p class="text-xs text-slate-500 italic">Seleccione una receta para cargar los granos automáticamente.</p>';
-    document.getElementById('contenedor-lupulos').innerHTML = '<p class="text-xs text-slate-500 italic">Seleccione una receta para autocompletar adiciones de lúpulo.</p>';
-    document.getElementById('total-granos').innerText = 'TOTALES DE KG: 0 kg';
+    pintarSales('contenedor-sales-mac', [], 4);
+    pintarSales('contenedor-sales-lav', [], 3);
+    pintarGranos([], 9);
+    pintarLupulos([], 8);
+    document.getElementById('total-granos').innerText = '0 kg';
     window.recetaActual = null;
     window.recetaActualKey = '';
 }
@@ -1114,47 +1105,46 @@ function cargarRecetaEnCoccion() {
     window.recetaActualKey = key;
 
     setV('coc-estilo', r.nombre);
+    setV('coc-batch', r.lote ? r.lote + ' LTS' : '');
     if (r.aguaIni) setV('coc-agua-lts', r.aguaIni);
-    setV('coc-agua-temp', r.tempAguaIni);
-    setV('coc-sales', (r.salesMac || []).map(s => `${s.nombre} (${s.cantidad}g)`).join(', '));
+    setV('coc-agua-obj', r.tempAguaIni);
+    pintarSales('contenedor-sales-mac', r.salesMac, 4);
     if (r.aguaLav) setV('coc-agua-lav-lts', r.aguaLav);
-    setV('coc-temp-lav', r.tempLav);
-    setV('coc-sales-lav', (r.salesLav || []).map(s => `${s.nombre} (${s.cantidad}g)`).join(', '));
-    setV('coc-dens-pre', r.densPre);
-    if (r.ltsPre) setV('coc-lts-pre', r.ltsPre);
+    setV('coc-lav-obj', r.tempLav);
+    pintarSales('contenedor-sales-lav', r.salesLav, 3);
+    pintarGranos(r.granos, 9);
+    calcularTotalGranos();
+    pintarLupulos(r.lupulos, 8);
+    setV('coc-moss-cant', (r.irishMoss ?? 45) + ' grs');
+    setV('coc-nutr-cant', (r.nutriente ?? 3) + ' grs');
     setV('coc-levadura', r.levadura);
 
-    document.getElementById('contenedor-granos').innerHTML = (r.granos || []).map(g => `
-        <div class="flex gap-4 items-center">
-            <input type="text" value="${esc(g.nombre)}" readonly class="flex-1 bg-slate-900/50 border border-slate-700 rounded p-2 text-sm text-slate-300">
-            <div class="flex items-center gap-2">
-                <input type="number" step="any" value="${esc(g.cantidad)}" oninput="calcularTotalGranos()" class="input-grano w-28 bg-slate-900 border border-slate-700 rounded p-2 text-sm font-bold text-amber-400">
-                <span class="text-xs text-slate-400">KG</span>
-            </div>
-        </div>`).join('');
-    calcularTotalGranos();
-
-    document.getElementById('contenedor-lupulos').innerHTML = (r.lupulos || []).map(l => `
-        <div class="grid grid-cols-12 gap-3 items-center text-xs">
-            <input type="text" value="${esc(l.nombre)}" readonly class="col-span-4 bg-slate-900/50 border border-slate-700 rounded p-2 text-slate-300">
-            <div class="col-span-3 flex items-center gap-1"><input type="number" step="any" value="${esc(l.cantidad)}" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-amber-400 font-bold"><span class="text-slate-500">grs</span></div>
-            <input type="text" value="${esc(l.momento)}" readonly class="col-span-3 bg-slate-900/50 border border-slate-700 rounded p-2 text-slate-400">
-            <input type="time" class="col-span-2 bg-slate-900 border border-slate-700 rounded p-2 text-slate-200">
-        </div>`).join('');
+    // Valores objetivo de la receta, al lado de los campos que se miden durante la cocción
+    hint('obj-temp-mac', r.tempMac ? 'Tº macerado ' + r.tempMac : '');
+    hint('obj-lts-pre', r.ltsPre);
+    hint('obj-dens-pre', r.densPre);
+    const post = r.ltsPost || ((r.ltsPre && r.evaporacion) ? Math.round(r.ltsPre * (1 - r.evaporacion / 100)) : '');
+    hint('obj-lts-post', post ? (r.ltsPost ? '' : '≈ ') + post : '');
+    hint('obj-di', r.diTeorica);
     guardarBorrador();
 }
 
 function calcularTotalGranos() {
     let total = 0;
     document.querySelectorAll('.input-grano').forEach(i => { total += parseFloat(i.value) || 0; });
-    document.getElementById('total-granos').innerText = `TOTALES DE KG: ${Math.round(total * 100) / 100} kg`;
+    document.getElementById('total-granos').innerText = `${Math.round(total * 100) / 100} kg`;
 }
 
 // Copia los valores escritos en los inputs al HTML (para poder reabrir la planilla desde la Biblioteca)
 function snapshotHTML(el) {
     const orig = el.querySelectorAll('input,select,textarea');
     const c = el.cloneNode(true);
-    c.querySelectorAll('input,select,textarea').forEach((x, i) => { if (orig[i]) x.setAttribute('value', orig[i].value); });
+    c.querySelectorAll('input,select,textarea').forEach((x, i) => {
+        const o = orig[i];
+        if (!o) return;
+        if (x.tagName === 'SELECT') [...x.options].forEach((op, k) => { if (k === o.selectedIndex) op.setAttribute('selected', ''); else op.removeAttribute('selected'); });
+        else x.setAttribute('value', o.value);
+    });
     c.querySelectorAll('[id]').forEach(x => { x.setAttribute('data-fid', x.id); x.removeAttribute('id'); });
     c.classList.remove('pdf-export-mode');
     return c.innerHTML;
@@ -1169,17 +1159,20 @@ function guardarCoccion() {
 
 function completarGuardadoCoccion(fid) {
     const consumo = calcularConsumo();
+    const ci = calcularCostoInsumos(consumo);
+    const costo = { insumos: ci.total, litros: litrosDeLote(v('coc-batch'), window.recetaActual), detalle: ci.detalle, sinPrecio: ci.sinPrecio };
     const f = fermentadores.find(x => x.id === fid);
     const lote = {
         id: 'coc_' + Date.now(), tipo: 'coccion', creado: Date.now(), v: 2,
         fecha: v('coc-fecha') || hoy(), numeroLote: v('coc-lote') || 'Sin número',
         estilo: v('coc-estilo'), densidadInicial: v('di-real-coccion') || '-',
-        fermentador: f ? f.nombre : '', consumo,
+        fermentador: f ? f.nombre : '', consumo, costo,
         html: snapshotHTML(document.getElementById('area-impresion-coccion'))
     };
     lotesCoccion.unshift(lote);
     guardarLotesLocal(); subirLote(lote);
     avisoConsumo(aplicarConsumo(consumo, -1), 'Stock descontado');
+    if (insumos.length && ci.sinPrecio.length) toast('Costo del lote incompleto: falta el costo de ' + ci.sinPrecio.join(', ') + '. Cargalo en Insumos y recalculá en Costos.', 'warn');
 
     // Pasar los datos al fermentador elegido (lo que había en pantalla se guarda en su fermentador)
     guardarFermActivo();
@@ -1210,7 +1203,7 @@ function exportarPDF(idArea, nombre) {
     const el = document.getElementById(idArea);
     if (!el || typeof html2pdf === 'undefined') return alert('No se pudo cargar el generador de PDF.');
     el.classList.add('pdf-export-mode');
-    html2pdf().set({ margin: 8, filename: nombre, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4' } })
+    html2pdf().set({ margin: 8, filename: nombre, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4' }, pagebreak: { mode: ['css', 'legacy'], avoid: '.card' } })
         .from(el).save().then(() => el.classList.remove('pdf-export-mode')).catch(() => el.classList.remove('pdf-export-mode'));
 }
 
@@ -1397,6 +1390,8 @@ function guardarEdicionCoccion() {
         aplicarConsumo(l.consumo, +1);
         avisoConsumo(aplicarConsumo(nuevo, -1), 'Stock ajustado');
         l.consumo = nuevo;
+        const ci = calcularCostoInsumos(nuevo);
+        l.costo = { insumos: ci.total, litros: litrosDeLote(v('coc-batch'), window.recetaActual) || (l.costo && l.costo.litros) || 0, detalle: ci.detalle, sinPrecio: ci.sinPrecio };
     }
     guardarLotesLocal(); subirLote(l);
     terminarEdicionCoccion();
@@ -1831,12 +1826,13 @@ function agregarFilaRemito() {
     const div = document.createElement('div');
     div.className = 'grid grid-cols-12 gap-2 items-center fila-remito-item';
     div.innerHTML = `
-        <select class="col-span-4 bg-slate-900 border border-slate-700 rounded p-2 text-xs item-presentacion">${opcionesPresentaciones.map(o => `<option value="${o}">${o}</option>`).join('')}</select>
+        <select onchange="aplicarPrecioLista(this)" class="col-span-4 bg-slate-900 border border-slate-700 rounded p-2 text-xs item-presentacion">${opcionesPresentaciones.map(o => `<option value="${o}">${o}</option>`).join('')}</select>
         <input type="text" placeholder="Estilo (ej. IPA)" class="col-span-3 bg-slate-900 border border-slate-700 rounded p-2 text-xs item-estilo">
         <input type="number" value="1" min="1" oninput="calcularTotalMovimiento()" class="col-span-2 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-center item-cant">
         <input type="number" value="0" min="0" oninput="calcularTotalMovimiento()" class="col-span-2 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-right font-mono item-precio">
         <button type="button" onclick="this.parentElement.remove(); calcularTotalMovimiento();" class="col-span-1 text-red-400 hover:text-red-300 font-bold text-center">×</button>`;
     document.getElementById('contenedor-filas-remito').appendChild(div);
+    aplicarPrecioLista(div.querySelector('.item-presentacion'));
     calcularTotalMovimiento();
 }
 
@@ -1972,7 +1968,7 @@ const cabeceraPDF = (derecha) => {
 function descargarRecetaPDF(clave) {
     const r = recetas[clave];
     if (!r) return alert('No se encontró la receta.');
-    const sTxt = a => (a && a.length) ? a.map(s => `${esc(s.nombre)} (${esc(s.cantidad)}g)`).join(', ') : 'Ninguna';
+    const sTxt = a => (a && a.length) ? a.map(s => `${esc(s.nombre)} (${esc(s.cantidad)}${s.unidad === 'ml' ? ' ml' : 'g'})`).join(', ') : 'Ninguna';
     const filas = (arr, f, vacio) => (arr && arr.length) ? arr.map(f).join('') : `<tr><td colspan="2"><i>${vacio}</i></td></tr>`;
     abrirImpresion('Receta_' + r.nombre, `
         ${cabeceraPDF(`<h2>${esc(r.nombre)}</h2><small>Lote: ${esc(r.lote || 280)} Lts</small>`)}
@@ -2297,12 +2293,14 @@ function renderInsumos() {
         sin: '<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-red-500/20 text-red-400">Sin stock</span>'
     };
     cont.innerHTML = `<div class="overflow-x-auto bg-slate-900 border border-slate-700 rounded-xl"><table class="w-full text-left text-sm">
-        <thead class="text-xs text-slate-400 uppercase bg-slate-800/50"><tr><th class="p-3">Insumo</th><th class="p-3">Tipo</th><th class="p-3 text-right">Stock</th><th class="p-3 text-right">Mínimo</th><th class="p-3">Estado</th><th class="p-3 text-right">Acciones</th></tr></thead>
+        <thead class="text-xs text-slate-400 uppercase bg-slate-800/50"><tr><th class="p-3">Insumo</th><th class="p-3">Tipo</th><th class="p-3 text-right">Stock</th><th class="p-3 text-right">Mínimo</th><th class="p-3 text-right">Costo unit.</th><th class="p-3 text-right">Valor stock</th><th class="p-3">Estado</th><th class="p-3 text-right">Acciones</th></tr></thead>
         <tbody class="divide-y divide-slate-800">` + lista.map(i => `<tr class="hover:bg-slate-800/40">
             <td class="p-3 text-slate-100 font-semibold">${esc(i.nombre)}</td>
             <td class="p-3 text-slate-400 text-xs">${esc(TIPOS_INSUMO[i.tipo] || 'Otro')}</td>
             <td class="p-3 text-right font-mono ${(parseFloat(i.stock) || 0) <= 0 ? 'text-red-400' : 'text-amber-300'} font-bold">${fmtNum(i.stock)} ${esc(i.unidad)}</td>
             <td class="p-3 text-right font-mono text-slate-400">${(parseFloat(i.minimo) || 0) ? fmtNum(i.minimo) + ' ' + esc(i.unidad) : '—'}</td>
+            <td class="p-3 text-right font-mono ${(parseFloat(i.precio) || 0) ? 'text-emerald-400' : 'text-slate-600'}">${(parseFloat(i.precio) || 0) ? '$ ' + fmtNum(i.precio) : '—'}</td>
+            <td class="p-3 text-right font-mono text-slate-300">${(parseFloat(i.precio) || 0) ? '$ ' + fmtNum((parseFloat(i.stock) || 0) * i.precio) : '—'}</td>
             <td class="p-3">${etq[estadoInsumo(i)]}</td>
             <td class="p-3 text-right whitespace-nowrap space-x-1">
                 <button onclick="ingresoInsumo('${esc(i.id)}')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-2.5 py-1.5 rounded-lg text-xs">+ Ingreso</button>
@@ -2315,7 +2313,7 @@ function mostrarModalInsumo(id) {
     const i = insumos.find(x => x.id === id);
     document.getElementById('modal-insumo-titulo').innerText = i ? 'Editar insumo' : 'Nuevo insumo';
     setV('ins-id', i ? i.id : ''); setV('ins-nombre', i ? i.nombre : ''); setV('ins-tipo', i ? i.tipo : 'malta');
-    setV('ins-unidad', i ? i.unidad : 'kg'); setV('ins-stock', i ? i.stock : ''); setV('ins-minimo', i ? i.minimo : '');
+    setV('ins-unidad', i ? i.unidad : 'kg'); setV('ins-stock', i ? i.stock : ''); setV('ins-minimo', i ? i.minimo : ''); setV('ins-precio', i ? (i.precio || '') : '');
     document.getElementById('modal-insumo').classList.remove('hidden');
 }
 function cerrarModalInsumo() { document.getElementById('modal-insumo').classList.add('hidden'); }
@@ -2324,7 +2322,7 @@ function guardarInsumo() {
     if (!nombre) return alert('Ingresá el nombre del insumo.');
     const id = v('ins-id');
     if (insumos.some(x => x.id !== id && normNombre(x.nombre) === normNombre(nombre))) return alert('Ya existe un insumo con ese nombre.');
-    const datos = { nombre, tipo: v('ins-tipo'), unidad: v('ins-unidad'), stock: parseNum(v('ins-stock')) || 0, minimo: parseNum(v('ins-minimo')) || 0 };
+    const datos = { nombre, tipo: v('ins-tipo'), unidad: v('ins-unidad'), stock: parseNum(v('ins-stock')) || 0, minimo: parseNum(v('ins-minimo')) || 0, precio: parseNum(v('ins-precio')) || 0 };
     const i = insumos.find(x => x.id === id);
     if (i) Object.assign(i, datos); else insumos.push({ id: 'i_' + Date.now(), ...datos });
     guardarInsumos(); cerrarModalInsumo(); renderInsumos();
@@ -2340,9 +2338,14 @@ function ingresoInsumo(id) {
     if (!i) return;
     const n = parseNum(prompt(`Cantidad que ingresa de "${i.nombre}" (${i.unidad}):`));
     if (n === null || n <= 0) return;
+    const total = parseNum(prompt(`Costo TOTAL de esta compra en $ (opcional; sirve para calcular costos). Dejá vacío para no cargarlo:`));
+    const stockPrev = Math.max(0, parseFloat(i.stock) || 0);
+    if (total !== null && total > 0) { // costo promedio ponderado entre el stock que había y lo que entra
+        i.precio = Math.round(((stockPrev * (parseFloat(i.precio) || 0)) + total) / (stockPrev + n) * 10000) / 10000;
+    }
     i.stock = Math.round(((parseFloat(i.stock) || 0) + n) * 1000) / 1000;
     guardarInsumos(); renderInsumos();
-    toast(`${i.nombre}: stock ${fmtNum(i.stock)} ${i.unidad}`);
+    toast(`${i.nombre}: stock ${fmtNum(i.stock)} ${i.unidad}${(parseFloat(i.precio) || 0) ? ' · costo $ ' + fmtNum(i.precio) + ' por ' + i.unidad : ''}`);
 }
 function ajustarInsumo(id) {
     const i = insumos.find(x => x.id === id);
@@ -2368,7 +2371,8 @@ function importarInsumosDesdeRecetas() {
     Object.values(recetas).forEach(r => {
         (r.granos || []).forEach(g => agregar(g.nombre, 'malta', 'kg'));
         (r.lupulos || []).forEach(l => agregar(l.nombre, 'lupulo', 'g'));
-        [...(r.salesMac || []), ...(r.salesLav || [])].forEach(s => agregar(s.nombre, 'sal', 'g'));
+        [...(r.salesMac || []), ...(r.salesLav || [])].forEach(s => agregar(s.nombre, 'sal', s.unidad === 'ml' ? 'ml' : 'g'));
+        agregar('Irish Moss', 'otro', 'g'); agregar('Nutriente levadura', 'otro', 'g');
         const lev = parseLevadura(r.levadura);
         if (lev) agregar(lev.nombre, 'levadura', 'g');
     });
@@ -2391,9 +2395,16 @@ function calcularConsumo(conservar) {
         const c = ins[1] ? parseFloat(ins[1].value) || 0 : 0;
         if (ins[0] && ins[0].value.trim() && c > 0) out.push({ nombre: ins[0].value.trim(), cantidad: c, unidad: 'g', fuente: 'planilla' });
     });
+    document.querySelectorAll('#contenedor-sales-mac .fila-sal, #contenedor-sales-lav .fila-sal').forEach(f => {
+        const ins = f.querySelectorAll('input');
+        const c = parseFloat(ins[1].value) || 0;
+        if (ins[0].value.trim() && c > 0) out.push({ nombre: ins[0].value.trim(), cantidad: c, unidad: /ml/i.test(ins[2].value) ? 'ml' : 'g', fuente: 'planilla' });
+    });
+    const num = id => { const m = String(v(id)).match(/(\d+(?:[.,]\d+)?)/); return m ? parseFloat(m[1].replace(',', '.')) : 0; };
+    if (num('coc-moss-cant') > 0) out.push({ nombre: 'Irish Moss', cantidad: num('coc-moss-cant'), unidad: 'g', fuente: 'planilla' });
+    if (num('coc-nutr-cant') > 0) out.push({ nombre: 'Nutriente levadura', cantidad: num('coc-nutr-cant'), unidad: 'g', fuente: 'planilla' });
     const r = window.recetaActual;
     if (r) {
-        [...(r.salesMac || []), ...(r.salesLav || [])].forEach(s => { if (s.nombre && s.cantidad > 0) out.push({ nombre: s.nombre, cantidad: s.cantidad, unidad: 'g', fuente: 'receta' }); });
         const lev = parseLevadura(r.levadura);
         if (lev && lev.cantidad > 0) out.push({ nombre: lev.nombre, cantidad: lev.cantidad, unidad: 'g', fuente: 'receta' });
     } else if (conservar) {
@@ -2433,7 +2444,7 @@ function avisoConsumo(res, accion) {
 
 /* ---------- RESPALDO Y EXPORTACIÓN ---------- */
 function renderTodo() {
-    renderRecetas(); renderBarriles(); renderClientes(); renderInsumos(); actualizarBadgeInsumos();
+    renderRecetas(); renderBarriles(); renderClientes(); renderInsumos(); actualizarBadgeInsumos(); renderCostos();
     renderBiblioteca(); renderBibliotecaFermentacion(); renderSelectorFermentadores();
 }
 function abrirModalDatos() {
@@ -2451,7 +2462,7 @@ function descargarArchivo(nombre, contenido, tipo) {
 }
 function descargarRespaldoJSON() {
     guardarFermActivo();
-    const datos = { app: 'albardon', version: 2, fecha: new Date().toISOString(), recetas, barriles, clientes, insumos, lotesCoccion, lotesFerm, fermentadores };
+    const datos = { app: 'albardon', version: 2, fecha: new Date().toISOString(), recetas, barriles, clientes, insumos, costosCfg, lotesCoccion, lotesFerm, fermentadores };
     descargarArchivo('Albardon_respaldo_' + hoy() + '.json', JSON.stringify(datos), 'application/json');
     localStorage.setItem('alb_ultimo_respaldo', hoy());
     document.getElementById('ultimo-respaldo').textContent = fmtFecha(hoy());
@@ -2481,11 +2492,11 @@ function restaurarRespaldoJSON(input) {
             const d = JSON.parse(rd.result);
             if (d.app !== 'albardon') throw new Error('El archivo no es un respaldo de Albardón.');
             if (!confirm(`Vas a REEMPLAZAR todos los datos actuales por los del respaldo del ${fmtFecha((d.fecha || '').slice(0, 10))}. No se puede deshacer. ¿Continuar?`)) return;
-            recetas = normRecetas(d.recetas); barriles = d.barriles || []; clientes = d.clientes || []; insumos = d.insumos || [];
+            recetas = normRecetas(d.recetas); barriles = d.barriles || []; clientes = d.clientes || []; insumos = d.insumos || []; costosCfg = normCostos(d.costosCfg);
             lotesCoccion = d.lotesCoccion || []; lotesFerm = d.lotesFerm || [];
             fermentadores = (d.fermentadores && d.fermentadores.length) ? d.fermentadores : null;
             inicializarFermentadores();
-            guardarStorage(); guardarInsumos(); guardarLotesLocal(); guardarFermentadoresLocal();
+            guardarStorage(); guardarInsumos(); guardarCostos(); guardarLotesLocal(); guardarFermentadoresLocal();
             reemplazarColeccion('albardon_lotes', [...lotesCoccion, ...lotesFerm]);
             reemplazarColeccion('albardon_fermentadores', fermentadores);
             cargarFermActivoEnPantalla();
@@ -2513,7 +2524,9 @@ function exportarExcel() {
     hoja('Remitos (detalle)', det);
     hoja('Cocciones', lotesCoccion.map(l => ({ Fecha: l.fecha, Lote: l.numeroLote, Estilo: l.estilo, 'DI real': l.densidadInicial, Fermentador: l.fermentador || '' })));
     hoja('Fermentaciones', lotesFerm.map(l => ({ Fecha: l.fecha, Lote: l.numeroLote, Estilo: l.estilo, DI: l.di, DF: l.df, ABV: l.abv, Fermentador: l.fermentador || '' })));
-    hoja('Insumos', insumos.map(i => ({ Insumo: i.nombre, Tipo: TIPOS_INSUMO[i.tipo] || 'Otro', Unidad: i.unidad, Stock: i.stock, Mínimo: i.minimo })));
+    hoja('Insumos', insumos.map(i => ({ Insumo: i.nombre, Tipo: TIPOS_INSUMO[i.tipo] || 'Otro', Unidad: i.unidad, Stock: i.stock, Mínimo: i.minimo, 'Costo unitario': i.precio || 0 })));
+    hoja('Costos por lote', lotesCoccion.map(l => { const c = costoLote(l); return c ? { Fecha: l.fecha, Lote: l.numeroLote, Estilo: l.estilo, Litros: c.litros, 'Costo insumos': Math.round(c.insumos), 'Otros costos': Math.round(c.otros), Total: Math.round(c.total), '$ por litro': c.porLitro ? Math.round(c.porLitro * 100) / 100 : '', Completo: c.incompleto ? 'No' : 'Sí' } : null; }).filter(Boolean));
+    hoja('Lista de precios', costosCfg.presentaciones.map(p => ({ Presentación: p.nombre, Litros: p.litros, 'Costo envase': p.envase, 'Precio de venta': p.precio })));
     XLSX.writeFile(wb, 'Albardon_' + hoy() + '.xlsx');
 }
 function recordarRespaldo() {
@@ -2604,6 +2617,204 @@ function iniciarAuth() {
 
 
 /* =========================================================
+   12c. COSTOS Y PRECIOS
+   ========================================================= */
+const PRESENTACIONES_LITROS = { 'Botella 355 cc': 0.355, 'Botella 500 cc': 0.5, 'Botella 1000 cc': 1, 'Barril 50L': 50, 'Barril 30L': 30, 'Barril 20L': 20 };
+function normCostos(c) {
+    c = (c && typeof c === 'object') ? c : {};
+    const guardadas = {};
+    (Array.isArray(c.presentaciones) ? c.presentaciones : []).forEach(p => { guardadas[p.nombre] = p; });
+    return {
+        otros: Array.isArray(c.otros) ? c.otros : [],
+        margen: (c.margen === undefined || c.margen === null) ? 100 : c.margen,
+        estiloRef: c.estiloRef || '',
+        presentaciones: Object.keys(PRESENTACIONES_LITROS).map(n => ({
+            nombre: n, litros: PRESENTACIONES_LITROS[n],
+            envase: (guardadas[n] && guardadas[n].envase) || 0, precio: (guardadas[n] && guardadas[n].precio) || 0
+        }))
+    };
+}
+function guardarCostos() {
+    try { localStorage.setItem('alb_costos', JSON.stringify(costosCfg)); } catch (e) {}
+    if (db) db.collection('albardon_app').doc('costos').set({ cfg: limpio(costosCfg) }).catch(console.error);
+}
+const dinero = (n, dec) => (n === null || n === undefined || isNaN(n)) ? '—' : '$ ' + Number(n).toLocaleString('es-AR', { minimumFractionDigits: dec || 0, maximumFractionDigits: dec || 0 });
+
+// Costo de los insumos usados (con el costo unitario que tengan cargado en Insumos)
+function calcularCostoInsumos(consumo) {
+    let total = 0;
+    const detalle = [], sinPrecio = [];
+    (consumo || []).forEach(it => {
+        const ins = insumos.find(i => normNombre(i.nombre) === normNombre(it.nombre));
+        const precio = ins ? (parseFloat(ins.precio) || 0) : 0;
+        if (!ins || !precio) { sinPrecio.push(it.nombre); return; }
+        const cant = convertirUnidad(it.cantidad, it.unidad, ins.unidad);
+        const sub = cant * precio;
+        total += sub;
+        detalle.push({ nombre: it.nombre, cantidad: Math.round(cant * 1000) / 1000, unidad: ins.unidad, precio, subtotal: Math.round(sub * 100) / 100 });
+    });
+    return { total: Math.round(total * 100) / 100, detalle, sinPrecio: [...new Set(sinPrecio)] };
+}
+function litrosDeLote(batchTxt, r) {
+    const m = String(batchTxt || '').match(/(\d+(?:[.,]\d+)?)/);
+    const n = m ? parseFloat(m[1].replace(',', '.')) : 0;
+    return n || (r && parseFloat(r.lote)) || 0;
+}
+// Costo total del lote = insumos (guardado al cocinar) + otros costos (según lo configurado hoy)
+function costoLote(l) {
+    if (!l.costo || !costosCfg) return null;
+    const lit = parseFloat(l.costo.litros) || 0;
+    const suma = tipo => costosCfg.otros.filter(o => o.tipo === tipo).reduce((a, o) => a + (parseFloat(o.monto) || 0), 0);
+    const insumosT = parseFloat(l.costo.insumos) || 0;
+    const otros = suma('lote') + suma('litro') * lit;
+    const total = insumosT + otros;
+    return { litros: lit, insumos: insumosT, otros, total, porLitro: lit ? total / lit : null, incompleto: (l.costo.sinPrecio || []).length > 0 };
+}
+// $/litro de referencia: promedio ponderado por litros de los últimos 5 lotes (o del estilo elegido)
+function costoLitroRef() {
+    let lotes = lotesCoccion.map(l => ({ l, c: costoLote(l) })).filter(x => x.c && x.c.porLitro);
+    if (costosCfg.estiloRef) lotes = lotes.filter(x => x.l.estilo === costosCfg.estiloRef);
+    lotes = lotes.slice(0, 5);
+    if (!lotes.length) return null;
+    const lit = lotes.reduce((a, x) => a + x.c.litros, 0);
+    return lit ? lotes.reduce((a, x) => a + x.c.total, 0) / lit : null;
+}
+
+function recalcularCostoLote(id) {
+    const l = lotesCoccion.find(x => x.id === id);
+    if (!l) return;
+    if (!l.consumo) return alert('Esta cocción se guardó con una versión anterior y no tiene el detalle de insumos usados, así que no se puede calcular el costo.');
+    let litros = l.costo && l.costo.litros;
+    if (!litros) {
+        litros = parseNum(prompt('¿Cuántos litros se elaboraron en este lote?', '280'));
+        if (!litros) return;
+    }
+    const ci = calcularCostoInsumos(l.consumo);
+    l.costo = { insumos: ci.total, litros, detalle: ci.detalle, sinPrecio: ci.sinPrecio };
+    guardarLotesLocal(); subirLote(l);
+    renderCostos();
+    toast(ci.sinPrecio.length ? 'Recalculado, pero falta el costo de: ' + ci.sinPrecio.join(', ') + '.' : 'Costo recalculado con los precios actuales.', ci.sinPrecio.length ? 'warn' : '');
+}
+function verDetalleCosto(id) {
+    const l = lotesCoccion.find(x => x.id === id);
+    const c = l && costoLote(l);
+    if (!c) return;
+    document.getElementById('modal-costo')?.remove();
+    const filas = (l.costo.detalle || []).map(d => `<tr><td class="p-2">${esc(d.nombre)}</td><td class="p-2 text-right font-mono">${fmtNum(d.cantidad)} ${esc(d.unidad)}</td><td class="p-2 text-right font-mono">${dinero(d.precio, 2)}</td><td class="p-2 text-right font-mono font-bold">${dinero(d.subtotal)}</td></tr>`).join('');
+    const otros = costosCfg.otros.map(o => `<tr><td class="p-2">${esc(o.concepto)} <span class="text-slate-500 text-xs">(${o.tipo === 'litro' ? 'por litro' : 'por lote'})</span></td><td></td><td></td><td class="p-2 text-right font-mono">${dinero(o.tipo === 'litro' ? (parseFloat(o.monto) || 0) * c.litros : (parseFloat(o.monto) || 0))}</td></tr>`).join('');
+    const m = document.createElement('div');
+    m.id = 'modal-costo';
+    m.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 no-print';
+    m.innerHTML = `<div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+        <div class="flex justify-between items-center bg-slate-800 px-6 py-4 border-b border-slate-700">
+            <h3 class="text-lg font-bold text-white">Costo del lote ${esc(l.numeroLote)} · ${esc(l.estilo)}</h3>
+            <button onclick="document.getElementById('modal-costo').remove()" class="px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-sm font-bold">✕ Cerrar</button>
+        </div>
+        <div class="p-6 overflow-y-auto space-y-3 text-sm">
+            <table class="w-full text-left"><thead class="text-xs text-slate-400 uppercase"><tr><th class="p-2">Concepto</th><th class="p-2 text-right">Cantidad</th><th class="p-2 text-right">Costo unit.</th><th class="p-2 text-right">Subtotal</th></tr></thead>
+            <tbody class="divide-y divide-slate-800">${filas || '<tr><td colspan="4" class="p-2 text-slate-500 italic">Sin insumos con costo cargado.</td></tr>'}${otros}</tbody></table>
+            ${(l.costo.sinPrecio || []).length ? `<p class="text-xs text-amber-300">⚠ Sin costo cargado: ${esc(l.costo.sinPrecio.join(', '))}. El costo real es mayor.</p>` : ''}
+            <div class="border-t border-slate-700 pt-3 space-y-1 font-mono">
+                <div class="flex justify-between"><span>Insumos</span><span>${dinero(c.insumos)}</span></div>
+                <div class="flex justify-between"><span>Otros costos</span><span>${dinero(c.otros)}</span></div>
+                <div class="flex justify-between font-bold text-amber-400 text-base"><span>Total (${fmtNum(c.litros)} L)</span><span>${dinero(c.total)}</span></div>
+                <div class="flex justify-between font-bold text-emerald-400"><span>Por litro</span><span>${dinero(c.porLitro, 2)}</span></div>
+            </div></div></div>`;
+    document.body.appendChild(m);
+}
+
+// Otros costos configurables
+function agregarOtroCosto() {
+    costosCfg.otros.push({ id: 'o_' + Date.now(), concepto: '', tipo: 'lote', monto: 0 });
+    guardarCostos(); renderCostos();
+}
+function editarOtroCosto(id, campo, valor) {
+    const o = costosCfg.otros.find(x => x.id === id);
+    if (!o) return;
+    o[campo] = campo === 'monto' ? (parseFloat(valor) || 0) : valor;
+    guardarCostos(); renderCostos();
+}
+function eliminarOtroCosto(id) {
+    costosCfg.otros = costosCfg.otros.filter(x => x.id !== id);
+    guardarCostos(); renderCostos();
+}
+function setMargen(val) { costosCfg.margen = parseFloat(val) || 0; guardarCostos(); renderCostos(); }
+function setEstiloRef(val) { costosCfg.estiloRef = val; guardarCostos(); renderCostos(); }
+function setPres(i, campo, val) {
+    if (!costosCfg.presentaciones[i]) return;
+    costosCfg.presentaciones[i][campo] = parseFloat(val) || 0;
+    guardarCostos(); renderCostos();
+}
+// Al armar un remito, completa el precio con el de la lista
+function aplicarPrecioLista(sel) {
+    if (!sel || !costosCfg) return;
+    const p = costosCfg.presentaciones.find(x => x.nombre === sel.value);
+    const campo = sel.closest('.fila-remito-item') && sel.closest('.fila-remito-item').querySelector('.item-precio');
+    if (campo && p && p.precio > 0) { campo.value = p.precio; calcularTotalMovimiento(); }
+}
+
+function renderCostos() {
+    const cont = document.getElementById('contenido-costos');
+    if (!cont || !costosCfg) return;
+    const lotes = lotesCoccion.map(l => ({ l, c: costoLote(l) }));
+    const conCosto = lotes.filter(x => x.c && x.c.porLitro);
+    const ref = costoLitroRef();
+    const ultimo = conCosto[0];
+    const incompletos = conCosto.filter(x => x.c.incompleto).length;
+    const estilos = [...new Set(conCosto.map(x => x.l.estilo))];
+    const margen = parseFloat(costosCfg.margen) || 0;
+    const inCls = 'bg-slate-900 border border-slate-700 rounded p-1.5 text-sm';
+
+    const tarjetas = `<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-xl p-4"><p class="text-xs font-semibold text-slate-400 uppercase">Costo por litro (referencia)</p><h3 class="text-xl font-bold font-mono text-amber-400 mt-1">${dinero(ref, 2)}</h3><p class="text-[11px] text-slate-500 mt-1">${costosCfg.estiloRef ? 'Últimos lotes de ' + esc(costosCfg.estiloRef) : 'Promedio de los últimos 5 lotes'}</p></div>
+        <div class="bg-slate-900 border border-slate-700 rounded-xl p-4"><p class="text-xs font-semibold text-slate-400 uppercase">Último lote</p><h3 class="text-xl font-bold font-mono text-emerald-400 mt-1">${ultimo ? dinero(ultimo.c.porLitro, 2) + ' /L' : '—'}</h3><p class="text-[11px] text-slate-500 mt-1">${ultimo ? esc(ultimo.l.estilo) + ' · ' + esc(ultimo.l.numeroLote) : 'Todavía no hay lotes con costo'}</p></div>
+        <div class="bg-slate-900 border border-slate-700 rounded-xl p-4"><p class="text-xs font-semibold text-slate-400 uppercase">Lotes con costo incompleto</p><h3 class="text-xl font-bold font-mono ${incompletos ? 'text-amber-300' : 'text-slate-300'} mt-1">${incompletos}</h3><p class="text-[11px] text-slate-500 mt-1">Faltó cargar el costo de algún insumo</p></div></div>`;
+
+    const otrosHTML = `<div class="card p-4 space-y-3">
+        <div class="flex flex-wrap justify-between items-center gap-2"><h3 class="text-sm font-semibold text-slate-300 uppercase tracking-wider">Otros costos del proceso</h3>
+            <button onclick="agregarOtroCosto()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs"><i class="fa-solid fa-plus"></i> Agregar</button></div>
+        <p class="text-xs text-slate-400">Gas, agua, electricidad, mano de obra, limpieza, CO₂, etc. "Por lote" se suma una vez en cada cocción; "Por litro" se multiplica por los litros elaborados. Los insumos (maltas, lúpulos, levadura...) se calculan solos desde la pestaña Insumos.</p>
+        ${costosCfg.otros.length ? `<div class="space-y-2">` + costosCfg.otros.map(o => `<div class="grid grid-cols-12 gap-2 items-center">
+            <input type="text" value="${esc(o.concepto)}" placeholder="Concepto (ej. Gas)" onchange="editarOtroCosto('${esc(o.id)}','concepto',this.value)" class="col-span-5 ${inCls}">
+            <select onchange="editarOtroCosto('${esc(o.id)}','tipo',this.value)" class="col-span-3 ${inCls}"><option value="lote"${o.tipo === 'lote' ? ' selected' : ''}>Por lote</option><option value="litro"${o.tipo === 'litro' ? ' selected' : ''}>Por litro</option></select>
+            <input type="number" step="any" value="${esc(o.monto)}" placeholder="$" onchange="editarOtroCosto('${esc(o.id)}','monto',this.value)" class="col-span-3 ${inCls} font-mono text-right">
+            <button onclick="eliminarOtroCosto('${esc(o.id)}')" class="col-span-1 text-red-400 hover:text-red-300"><i class="fa-solid fa-trash"></i></button></div>`).join('') + '</div>' : '<p class="text-xs text-slate-500 italic">Todavía no cargaste otros costos. Sin ellos, el costo por litro solo incluye insumos.</p>'}</div>`;
+
+    const lotesHTML = `<div class="card p-4 space-y-3"><h3 class="text-sm font-semibold text-slate-300 uppercase tracking-wider">Costo por lote</h3>
+        ${lotes.length ? `<div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="text-xs text-slate-400 uppercase bg-slate-800/50"><tr><th class="p-2">Fecha</th><th class="p-2">Lote</th><th class="p-2">Estilo</th><th class="p-2 text-right">Litros</th><th class="p-2 text-right">Insumos</th><th class="p-2 text-right">Otros</th><th class="p-2 text-right">Total</th><th class="p-2 text-right">$ / litro</th><th class="p-2 text-right">Acciones</th></tr></thead><tbody class="divide-y divide-slate-800">` +
+        lotes.map(({ l, c }) => `<tr class="hover:bg-slate-800/40">
+            <td class="p-2 text-slate-300">${esc(fmtFecha(l.fecha))}</td><td class="p-2 font-mono text-amber-400 font-bold">${esc(l.numeroLote)}</td><td class="p-2 text-slate-100">${esc(l.estilo)}</td>
+            ${c ? `<td class="p-2 text-right font-mono">${fmtNum(c.litros)}</td><td class="p-2 text-right font-mono">${dinero(c.insumos)}</td><td class="p-2 text-right font-mono">${dinero(c.otros)}</td><td class="p-2 text-right font-mono font-bold">${dinero(c.total)}</td><td class="p-2 text-right font-mono font-bold text-emerald-400">${dinero(c.porLitro, 2)}${c.incompleto ? ' <span title="Falta el costo de algún insumo" class="text-amber-300">⚠</span>' : ''}</td>`
+                : `<td class="p-2 text-right text-slate-600" colspan="5">${l.consumo ? 'Sin costo calculado' : 'Sin detalle de insumos (cocción anterior)'}</td>`}
+            <td class="p-2 text-right whitespace-nowrap space-x-1">${c ? `<button onclick="verDetalleCosto('${esc(l.id)}')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-2.5 py-1.5 rounded-lg text-xs">Detalle</button>` : ''}${l.consumo ? `<button onclick="recalcularCostoLote('${esc(l.id)}')" class="bg-slate-700 hover:bg-slate-600 text-amber-400 px-2.5 py-1.5 rounded-lg text-xs">${c ? 'Recalcular' : 'Calcular'}</button>` : ''}</td></tr>`).join('') +
+        '</tbody></table></div>' : '<p class="text-xs text-slate-500 italic">Cuando guardes una cocción, acá aparece su costo (usa el costo de cada insumo que cargues en la pestaña Insumos).</p>'}</div>`;
+
+    const filas = costosCfg.presentaciones.map((p, i) => {
+        const cerveza = ref !== null ? ref * p.litros : null;
+        const total = cerveza !== null ? cerveza + (parseFloat(p.envase) || 0) : null;
+        const sugerido = total !== null ? Math.round(total * (1 + margen / 100) / 10) * 10 : null;
+        const ganancia = (total !== null && p.precio > 0) ? p.precio - total : null;
+        const recargo = (ganancia !== null && total > 0) ? ganancia / total * 100 : null;
+        return `<tr class="hover:bg-slate-800/40"><td class="p-2 text-slate-100 font-semibold">${esc(p.nombre)}</td><td class="p-2 text-right font-mono text-slate-400">${fmtNum(p.litros)}</td>
+            <td class="p-2 text-right"><input type="number" step="any" value="${esc(p.envase)}" onchange="setPres(${i},'envase',this.value)" class="w-24 ${inCls} font-mono text-right"></td>
+            <td class="p-2 text-right font-mono">${dinero(cerveza)}</td><td class="p-2 text-right font-mono font-bold">${dinero(total)}</td>
+            <td class="p-2 text-right font-mono text-amber-300">${dinero(sugerido)}${sugerido !== null ? ` <button onclick="setPres(${i},'precio',${sugerido})" title="Usar como precio de venta" class="text-[10px] text-emerald-400 hover:underline">usar</button>` : ''}</td>
+            <td class="p-2 text-right"><input type="number" step="any" value="${esc(p.precio)}" onchange="setPres(${i},'precio',this.value)" class="w-28 ${inCls} font-mono text-right text-emerald-400 font-bold"></td>
+            <td class="p-2 text-right font-mono ${ganancia !== null && ganancia < 0 ? 'text-red-400' : 'text-emerald-400'}">${ganancia !== null ? dinero(ganancia) + ' (' + Math.round(recargo) + '%)' : '—'}</td></tr>`;
+    }).join('');
+    const preciosHTML = `<div class="card p-4 space-y-3"><h3 class="text-sm font-semibold text-slate-300 uppercase tracking-wider">Lista de precios</h3>
+        <div class="flex flex-wrap items-end gap-4 text-xs">
+            <div><label class="text-slate-400 block mb-1">Margen objetivo (recargo sobre el costo, %)</label><input type="number" step="any" value="${esc(costosCfg.margen)}" onchange="setMargen(this.value)" class="w-28 ${inCls} font-mono"></div>
+            <div><label class="text-slate-400 block mb-1">Costo por litro de referencia</label><select onchange="setEstiloRef(this.value)" class="${inCls}"><option value="">Promedio de los últimos 5 lotes</option>${estilos.map(e => `<option value="${esc(e)}"${costosCfg.estiloRef === e ? ' selected' : ''}>Estilo: ${esc(e)}</option>`).join('')}</select></div>
+        </div>
+        <div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="text-xs text-slate-400 uppercase bg-slate-800/50"><tr><th class="p-2">Presentación</th><th class="p-2 text-right">Litros</th><th class="p-2 text-right">Envase / unidad ($)</th><th class="p-2 text-right">Cerveza</th><th class="p-2 text-right">Costo total</th><th class="p-2 text-right">Precio sugerido</th><th class="p-2 text-right">Precio de venta ($)</th><th class="p-2 text-right">Ganancia (recargo)</th></tr></thead><tbody class="divide-y divide-slate-800">${filas}</tbody></table></div>
+        <p class="text-xs text-slate-400">"Envase / unidad" es lo que cuesta cada botella con tapa y etiqueta (o el desgaste del barril, si querés contarlo). El precio de venta que cargues acá se completa solo al armar un remito.</p></div>`;
+
+    cont.innerHTML = `<div class="card p-4"><h2 class="text-lg font-bold text-amber-400 flex items-center gap-2"><i class="fa-solid fa-coins"></i> Costos y Precios</h2><p class="text-xs text-slate-400">Costo de cada lote, costo por litro y lista de precios de venta.</p></div>` + tarjetas + lotesHTML + otrosHTML + preciosHTML;
+}
+
+
+/* =========================================================
    13. ARRANQUE
    ========================================================= */
 document.addEventListener('DOMContentLoaded', () => {
@@ -2613,6 +2824,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderRecetas();
     renderBarriles();
     renderClientes();
+    costosCfg = normCostos(leer('alb_costos', null));
     renderInsumos();
     actualizarBadgeInsumos();
     inicializarFermentadores();
