@@ -328,7 +328,10 @@
             <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2"><i class="fa-solid fa-boxes-stacked"></i> Inventario & Control de Barriles</h2>
             <p class="text-xs text-slate-400">Trazabilidad de parque de barriles, estados y asignación de lotes.</p>
         </div>
-        <button onclick="mostrarModalBarril()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-2 rounded-lg text-xs flex items-center gap-1.5 transition-colors"><i class="fa-solid fa-plus"></i> Nuevo Barril</button>
+        <div class="flex flex-wrap gap-2">
+            <button onclick="abrirListadoBarriles()" class="bg-slate-700 hover:bg-slate-600 text-slate-100 font-bold px-3 py-2 rounded-lg text-xs flex items-center gap-1.5 transition-colors"><i class="fa-solid fa-file-pdf"></i> Listado PDF</button>
+            <button onclick="mostrarModalBarril()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-2 rounded-lg text-xs flex items-center gap-1.5 transition-colors"><i class="fa-solid fa-plus"></i> Nuevo Barril</button>
+        </div>
     </div>
     <div class="flex flex-wrap items-center gap-2 text-xs no-print">
         <button onclick="filtrarBarriles('TODOS')" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700">Todos</button>
@@ -531,6 +534,27 @@
         </div>
         <div class="flex justify-end pt-3 border-t border-slate-700">
             <button onclick="cerrarModalDatos()" class="bg-slate-700 text-slate-300 text-xs font-bold px-4 py-2 rounded-lg">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL LISTADO DE BARRILES -->
+<div id="modal-listado-barriles" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden no-print">
+    <div class="card p-6 w-full max-w-md space-y-4">
+        <h3 class="font-bold text-amber-400 text-base border-b border-slate-700 pb-2"><i class="fa-solid fa-file-pdf"></i> Listado de barriles en PDF</h3>
+        <div class="space-y-3 text-xs">
+            <div><label class="text-slate-400 block mb-1">Estado de los barriles</label>
+                <select id="listado-estado" onchange="actualizarCuentaListado()" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm"></select></div>
+            <div><label class="text-slate-400 block mb-1">Ordenar de más viejo a más nuevo según</label>
+                <select id="listado-orden" onchange="actualizarCuentaListado()" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+                    <option value="embarrilado">Fecha de embarrilado</option>
+                    <option value="entrega">Fecha de entrega al cliente</option>
+                </select></div>
+            <p id="listado-cuenta" class="text-slate-300 font-semibold"></p>
+        </div>
+        <div class="flex justify-end gap-3 pt-3 border-t border-slate-700">
+            <button onclick="cerrarListadoBarriles()" class="bg-slate-700 text-slate-300 text-xs font-bold px-4 py-2 rounded-lg">Cancelar</button>
+            <button onclick="generarListadoBarrilesPDF()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold px-4 py-2 rounded-lg"><i class="fa-solid fa-file-pdf"></i> Generar PDF</button>
         </div>
     </div>
 </div>
@@ -1680,7 +1704,8 @@ function guardarBarril() {
     const obj = {
         codigo, capacidad: v('barril-capacidad'), conector: v('barril-conector'), estado,
         cerveza: conCerveza ? v('barril-cerveza') : '', lote: conCerveza ? v('barril-lote') : '',
-        fechaEmbarrilado: conCerveza ? v('barril-fecha') : '', ubicacion: v('barril-ubicacion'), cliente, clienteId
+        fechaEmbarrilado: conCerveza ? v('barril-fecha') : '', ubicacion: v('barril-ubicacion'), cliente, clienteId,
+        fechaEntrega: (estado === 'entregado_cliente' && barrilEditandoIdx !== null && barriles[barrilEditandoIdx]) ? (barriles[barrilEditandoIdx].fechaEntrega || '') : ''
     };
     if (barrilEditandoIdx !== null && barriles[barrilEditandoIdx]) barriles[barrilEditandoIdx] = obj;
     else barriles.push(obj);
@@ -1882,12 +1907,12 @@ function guardarMovimiento() {
     if (tipo === 'entrega') {
         codigos.forEach(cod => {
             const b = barriles.find(x => x.codigo === cod && normEstado(x.estado) === 'lleno_fabrica');
-            if (b) { b.estado = 'entregado_cliente'; b.cliente = cli.nombre; b.clienteId = cli.id; }
+            if (b) { b.estado = 'entregado_cliente'; b.cliente = cli.nombre; b.clienteId = cli.id; b.fechaEntrega = fecha; }
         });
     } else if (tipo === 'devolucion') {
         codigos.forEach(cod => {
             const b = barriles.find(x => x.codigo === cod && normEstado(x.estado) === 'entregado_cliente' && perteneceA(x, cli));
-            if (b) { b.estado = 'vacio_sucio'; b.cliente = ''; b.clienteId = ''; b.cerveza = ''; b.lote = ''; b.fechaEmbarrilado = ''; }
+            if (b) { b.estado = 'vacio_sucio'; b.cliente = ''; b.clienteId = ''; b.cerveza = ''; b.lote = ''; b.fechaEmbarrilado = ''; b.fechaEntrega = ''; }
         });
     }
     if (!cli.movimientos) cli.movimientos = [];
@@ -1907,7 +1932,7 @@ function eliminarMovimiento(clienteId, mi) {
             if (b) { b.estado = 'entregado_cliente'; b.cliente = c.nombre; b.clienteId = c.id; }
         } else {
             const b = barriles.find(x => x.codigo === cod && normEstado(x.estado) === 'entregado_cliente' && perteneceA(x, c));
-            if (b) { b.estado = 'lleno_fabrica'; b.cliente = ''; b.clienteId = ''; }
+            if (b) { b.estado = 'lleno_fabrica'; b.cliente = ''; b.clienteId = ''; b.fechaEntrega = ''; }
         }
     });
     c.movimientos.splice(mi, 1);
@@ -2831,6 +2856,90 @@ function renderCostos() {
         <p class="text-xs text-slate-400">"Envase / unidad" es lo que cuesta cada botella con tapa y etiqueta (o el desgaste del barril, si querés contarlo). El precio de venta que cargues acá se completa solo al armar un remito.</p></div>`;
 
     cont.innerHTML = `<div class="card p-4"><h2 class="text-lg font-bold text-amber-400 flex items-center gap-2"><i class="fa-solid fa-coins"></i> Costos y Precios</h2><p class="text-xs text-slate-400">Costo de cada lote, costo por litro y lista de precios de venta.</p></div>` + tarjetas + lotesHTML + otrosHTML + preciosHTML;
+}
+
+
+/* =========================================================
+   12d. LISTADO DE BARRILES EN PDF
+   ========================================================= */
+const OPCIONES_LISTADO = [
+    { valor: 'TODOS', texto: 'Todos los estados', test: () => true },
+    { valor: 'VACIO', texto: 'Vacíos (todos)', test: e => e.startsWith('vacio') },
+    { valor: 'vacio_sucio', texto: 'Vacío - Sucio', test: e => e === 'vacio_sucio' },
+    { valor: 'vacio_limpio', texto: 'Vacío - Limpio', test: e => e === 'vacio_limpio' },
+    { valor: 'vacio_sanitizado', texto: 'Vacío - Sanitizado', test: e => e === 'vacio_sanitizado' },
+    { valor: 'lleno_fabrica', texto: 'Llenos en fábrica', test: e => e === 'lleno_fabrica' },
+    { valor: 'entregado_cliente', texto: 'En cliente', test: e => e === 'entregado_cliente' },
+    { valor: 'mantenimiento', texto: 'En mantenimiento', test: e => e === 'mantenimiento' }
+];
+// Para barriles que están en un cliente: fecha del remito donde se entregó (si no se guardó en el barril, se busca en los movimientos)
+function fechaEntregaBarril(b) {
+    if (normEstado(b.estado) !== 'entregado_cliente') return '';
+    if (b.fechaEntrega) return b.fechaEntrega;
+    let mejor = '';
+    clientes.forEach(c => (c.movimientos || []).forEach(m => {
+        if (m.tipo !== 'devolucion' && (m.barriles || []).includes(b.codigo) && perteneceA(b, c) && (m.fecha || '') > mejor) mejor = m.fecha;
+    }));
+    return mejor;
+}
+const diasDesde = f => /^\d{4}-\d{2}-\d{2}$/.test(f || '') ? Math.max(0, Math.floor((new Date(hoy()) - new Date(f)) / 864e5)) : null;
+const cmpCodigo = (a, b) => String(a.codigo).localeCompare(String(b.codigo), 'es', { numeric: true });
+
+// De más viejo a más nuevo; los que no tienen fecha van al final
+function listaBarrilesOrdenada(filtro, criterio) {
+    const op = OPCIONES_LISTADO.find(o => o.valor === filtro) || OPCIONES_LISTADO[0];
+    const fechaRef = b => criterio === 'entrega' ? fechaEntregaBarril(b) : (b.fechaEmbarrilado || '');
+    return barriles.filter(b => op.test(normEstado(b.estado)))
+        .map(b => ({ b, f: fechaRef(b) || '' }))
+        .sort((x, y) => (x.f && y.f) ? (x.f.localeCompare(y.f) || cmpCodigo(x.b, y.b)) : (x.f ? -1 : (y.f ? 1 : cmpCodigo(x.b, y.b))));
+}
+
+function abrirListadoBarriles() {
+    const sel = document.getElementById('listado-estado');
+    sel.innerHTML = OPCIONES_LISTADO.map(o => `<option value="${o.valor}">${o.texto}</option>`).join('');
+    const mapa = { TODOS: 'TODOS', VACIO: 'VACIO', LLENO_FABRICA: 'lleno_fabrica', EN_CLIENTE: 'entregado_cliente' };
+    sel.value = mapa[filtroBarriles] || 'TODOS';
+    setV('listado-orden', sel.value === 'entregado_cliente' ? 'entrega' : 'embarrilado');
+    actualizarCuentaListado();
+    document.getElementById('modal-listado-barriles').classList.remove('hidden');
+}
+function cerrarListadoBarriles() { document.getElementById('modal-listado-barriles').classList.add('hidden'); }
+function actualizarCuentaListado() {
+    const n = listaBarrilesOrdenada(v('listado-estado'), v('listado-orden')).length;
+    document.getElementById('listado-cuenta').textContent = n === 1 ? '1 barril en el listado' : n + ' barriles en el listado';
+}
+
+function generarListadoBarrilesPDF() {
+    const filtro = v('listado-estado'), criterio = v('listado-orden');
+    const lista = listaBarrilesOrdenada(filtro, criterio);
+    if (!lista.length) return alert('No hay barriles con ese estado.');
+    const op = OPCIONES_LISTADO.find(o => o.valor === filtro);
+    const hayCliente = lista.some(x => normEstado(x.b.estado) === 'entregado_cliente');
+    const nombreFecha = criterio === 'entrega' ? 'fecha de entrega al cliente' : 'fecha de embarrilado';
+
+    const filas = lista.map(({ b, f }) => {
+        const est = (etiquetasEstado[normEstado(b.estado)] || {}).texto || b.estado;
+        const dias = diasDesde(f);
+        const entrega = fechaEntregaBarril(b);
+        return `<tr><td><b>${esc(b.codigo)}</b></td><td>${esc(normCap(b.capacidad))}</td><td>${esc(b.conector || 'G')}</td><td>${esc(est)}</td>
+            <td>${esc(b.cerveza || '')}</td><td>${esc(b.lote || '')}</td><td>${b.fechaEmbarrilado ? esc(fmtFecha(b.fechaEmbarrilado)) : '—'}</td>
+            ${hayCliente ? `<td>${entrega ? esc(fmtFecha(entrega)) : ''}</td><td>${esc(b.cliente || '')}</td>` : `<td>${esc(b.ubicacion || '')}</td>`}
+            <td class="n">${dias === null ? '—' : dias}</td></tr>`;
+    }).join('');
+
+    const porCap = {};
+    let litros = 0;
+    lista.forEach(({ b }) => { const cap = normCap(b.capacidad); porCap[cap] = (porCap[cap] || 0) + 1; litros += parseFloat(cap) || 0; });
+    const resumen = Object.keys(porCap).sort((a, c) => parseFloat(c) - parseFloat(a)).map(k => `${porCap[k]} de ${k}`).join(' · ');
+
+    abrirImpresion('Listado de barriles - ' + op.texto, `
+        ${cabeceraPDF(`<h2>LISTADO DE BARRILES</h2><small>${esc(op.texto)} · Emitido: ${esc(fmtFecha(hoy()))}</small>`)}
+        <p style="font-size:11px;color:#475569">Ordenado de más viejo a más nuevo según la ${nombreFecha}. Los barriles sin esa fecha figuran al final.</p>
+        <table style="font-size:11px"><tr><th>Código</th><th>Cap.</th><th>Conector</th><th>Estado</th><th>Cerveza</th><th>Lote</th><th>Embarrilado</th>
+            ${hayCliente ? '<th>Entregado</th><th>Cliente</th>' : '<th>Ubicación / notas</th>'}<th class="n">Días</th></tr>${filas}</table>
+        <p><b>Total: ${lista.length} ${lista.length === 1 ? 'barril' : 'barriles'}</b> (${esc(resumen)}) · ${fmtNum(litros)} litros de capacidad</p>
+        <p style="font-size:10px;color:#64748b">"Días" cuenta desde la ${nombreFecha} hasta hoy.</p>`);
+    cerrarListadoBarriles();
 }
 
 
