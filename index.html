@@ -472,8 +472,8 @@
 </div>
 
 <!-- MODAL INSUMO -->
-<div id="modal-insumo" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden no-print">
-    <div class="card p-6 w-full max-w-md space-y-4">
+<div id="modal-insumo" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex p-4 z-50 hidden no-print overflow-y-auto">
+    <div class="card p-6 w-full max-w-md space-y-4 m-auto">
         <h3 id="modal-insumo-titulo" class="font-bold text-amber-400 text-base border-b border-slate-700 pb-2">Nuevo insumo</h3>
         <input type="hidden" id="ins-id">
         <div class="space-y-3 text-xs">
@@ -502,8 +502,8 @@
 </div>
 
 <!-- MODAL DESTINO FERMENTADOR -->
-<div id="modal-destino-ferm" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden no-print">
-    <div class="card p-6 w-full max-w-md space-y-4">
+<div id="modal-destino-ferm" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex p-4 z-50 hidden no-print overflow-y-auto">
+    <div class="card p-6 w-full max-w-md space-y-4 m-auto">
         <h3 class="font-bold text-amber-400 text-base border-b border-slate-700 pb-2">¿A qué fermentador va este lote?</h3>
         <div id="lista-destino-ferm" class="space-y-2"></div>
         <div class="flex justify-between gap-3 pt-3 border-t border-slate-700">
@@ -514,8 +514,8 @@
 </div>
 
 <!-- MODAL DATOS (respaldo / exportación) -->
-<div id="modal-datos" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden no-print">
-    <div class="card p-6 w-full max-w-md space-y-4">
+<div id="modal-datos" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex p-4 z-50 hidden no-print overflow-y-auto">
+    <div class="card p-6 w-full max-w-md space-y-4 m-auto">
         <h3 class="font-bold text-amber-400 text-base border-b border-slate-700 pb-2"><i class="fa-solid fa-database"></i> Datos: respaldo y exportación</h3>
         <div class="space-y-4 text-xs">
             <div class="space-y-2">
@@ -539,8 +539,8 @@
 </div>
 
 <!-- MODAL LISTADO DE BARRILES -->
-<div id="modal-listado-barriles" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden no-print">
-    <div class="card p-6 w-full max-w-md space-y-4">
+<div id="modal-listado-barriles" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex p-4 z-50 hidden no-print overflow-y-auto">
+    <div class="card p-6 w-full max-w-md space-y-4 m-auto">
         <h3 class="font-bold text-amber-400 text-base border-b border-slate-700 pb-2"><i class="fa-solid fa-file-pdf"></i> Listado de barriles en PDF</h3>
         <div class="space-y-3 text-xs">
             <div><label class="text-slate-400 block mb-1">Estado de los barriles</label>
@@ -560,8 +560,8 @@
 </div>
 
 <!-- MODAL CLIENTE -->
-<div id="modal-cliente" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden no-print">
-    <div class="card p-6 w-full max-w-md space-y-4">
+<div id="modal-cliente" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex p-4 z-50 hidden no-print overflow-y-auto">
+    <div class="card p-6 w-full max-w-md space-y-4 m-auto">
         <h3 id="modal-cliente-titulo" class="font-bold text-amber-400 text-base border-b border-slate-700 pb-2">Nuevo Cliente</h3>
         <input type="hidden" id="cli-id-editar">
         <div class="space-y-3 text-xs">
@@ -577,8 +577,8 @@
 </div>
 
 <!-- MODAL MOVIMIENTO -->
-<div id="modal-movimiento" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden overflow-y-auto no-print">
-    <div class="card p-6 w-full max-w-2xl space-y-4 my-8">
+<div id="modal-movimiento" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex p-3 sm:p-4 z-50 hidden overflow-y-auto no-print">
+    <div class="card p-4 sm:p-6 w-full max-w-2xl space-y-4 m-auto">
         <h3 class="font-bold text-amber-400 text-base border-b border-slate-700 pb-2">Registrar Movimiento / Remito</h3>
         <div class="space-y-4 text-xs">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1849,13 +1849,14 @@ function actualizarListasBarrilesMov() {
 
 function agregarFilaRemito() {
     const div = document.createElement('div');
-    div.className = 'grid grid-cols-12 gap-2 items-center fila-remito-item';
+    div.className = 'grid grid-cols-12 gap-2 items-end fila-remito-item border-b border-slate-800 pb-2 sm:border-0 sm:pb-0';
+    const rot = t => `<span class="sm:hidden block text-[10px] text-slate-500 mb-0.5">${t}</span>`;
     div.innerHTML = `
-        <select onchange="aplicarPrecioLista(this)" class="col-span-4 bg-slate-900 border border-slate-700 rounded p-2 text-xs item-presentacion">${opcionesPresentaciones.map(o => `<option value="${o}">${o}</option>`).join('')}</select>
-        <input type="text" placeholder="Estilo (ej. IPA)" class="col-span-3 bg-slate-900 border border-slate-700 rounded p-2 text-xs item-estilo">
-        <input type="number" value="1" min="1" oninput="calcularTotalMovimiento()" class="col-span-2 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-center item-cant">
-        <input type="number" value="0" min="0" oninput="calcularTotalMovimiento()" class="col-span-2 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-right font-mono item-precio">
-        <button type="button" onclick="this.parentElement.remove(); calcularTotalMovimiento();" class="col-span-1 text-red-400 hover:text-red-300 font-bold text-center">×</button>`;
+        <div class="col-span-12 sm:col-span-4">${rot('Presentación')}<select onchange="aplicarPrecioLista(this)" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-xs item-presentacion">${opcionesPresentaciones.map(o => `<option value="${o}">${o}</option>`).join('')}</select></div>
+        <div class="col-span-12 sm:col-span-3">${rot('Estilo')}<input type="text" placeholder="Estilo (ej. IPA)" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-xs item-estilo"></div>
+        <div class="col-span-5 sm:col-span-2">${rot('Cantidad')}<input type="number" value="1" min="1" oninput="calcularTotalMovimiento()" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-xs text-center item-cant"></div>
+        <div class="col-span-6 sm:col-span-2">${rot('Precio unitario')}<input type="number" value="0" min="0" oninput="calcularTotalMovimiento()" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-xs text-right font-mono item-precio"></div>
+        <button type="button" onclick="this.closest('.fila-remito-item').remove(); calcularTotalMovimiento();" class="col-span-1 text-red-400 hover:text-red-300 font-bold text-center pb-2">×</button>`;
     document.getElementById('contenedor-filas-remito').appendChild(div);
     aplicarPrecioLista(div.querySelector('.item-presentacion'));
     calcularTotalMovimiento();
